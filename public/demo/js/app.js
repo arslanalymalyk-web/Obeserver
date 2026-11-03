@@ -5,7 +5,7 @@
   const t = I.t;
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = id => document.getElementById(id);
-  const S = { periodId: '2026-Q3', portfolio: 'all', role: 'Analyst', theme: 'system', cfg: null, periods: [], portfolios: [], filter: { q: '', type: '', status: '', exceptionsOnly: false }, answers: [], docFilter: '' };
+  const S = { periodId: '2026-Q3', portfolio: 'all', role: 'Analyst', theme: 'system', cfg: null, periods: [], portfolios: [], filter: { q: '', type: '', status: '', exceptionsOnly: false }, answers: [], docFilter: '', mode: 'standalone', me: null };
 
   // ── formatting (driven by configuration, never hard-coded to a region) ──
   const money = (n, compact) => n == null ? '—' : new Intl.NumberFormat(S.cfg.locale, { style: 'currency', currency: S.cfg.currency, maximumFractionDigits: compact ? 2 : 0, notation: compact ? 'compact' : 'standard' }).format(n);
@@ -114,7 +114,7 @@
   async function viewAssets() {
     const [facets] = await Promise.all([Store.getFacets()]);
     const f = S.filter;
-    return head(t('Asset registry'), `${esc(periodLabel(S.periodId))} · ${assumptions()}`, periodSelect() + portfolioSelect()) +
+    return head(t('Asset registry'), `${esc(periodLabel(S.periodId))} · ${assumptions()}`, periodSelect() + portfolioSelect() + (S.mode === 'connected' ? `<button class="btn primary" data-act="add-asset">${esc(t('Add asset'))}</button>` : `<button class="btn" disabled title="${esc(t('Needs connected mode'))}">${esc(t('Add asset'))}</button>`)) +
       `<section class="card"><div class="ctrls" style="margin-bottom:12px">
         <label class="ctrl">${esc(t('Search'))}<input type="search" id="f-q" value="${esc(f.q)}" placeholder="${esc(t('Name, location or type'))}"></label>
         <label class="ctrl">${esc(t('Type'))}<select id="f-type"><option value="">${esc(t('All'))}</option>${facets.types.map(x => `<option${f.type === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select></label>
@@ -141,7 +141,7 @@
         <dt>${esc(t('Ownership'))}</dt><dd>${d.owners.length ? d.owners.map(o => `${esc(o.name)} ${esc(pct(o.share, 0))}`).join('<br>') : '—'}<div class="muted small">${esc(t('Remaining ownership is not recorded in the sample.'))}</div></dd>
         <dt>${esc(t('Acquired'))}</dt><dd>${esc(date(a.acquired))}</dd><dt>${esc(t('Acquisition cost'))}</dt><dd>${esc(money(a.cost))}</dd>
         <dt>${esc(t('Current valuation'))}</dt><dd>${a.valuation ? `${esc(money(a.valuation.value))}<div class="small muted">${esc(t('As at'))} ${esc(date(a.valuation.date))} · ${esc(a.valuation.source)} ${stale ? pill(`${age} ${t('days old')}`, 'warn') : ''}</div>` : `${pill(t('No valuation on file'), 'bad')}<div class="small muted">${esc(t('Yield on value and value share cannot be calculated.'))}</div>`}</dd>
-        <dt>${esc(t('Status'))}</dt><dd>${esc(a.status)}</dd><dt>${esc(t('Capacity'))}</dt><dd>${esc(num(a.capacity))} ${esc(a.unit)}</dd></dl></section>
+        <dt>${esc(t('Status'))}</dt><dd>${esc(a.status)}</dd>${S.mode === 'connected' ? `<dt>${esc(t('Valuation'))}</dt><dd><button class="btn small" data-act="valuation" data-id="${esc(a.id)}"${S.role === 'Approver' ? '' : ' disabled title="' + esc(t('Only an Approver can record valuations')) + '"'}>${esc(t('Record valuation'))}</button></dd>` : ''}<dt>${esc(t('Capacity'))}</dt><dd>${esc(num(a.capacity))} ${esc(a.unit)}</dd></dl></section>
         <section class="card"><header><h2>${esc(periodLabel(S.periodId))}</h2>${periodSelect()}</header><dl class="dl">
         <dt>${esc(t('Income'))}</dt><dd>${esc(money(p.income))}</dd><dt>${esc(t('Operating costs'))}</dt><dd>${esc(money(p.opex))}</dd><dt>NOI</dt><dd>${esc(money(p.noi))} ${d.prior ? delta(p.noi - d.prior.noi, signed) + ` <span class="muted small">${esc(t('vs'))} ${esc(periodLabel(d.prior.periodId))}</span>` : ''}</dd>
         <dt>${esc(t('Occupancy'))}</dt><dd>${esc(pct(p.occupancy))} <span class="muted small">(${esc(t('average of months'))})</span></dd>
@@ -218,10 +218,13 @@
   const stmtTable = sn => `<div class="tblwrap"><table><thead><tr><th>${esc(t('Asset'))}</th><th class="num">${esc(t('Ownership'))}</th><th class="num">${esc(t('Income'))}</th><th class="num">${esc(t('Operating costs'))}</th><th class="num">NOI</th><th class="num">${esc(t('Value share'))}</th></tr></thead><tbody>${sn.rows.map(r => `<tr><td>${esc(r.name)}</td><td class="num">${esc(pct(r.share, 0))}</td><td class="num">${esc(money(r.income))}</td><td class="num">${esc(money(r.opex))}</td><td class="num">${esc(money(r.noi))}</td><td class="num">${r.valueShare == null ? 'n/a' : `${esc(money(r.valueShare))}<div class="muted small">${esc(date(r.valuationDate))}</div>`}</td></tr>`).join('')}<tr><th>${esc(t('Total'))}</th><th></th><th class="num">${esc(money(sn.income))}</th><th class="num">${esc(money(sn.opex))}</th><th class="num">${esc(money(sn.noi))}</th><th class="num">${esc(money(sn.valueShare))}</th></tr></tbody></table></div><p class="small muted" style="margin-top:6px">${esc(t('Share = asset figure × ownership %. Value share uses each asset’s latest valuation on file (dates shown); assets without one are excluded.'))} ${esc(S.cfg.currency)}.</p>`;
 
   async function viewInvestorWorkspace(id) {
-    const invs = await Store.getInvestors(), w = await Store.getInvestorWorkspace(id), latest = w.statements[0];
+    const only = S.mode === 'investor';
+    const invs = only ? [] : await Store.getInvestors(), w = await Store.getInvestorWorkspace(id), latest = w.statements[0];
+    if (only && w.config) S.cfg = { ...S.cfg, ...w.config };
     // The switcher is demo chrome (an operator tool), kept inside the band and outside the investor's own content.
-    const sw = `<label class="demo-ctrl">${esc(t('Demo control, not part of the investor’s view'))}: ${esc(t('View as investor'))} <select data-bind="investor" data-demo-chrome>${invs.map(i => `<option value="${esc(i.id)}"${i.id === id ? ' selected' : ''}>${esc(i.name)}</option>`).join('')}</select></label>`;
-    return `<div class="inv-band" data-demo-chrome><strong>${esc(t('INVESTOR VIEW'))}</strong><span>${esc(t('Visual demonstration of what one investor might see. Filtering here is done in the browser; real access control must be enforced by a server.'))}</span>${sw}<a href="#/overview" style="color:#fff;margin-inline-start:auto">${esc(t('Back to operator view'))}</a></div><div id="investor-content">` +
+    const sw = only ? '' : `<label class="demo-ctrl">${esc(t('Demo control, not part of the investor’s view'))}: ${esc(t('View as investor'))} <select data-bind="investor" data-demo-chrome>${invs.map(i => `<option value="${esc(i.id)}"${i.id === id ? ' selected' : ''}>${esc(i.name)}</option>`).join('')}</select></label>`;
+    const note = only ? t('Your access is limited by the server to your own approved statements and documents.') : (S.mode === 'connected' ? t('Server-built preview of exactly what this investor receives. An investor account sees only this, enforced by the server.') : t('Visual demonstration of what one investor might see. Filtering here is done in the browser; real access control must be enforced by a server.'));
+    return `<div class="inv-band" data-demo-chrome><strong>${esc(t('INVESTOR VIEW'))}</strong><span>${esc(note)}</span>${sw}${only ? '' : `<a href="#/overview" style="color:#fff;margin-inline-start:auto">${esc(t('Back to operator view'))}</a>`}</div><div id="investor-content">` +
       head(w.investor.name, `${esc(w.investor.type)} · ${sample()}`) +
       (latest ? `<div class="grid kpis"><div class="card kpi"><div class="label">${esc(t('Latest approved period'))}</div><div class="value" style="font-size:18px">${esc(latest.periodLabel)}</div><div class="note">${esc(t('Only approved statements are shown here.'))}</div></div>
         <div class="card kpi"><div class="label">${esc(t('Your share of income'))}</div><div class="value">${esc(money(latest.snapshot.income, true))}</div><div class="note">${esc(latest.periodLabel)}</div></div>
@@ -261,42 +264,56 @@
   const answerHtml = a => `<div class="answer"><div class="q">${esc(a.question)}</div>${a.refused ? `<div class="notice bad" style="margin-bottom:8px">${esc(t('Not answered: advice, valuation opinions and forecasts are out of scope.'))}</div>` : ''}<ul>${a.summary.map(s => `<li><span class="kind ${s.type}">${esc(s.type === 'fact' ? t('FACT') : t('INFERENCE'))}</span>${esc(s.text)}</li>`).join('')}</ul>${a.gaps.length ? `<div class="notice warn" style="margin-top:8px"><strong>${esc(t('Gaps'))}</strong><ul style="margin:4px 0 0;padding-inline-start:18px">${a.gaps.map(g => `<li>${esc(g)}</li>`).join('')}</ul></div>` : ''}${a.sources.length ? `<div class="srcs"><strong>${esc(t('Based on'))}:</strong> ${a.sources.map(s => `<a href="${esc(s.href)}">${esc(s.label)}</a>`).join(' · ')}</div>` : ''}<p class="small muted" style="margin-top:8px">${esc(t('Simulated, rule-based answer. Human review is required before acting.'))}</p></div>`;
 
   async function viewSettings() {
+    const conn = S.mode === 'connected', lock = conn && S.role !== 'Approver' ? ' disabled' : '';
     const cur = ['USD', 'EUR', 'GBP', 'AED', 'SAR', 'AUD'], loc = [['en-US', 'English (US)'], ['en-GB', 'English (UK)'], ['de-DE', 'Deutsch'], ['fr-FR', 'Français'], ['ar-AE', 'العربية (AE)'], ['ar-SA', 'العربية (SA)']];
     return head(t('Settings and configuration'), esc(t('Sample configuration for the demonstration; not assumptions about any real organisation.'))) +
       `<div class="grid cols2e"><section class="card"><header><h2>${esc(t('Presentation'))}</h2></header><div class="ctrls" style="flex-direction:column;align-items:stretch">
-        <label class="ctrl">${esc(t('Currency label of the sample data'))}<select data-bind="currency">${cur.map(c => `<option${c === S.cfg.currency ? ' selected' : ''}>${c}</option>`).join('')}</select></label>
+        <label class="ctrl">${esc(t('Currency label of the sample data'))}<select data-bind="currency"${lock}>${cur.map(c => `<option${c === S.cfg.currency ? ' selected' : ''}>${c}</option>`).join('')}</select></label>
         <p class="small muted">${esc(t('Relabels the unit only. The sample values are not converted between currencies.'))}</p>
-        <label class="ctrl">${esc(t('Number and date format'))}<select data-bind="locale">${loc.map(([v, l]) => `<option value="${v}"${v === S.cfg.locale ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
-        <label class="ctrl">${esc(t('Target NOI yield on cost (%)'))}<input type="number" step="0.1" min="0" max="30" value="${(S.cfg.targetYield * 100).toFixed(1)}" data-bind="target"></label>
+        <label class="ctrl">${esc(t('Number and date format'))}<select data-bind="locale"${lock}>${loc.map(([v, l]) => `<option value="${v}"${v === S.cfg.locale ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+        <label class="ctrl">${esc(t('Target NOI yield on cost (%)'))}<input type="number" step="0.1" min="0" max="30" value="${(S.cfg.targetYield * 100).toFixed(1)}" data-bind="target"${lock}></label>
+        ${conn ? `<p class="small muted">${esc(lock ? t('Only an Approver can change these; they apply to the whole agency.') : t('These settings are saved for the whole agency.'))}</p>` : ''}
         <label class="ctrl">${esc(t('Theme'))}<select data-bind="theme"><option value="system"${S.theme === 'system' ? ' selected' : ''}>${esc(t('System'))}</option><option value="light"${S.theme === 'light' ? ' selected' : ''}>${esc(t('Light'))}</option><option value="dark"${S.theme === 'dark' ? ' selected' : ''}>${esc(t('Dark'))}</option></select></label>
         <div class="seg" role="group" aria-label="${esc(t('Language'))}"><button data-act="lang" data-l="en" aria-pressed="${I.lang === 'en'}">English</button><button data-act="lang" data-l="ar" aria-pressed="${I.lang === 'ar'}">العربية</button></div>
         <p class="small muted">${esc(t('Arabic covers interface text. Sample record names, assistant answers and exception sentences remain in English.'))}</p></div></section>
-        <section class="card"><header><h2>${esc(t('Data connections'))}</h2></header><ul class="list">${[['General ledger / accounting', 'Sample extract in the page'], ['Valuation provider', 'Sample records'], ['Document store', 'Sample records, no files'], ['Identity and permissions', 'Visual demo roles only'], ['Lead engagement (voice) module', 'Separate scripted simulation']].map(([n, d]) => `<li><div><div class="t">${esc(t(n))}</div><div class="d">${esc(t(d))}</div></div>${pill(t('Not connected'), 'neutral')}</li>`).join('')}</ul>
-        <div style="margin-top:12px"><button class="btn" data-act="reset">${esc(t('Reset demo data'))}</button> <span class="small muted">${esc(t('Clears this session’s changes.'))}</span></div></section></div>
+        <section class="card"><header><h2>${esc(t('Data connections'))}</h2></header><ul class="list">${[...(conn ? [['Observer backend', 'Agency database, roles and audit enforced by the server']] : []), ['General ledger / accounting', conn ? 'Sample data stored in the database' : 'Sample extract in the page'], ['Valuation provider', 'Sample records'], ['Document store', 'Sample records, no files'], ['Identity and permissions', 'Visual demo roles only'], ['Lead engagement (voice) module', 'Separate scripted simulation']].map(([n, d]) => `<li><div><div class="t">${esc(t(n))}</div><div class="d">${esc(t(d))}</div></div>${n === 'Observer backend' ? pill(t('Connected'), 'good') : pill(t('Not connected'), 'neutral')}</li>`).join('')}</ul>
+        ${conn ? '' : `<div style="margin-top:12px"><button class="btn" data-act="reset">${esc(t('Reset demo data'))}</button> <span class="small muted">${esc(t('Clears this session’s changes.'))}</span></div>`}</section></div>
       <details class="method" style="margin-top:14px"><summary>${esc(t('About this prototype'))}</summary><p class="small" style="margin-top:8px">${esc(t('Concept prototype with fictional data. Not a production platform and not connected to any real system. What is simulated, what is missing and what a production build needs is documented in IMPLEMENTATION_NOTES.md.'))}</p></details>`;
   }
 
   // ── shell ──
   function renderShell(r) {
-    const inv = r.route === 'investor';
+    const inv = r.route === 'investor', invOnly = S.mode === 'investor', conn = S.mode === 'connected' || S.mode === 'connected-empty';
     document.body.classList.toggle('investor-mode', inv);
     $('skip').textContent = t('Skip to content');
-    $('banner').innerHTML = `<strong>${esc(t('Concept prototype — sample data'))}</strong><span>${esc(t('Fictional assets, figures and people. Not connected to any production system. Nothing is saved.'))}</span><a href="voice.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`;
+    $('banner').innerHTML = invOnly
+      ? `<strong>${esc(t('Investor access'))}</strong><span>${esc(t('You can see only your own approved statements and documents. This is enforced by the server. Fictional sample data.'))}</span><a href="#" data-act="signout">${esc(t('Sign out'))}</a>`
+      : conn
+        ? `<strong>${esc(t('Concept prototype — sample data'))}</strong><span>${esc(t('Connected mode: fictional sample data stored in your agency’s Observer database. Roles and investor access are enforced by the server.'))}</span><a href="voice.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`
+        : `<strong>${esc(t('Concept prototype — sample data'))}</strong><span>${esc(t('Fictional assets, figures and people. Not connected to any production system. Nothing is saved.'))}</span><a href="voice.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`;
     const nav = [['overview', 'Overview'], ['assets', 'Assets'], ['performance', 'Performance'], ['investors', 'Investors'], ['records', 'Records'], ['assistant', 'Assistant (simulated)'], ['settings', 'Settings']];
-    $('side').innerHTML = `<div class="brand"><b>${esc(t('Portfolio & Investor Operations'))}</b><span>${esc(t('Concept prototype'))}</span></div>
-      <nav class="nav" aria-label="${esc(t('Primary'))}">${inv ? `<a href="#/investor/${esc(r.id || '')}" aria-current="page">${esc(t('My portfolio'))}</a><a href="#/overview">${esc(t('Back to operator view'))}</a>` : nav.map(([k, l]) => `<a href="#/${k}"${k === r.route || (k === 'assets' && r.route === 'assets') ? ' aria-current="page"' : ''}>${esc(t(l))}</a>`).join('')}</nav>
-      <div class="sep"></div><div class="opt">${inv ? '' : `<label class="ctrl">${esc(t('Demo role'))}<select data-bind="role"><option value="Analyst"${S.role === 'Analyst' ? ' selected' : ''}>${esc(t('Analyst'))}</option><option value="Approver"${S.role === 'Approver' ? ' selected' : ''}>${esc(t('Approver'))}</option></select></label><span class="small">${esc(t('Visual only: not enforced.'))}</span>`}
+    const chip = invOnly ? `${esc(S.me.email)}` : conn ? `${esc(t('Connected'))}: ${esc(S.me.agency || '')}` : esc(t('Standalone sample (nothing saved)'));
+    const account = invOnly ? '' : conn
+      ? `<span class="small">${esc(S.me.email)} · <strong>${esc(t(S.role))}</strong></span><span class="small">${esc(t('Role enforced by the server.'))}</span><button class="btn small" data-act="signout" style="margin-top:6px">${esc(t('Sign out'))}</button>`
+      : `<label class="ctrl">${esc(t('Demo role'))}<select data-bind="role"><option value="Analyst"${S.role === 'Analyst' ? ' selected' : ''}>${esc(t('Analyst'))}</option><option value="Approver"${S.role === 'Approver' ? ' selected' : ''}>${esc(t('Approver'))}</option></select></label><span class="small">${esc(t('Visual only: not enforced.'))}</span>`;
+    $('side').innerHTML = `<div class="brand"><b>${esc(t('Portfolio & Investor Operations'))}</b><span>${esc(t('Concept prototype'))}</span><span class="small" style="display:block;margin-top:4px">${chip}</span></div>
+      <nav class="nav" aria-label="${esc(t('Primary'))}">${invOnly ? `<a href="#/investor/${esc(S.me.investorId)}" aria-current="page">${esc(t('My portfolio'))}</a>` : inv ? `<a href="#/investor/${esc(r.id || '')}" aria-current="page">${esc(t('My portfolio'))}</a><a href="#/overview">${esc(t('Back to operator view'))}</a>` : (S.mode === 'signin' || S.mode === 'connected-empty') ? '' : nav.map(([k, l]) => `<a href="#/${k}"${k === r.route ? ' aria-current="page"' : ''}>${esc(t(l))}</a>`).join('')}</nav>
+      <div class="sep"></div><div class="opt">${account}
       <div class="seg" style="margin-top:8px" role="group" aria-label="${esc(t('Language'))}"><button data-act="lang" data-l="en" aria-pressed="${I.lang === 'en'}">EN</button><button data-act="lang" data-l="ar" aria-pressed="${I.lang === 'ar'}">AR</button></div>
-      <a href="voice.html">${esc(t('Lead engagement module (optional, separate)'))}</a></div>`;
+      ${invOnly ? '' : `<a href="voice.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`}${conn ? `<a href="../platform.html">${esc(t('Open the lead workspace'))}</a>` : ''}</div>`;
   }
 
   let renderId = 0;
   async function render() {
     const my = ++renderId, r = parse(), main = $('main');
+    if (S.mode === 'investor') { r.route = 'investor'; r.id = S.me.investorId; }
     renderShell(r);
     try {
       let html;
-      if (r.route === 'overview') html = await viewOverview();
+      if (S.mode === 'connected') { await Store.sync(); S.cfg = await Store.getConfig(); S.portfolios = await Store.getPortfolios(); }
+      if (S.mode === 'signin') html = viewSignin();
+      else if (S.mode === 'connected-empty') html = viewEmptyConnected();
+      else if (r.route === 'overview') html = await viewOverview();
       else if (r.route === 'assets') html = r.id ? await viewAsset(r.id, r.q.tab) : await viewAssets();
       else if (r.route === 'performance') html = await viewPerformance();
       else if (r.route === 'investors') html = await viewInvestors();
@@ -316,8 +333,45 @@
     }
   }
 
+  function viewSignin() {
+    return `<section class="card" style="max-width:640px"><h1>${esc(t('Portfolio & Investor Operations'))}</h1>
+      <p style="margin:10px 0">${esc(t('This page is served by an Observer server. Sign in to use connected mode (data stored per agency, roles and investor access enforced by the server), or continue with the local sample (nothing saved).'))}</p>
+      <p class="ctrls"><a class="btn primary" style="text-decoration:none;display:inline-block" href="/login.html?next=/demo/index.html">${esc(t('Sign in'))}</a><button class="btn" data-act="standalone">${esc(t('Continue with the local sample'))}</button></p></section>`;
+  }
+  function viewEmptyConnected() {
+    const admin = S.me.role === 'admin';
+    return `<section class="card" style="max-width:640px"><h1>${esc(t('No portfolio data yet'))}</h1>
+      <p style="margin:10px 0">${esc(t('This agency has no portfolio records. Loading the sample adds the fictional demonstration portfolio to this agency’s database.'))}</p>
+      ${admin ? `<button class="btn primary" data-act="load-sample">${esc(t('Load the sample portfolio'))}</button>` : `<div class="notice info">${esc(t('Ask an admin to load the sample portfolio.'))}</div>`}
+      <p class="small muted" style="margin-top:10px"><button class="btn small" data-act="standalone">${esc(t('Use the local sample instead'))}</button></p></section>`;
+  }
+
+  function openAssetDialog() {
+    const f = (id, label, input) => `<label class="ctrl" style="margin-bottom:8px">${esc(label)}${input}</label>`;
+    openDialog(t('Add asset'), `<p class="small muted" style="margin-bottom:10px">${esc(t('Creates an asset with no valuation. Missing required records are flagged automatically.'))}</p>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px">
+      ${f('n', t('Name'), '<input type="text" id="na-name" maxlength="120">')}${f('t', t('Type'), '<input type="text" id="na-type" maxlength="60" placeholder="Office">')}
+      ${f('p', t('Portfolio'), `<select id="na-port">${S.portfolios.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select>`)}${f('l', t('Location'), '<input type="text" id="na-loc" maxlength="120">')}
+      ${f('s', t('Status'), '<select id="na-status"><option>Stabilised</option><option>Lease-up</option><option>Refurbishment</option><option>Held for sale</option></select>')}${f('a', t('Acquired'), '<input type="date" id="na-acq">')}
+      ${f('c', t('Acquisition cost'), '<input type="number" id="na-cost" min="1" step="1">')}${f('cap', t('Capacity'), '<input type="number" id="na-cap" min="0" step="1" value="0">')}
+      ${f('u', t('Unit'), '<select id="na-unit"><option value="units">units</option><option value="sqm">sqm</option></select>')}${f('g', t('Gross potential rent per month'), '<input type="number" id="na-gpr" min="0" step="1" value="0">')}
+      ${f('o', t('Other income per month'), '<input type="number" id="na-other" min="0" step="1" value="0">')}${f('m', t('Operating costs per month'), '<input type="number" id="na-opex" min="0" step="1" value="0">')}
+      ${f('oc', t('Typical occupancy (%) applied to every month'), '<input type="number" id="na-occ" min="0" max="100" step="1" value="0">')}</div>`,
+      [{ label: t('Create asset'), primary: true, onClick: async () => {
+        const v = id => $(id).value, occ = Math.min(100, Math.max(0, Number(v('na-occ')) || 0)) / 100;
+        await Store.createAsset({ name: v('na-name'), type: v('na-type'), portfolio: v('na-port'), location: v('na-loc'), status: v('na-status'), acquired: v('na-acq'), cost: Number(v('na-cost')), capacity: Number(v('na-cap')), unit: v('na-unit'), gpr: Number(v('na-gpr')), other: Number(v('na-other')), opex: { maintenance: Number(v('na-opex')) }, occupancy: Array(12).fill(occ) });
+        dlg.close(); toast(t('Asset created and recorded in the audit history.')); await render();
+      } }]);
+  }
+  function openValuationDialog(id) {
+    openDialog(t('Record valuation'), `<p class="small muted" style="margin-bottom:10px">${esc(t('A valuation needs a value, an as-at date and a named source. It is recorded in the audit history.'))}</p>
+      <label class="ctrl" style="margin-bottom:8px">${esc(t('Value'))}<input type="number" id="nv-val" min="1" step="1"></label><label class="ctrl" style="margin-bottom:8px">${esc(t('As at'))}<input type="date" id="nv-date"></label><label class="ctrl">${esc(t('Source'))}<input type="text" id="nv-src" maxlength="120" placeholder="Independent appraisal"></label>`,
+      [{ label: t('Save valuation'), primary: true, onClick: async () => { await Store.recordValuation(id, { value: Number($('nv-val').value), date: $('nv-date').value, source: $('nv-src').value }); dlg.close(); toast(t('Valuation recorded.')); await render(); } }]);
+  }
+
   // ── events ──
-  document.addEventListener('change', async e => {
+  document.addEventListener('change', async e => { try { await onChange(e); } catch (err) { toast(err.message, true); await render(); } });
+  async function onChange(e) {
     const el = e.target, b = el.dataset && el.dataset.bind;
     if (el.id === 'f-type') { S.filter.type = el.value; return fillAssetTable(); }
     if (el.id === 'f-status') { S.filter.status = el.value; return fillAssetTable(); }
@@ -333,7 +387,7 @@
     else if (b === 'target') { const v = parseFloat(el.value); if (isFinite(v) && v >= 0 && v <= 30) S.cfg = await Store.setConfig({ targetYield: v / 100 }); }
     else if (b === 'theme') { S.theme = el.value; if (el.value === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = el.value; }
     render();
-  });
+  }
   document.addEventListener('input', e => { if (e.target.id === 'f-q') { S.filter.q = e.target.value; fillAssetTable(); } });
   document.addEventListener('submit', async e => {
     if (e.target.id !== 'ask-form') return; e.preventDefault(); await ask($('ask-q').value);
@@ -350,6 +404,11 @@
     try {
       if (act === 'lang') { I.set(el.dataset.l); await render(); }
       else if (act === 'retry') await render();
+      else if (act === 'signout') await Store.signOut();
+      else if (act === 'standalone') { Store.useStandalone(); S.mode = 'standalone'; S.me = null; S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); location.hash = '#/overview'; await render(); }
+      else if (act === 'load-sample') { await Store.loadSample(); S.mode = 'connected'; S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); toast(t('Sample portfolio loaded.')); location.hash = '#/overview'; await render(); }
+      else if (act === 'add-asset') openAssetDialog();
+      else if (act === 'valuation') openValuationDialog(el.dataset.id);
       else if (act === 'ask') await ask(el.dataset.q);
       else if (act === 'task') { await Store.toggleTask(el.dataset.id, S.role); toast(t('Task updated and recorded in the audit history.')); await render(); }
       else if (act === 'doc') { await Store.reviewDocument(el.dataset.id, el.dataset.d, S.role); toast(t('Document review recorded in the audit history.')); await render(); }
@@ -363,9 +422,15 @@
   window.addEventListener('hashchange', () => { render(); $('main').focus({ preventScroll: true }); window.scrollTo(0, 0); });
 
   (async function init() {
-    S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios();
+    try {
+      const st = await Store.init();
+      S.mode = st.mode; S.me = st.me || null;
+      if (S.mode === 'connected' || S.mode === 'connected-empty') S.role = S.me.label || (S.me.role === 'admin' ? 'Approver' : 'Analyst');
+      if (S.mode === 'investor') S.cfg = { currency: 'USD', locale: 'en-US', thresholds: {} };
+      else { S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); }
+    } catch (e) { S.mode = 'standalone'; Store.useStandalone(); S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); }
     window.DemoI18n.register(window.DemoAR || {});
-    if (!location.hash) location.hash = '#/overview'; else render();
+    if (!location.hash && S.mode !== 'investor') location.hash = '#/overview'; else render();
   })();
   window.DemoApp = { render };
 })();

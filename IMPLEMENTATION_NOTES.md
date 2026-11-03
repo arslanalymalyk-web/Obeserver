@@ -4,9 +4,10 @@ This is a **concept prototype and technical demonstration**, built to show how a
 
 ## How to open it
 
-- **Portfolio prototype (primary):** open `public/demo/index.html` in a browser. It is plain HTML/CSS/JS, needs no server, no install and no network, and works from `file://`.
+- **Portfolio prototype, standalone mode (primary):** open `public/demo/index.html` in a browser. It is plain HTML/CSS/JS, needs no server, no install and no network, and works from `file://`. Nothing is saved.
+- **Portfolio prototype, connected mode:** start the Observer server (`DATABASE_URL=... SESSION_SECRET=... node server.js`), sign up at `/login.html?next=/demo/index.html` with "Start with demo leads" ticked (this also loads the sample portfolio), and the same screens then read and write that agency's Postgres data. The mode is auto-detected: from `file://` or a host without the Observer API it stays standalone, and the banner states which mode is active.
 - **Lead-engagement module (optional, separate):** open `public/demo/voice.html` (also standalone), or use the link in the banner.
-- **Tests:** `npm run test:demo` (calculations and data integrity, no dependencies). Browser checks (need Playwright): `node test/browser/demo-flow.js` (52 checks on the portfolio prototype) and `node test/browser/voice-sim.js` (the voice simulation's labelling and behaviour).
+- **Tests:** `npm run test:demo` (calculations and data integrity, no dependencies); `npm test` (backend API suites, needs `DATABASE_URL`). Browser checks (need Playwright): `node test/browser/demo-flow.js` (standalone mode, 52 checks), `node test/browser/demo-connected.js` (connected mode with admin, analyst and investor sessions against a running server) and `node test/browser/voice-sim.js` (the voice simulation's labelling and behaviour).
 - The repository also contains an earlier brokerage lead-management app with a demo Node/Postgres backend (`server.js`, `lib/`, `api/`, `public/platform.html`). It is a separate track, kept intact and now honestly labelled. See "Repository layout".
 
 ## What the prototype demonstrates
@@ -27,19 +28,33 @@ This is a **concept prototype and technical demonstration**, built to show how a
 | Asset, valuation, lease, document, investor and communication data | **Fictional sample data** in `public/demo/js/data.js`. Deterministic and local. |
 | Financial figures | Computed in the browser by `calc.js` from visible monthly inputs; the formulas are shown in the UI and re-checked by `test/demo-calc.test.js`. The methodology is a sample, not an accounting standard. |
 | Exceptions ("needs attention") | Transparent threshold rules (valuation age, lease expiry, occupancy, yield shortfall, document status). No scoring model. Each item shows its rule. |
-| Roles (Analyst / Approver, investor view) | **Visual demonstration only.** Nothing is enforced; filtering happens in the browser. |
-| Approvals, tasks, statements, documents | Interactive, **in memory only**. Lost on reload. Nothing is stored or secured. "This session" entries mark what you created. |
-| "Documents" | Records only. No files exist or are stored. |
-| Assistant | **Simulated.** Keyword rules over the sample data. No AI model, no network call. |
-| Data connections (ledger, valuations, documents, identity) | **Not connected.** The UI says so. |
+| Roles (Analyst / Approver, investor view) | **Standalone: visual demonstration only**; nothing is enforced and filtering happens in the browser. **Connected: enforced by the server** (see "Connected mode" below). |
+| Approvals, tasks, statements | **Standalone: in memory only**, lost on reload ("this session" entries). **Connected: stored in Postgres per agency**, with a database-level append-only audit log. |
+| "Documents" | Records only, in both modes. No files exist or are stored, uploaded or scanned. |
+| Assistant | **Simulated** in both modes: keyword rules over the data the browser holds. No AI model, no network call. (It is not wired to the server data in connected mode beyond what the page already loaded.) |
+| Data connections (ledger, valuations, documents, identity) | **Not connected** in either mode; the UI says so. Connected mode adds only the Observer backend. The data in it is still the fictional sample plus whatever you create. |
 | Currency | The currency setting relabels the sample unit. **No FX conversion** is performed. |
 | Dates | The demo uses a fixed reference date (2026-10-05) so that results are deterministic; it is not "today". |
 | Language | Arabic covers interface text only. Sample record names, assistant answers and exception sentences are English. A native-speaker review is needed before external use. |
 | Voice module | A **scripted simulation**. No calls are placed, recorded or transcribed; no messages are sent; nothing syncs to a CRM. Buttons only change the on-screen transcript. |
 
+## Connected mode (added after the first version, at the request of the project owner)
+
+The repository gained a small demo backend (Node, Postgres, no framework) for the earlier lead-management app. Connected mode reuses it, which means the brief's "do not invent a backend" was resolved by an explicit decision rather than evidence in the original files. What it adds:
+
+- **Per-agency (tenant) tables** for portfolios, assets, leases, documents, tasks, investors, communications, statements and audit events, seeded from the same fictional data (`db/schema.sql`, `lib/portfolio.js`).
+- **Server-enforced roles:** `admin` acts as Approver, `agent` as Analyst, and a new `investor` account type bound to exactly one investor. Analysts cannot review documents, record valuations, decide statements or change settings; the server refuses these even if the UI is bypassed (tested).
+- **Maker/checker on real user ids:** the account that prepared a statement cannot approve it.
+- **Investor isolation:** the investor view is built on the server from approved, published statements only. An investor account cannot read another investor, internal notes, drafts, other endpoints or the operator data (tested, including payload contents). Removing an investor locks them out on the next request.
+- **Server-side calculation:** statement snapshots are computed by the server with the same tested `calc.js` the browser uses.
+- **Audit:** every write appends an event naming the real account; the database itself rejects updates and deletes of audit rows (trigger).
+- **Writes with validation:** create asset (required fields, ranges, existing portfolio), record valuation (value, date, source), settings, tasks, document review, statements.
+
+None of this has been security-reviewed or penetration-tested, and it has only been run against a local Postgres 16 and mock services; it is not deployed.
+
 ## What is not implemented
 
-Authentication and authorization; any database or persistence; document storage, versioning and retention; real approvals; tamper-evident audit logging; accounting, banking, valuation, CRM or telephony integrations; investor onboarding and KYC; tax, fee and waterfall calculations; multi-currency and FX; multi-entity and ownership structures beyond a flat percentage; reporting packs and PDF generation; notifications; localisation beyond the interface strings; accessibility testing with assistive technology; cross-browser testing beyond headless Chromium.
+Production hardening of authentication and authorization (password reset, MFA, SSO, session revocation, rate limiting beyond a per-process counter); migrations tooling (the schema is applied idempotently at start-up), backups and tenant deletion (blocked by the immutable audit table); asset edit/delete and bulk import (only create and valuation update exist); statement versioning and restatements; document storage, versioning and retention; real approvals; tamper-evident audit logging; accounting, banking, valuation, CRM or telephony integrations; investor onboarding and KYC; tax, fee and waterfall calculations; multi-currency and FX; multi-entity and ownership structures beyond a flat percentage; reporting packs and PDF generation; notifications; localisation beyond the interface strings; accessibility testing with assistive technology; cross-browser testing beyond headless Chromium.
 
 ## Production components that would need backend services
 
@@ -55,7 +70,7 @@ Authentication and authorization; any database or persistence; document storage,
 
 ## Security controls that require server-side enforcement
 
-Everything the UI hints at but cannot enforce: who can see which asset, investor or document; investor isolation; internal-only notes; maker/checker on approvals; immutability of published statements and the audit trail; document access and download controls; rate limiting and abuse protection; secrets management; input validation; export controls. The prototype's investor filtering and role switch are explicitly **not** security boundaries.
+In standalone mode everything below is only hinted at by the UI. In connected mode the demo backend enforces roles, investor isolation, maker/checker and audit immutability as listed above; the rest remains open. What a production system must enforce on a server: who can see which asset, investor or document; investor isolation; internal-only notes; maker/checker on approvals; immutability of published statements and the audit trail; document access and download controls; rate limiting and abuse protection; secrets management; input validation; export controls. The prototype's investor filtering and role switch are explicitly **not** security boundaries.
 
 ## Integration details that depend on ZMNHOOF's architecture
 
@@ -118,6 +133,7 @@ test/api.test.js        Backend API tests (needs a Postgres via DATABASE_URL)
 
 ## Known limitations of this deliverable
 
+- Connected mode was verified end to end in headless Chromium against a local Postgres 16 (35 browser checks across admin, analyst and investor sessions, plus 65 assertion lines in the portfolio API suite); it has not been deployed or load-tested.
 - Verified in headless Chromium only (52 scripted browser checks on the portfolio prototype, a separate suite for the voice simulation, and the calculation tests). Not tested in Safari or Firefox, on real devices, or with a screen reader. Contrast of the prototype palette was computed (all text and status colours at or above 4.5:1 in light and dark themes), but that is not a full accessibility audit.
 - `public/platform.html` (the CRM page) still loads Google Fonts and Unsplash images, unlike the portfolio prototype, which makes no network requests. The CRM app also calls its own demo backend for leads, teams and integrations.
 - The CRM app's HubSpot connector and Claude copilot/voice-demo features were tested against mock servers only; they have not been run against HubSpot or a real model.

@@ -38,6 +38,9 @@ Email + password (scrypt). Session is an HMAC-signed, HttpOnly, SameSite=Lax coo
 
 **Duplicates:** matched by phone (last 9 digits, so `+971 50 111 2233` equals `050 111 2233`) or email (case-insensitive), via generated columns `phone_key`/`email_key`. A match fills the existing lead's empty fields and never overwrites. Applies to webhooks and CSV import, including duplicates inside one batch. Manual "Add lead" does not dedupe.
 
+## Portfolio & investor operations (connected mode of `public/demo/`)
+Tenant-scoped tables (`portfolio_config`, `portfolios`, `assets`, `leases`, `documents`, `tasks`, `investors`, `communications`, `statements`, `audit_events`) seeded from `public/demo/js/data.js`. `lib/portfolio.js` serves `/api/portfolio/*`: `GET bootstrap` (operators), `GET investor-view` (investor accounts get only their own approved data; operators can preview), `POST seed|assets|assets/:id/valuation|statements|statements/:id/submit|decide|tasks/:id/toggle|documents/:id/review`, `PATCH config`. Roles: `admin` = Approver, `agent` = Analyst, `investor` = one investor only; investor accounts are blocked from every other endpoint. Statement snapshots use the same pure `calc.js` as the browser. `audit_events` is append-only (trigger). The front end (`public/demo/js/store.js`) auto-detects connected vs standalone mode.
+
 ## Configuration
 See `.env.example`. `DATABASE_URL`, `SESSION_SECRET` (32+ chars) are required; `ANTHROPIC_API_KEY` enables the copilot.
 

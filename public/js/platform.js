@@ -2335,15 +2335,27 @@ async function renderTeam(){
     const {users,invites}=await api('GET','/api/users'),me=window.__me||{};
     document.getElementById('team-count').textContent=users.length+' member'+(users.length===1?'':'s')+(invites.length?` · ${invites.length} pending`:'');
     body.innerHTML=users.map(u=>`<tr><td>${esc(u.email)}${u.email===me.email?' <span style="color:var(--text3)">(you)</span>':''}</td>
-      <td><select class="field-input" style="width:auto;padding:4px 8px" onchange="setRole(${Number(u.id)},this)" aria-label="Role for ${esc(u.email)}"><option value="agent"${u.role==='agent'?' selected':''}>Agent</option><option value="admin"${u.role==='admin'?' selected':''}>Admin</option></select></td>
+      <td>${u.role==='investor'?`Investor · ${esc(u.investor_id)}`:`<select class="field-input" style="width:auto;padding:4px 8px" onchange="setRole(${Number(u.id)},this)" aria-label="Role for ${esc(u.email)}"><option value="agent"${u.role==='agent'?' selected':''}>Agent</option><option value="admin"${u.role==='admin'?' selected':''}>Admin</option></select>`}</td>
       <td>${u.email===me.email?'':`<button class="btn btn-sm" style="color:var(--hot)" onclick="removeUser(${Number(u.id)})">Remove</button>`}</td></tr>`).join('')
       +invites.map(i=>`<tr><td>${esc(i.email)} <span style="color:var(--text3)">· invited</span></td><td>${esc(i.role)}</td>
       <td><button class="btn btn-sm" onclick="revokeInvite(${Number(i.id)})">Revoke</button></td></tr>`).join('');
   }catch(e){body.textContent=e.message}
 }
+async function onInviteRole(){
+  const inv=document.getElementById('inv-role').value==='investor',wrap=document.getElementById('inv-investor-wrap');
+  wrap.style.display=inv?'':'none';
+  if(inv&&!document.getElementById('inv-investor').options.length){
+    try{
+      const b=await api('GET','/api/portfolio/bootstrap'),sel=document.getElementById('inv-investor');
+      if(b.empty){toastMsg('Load the sample portfolio first (open the Portfolio prototype)');return}
+      b.investors.forEach(i=>{const o=document.createElement('option');o.value=i.id;o.textContent=i.name;sel.appendChild(o)});
+    }catch(e){toastMsg(e.message)}
+  }
+}
 async function sendInvite(){
   try{
-    const r=await api('POST','/api/users/invite',{email:document.getElementById('inv-email').value,role:document.getElementById('inv-role').value});
+    const role=document.getElementById('inv-role').value;
+    const r=await api('POST','/api/users/invite',{email:document.getElementById('inv-email').value,role,investor_id:role==='investor'?document.getElementById('inv-investor').value:undefined});
     document.getElementById('inv-link').value=location.origin+'/login.html?invite='+encodeURIComponent(r.token);
     document.getElementById('inv-result').style.display='';document.getElementById('inv-email').value='';
     renderTeam();

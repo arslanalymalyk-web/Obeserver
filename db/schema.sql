@@ -95,3 +95,66 @@ ALTER TABLE integrations ADD COLUMN IF NOT EXISTS last_error   TEXT NOT NULL DEF
 -- Stable id from the source system (e.g. 'hubspot:51'), so re-syncing never duplicates a contact that has no phone/email.
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS external_id TEXT;
 CREATE INDEX IF NOT EXISTS leads_external_idx ON leads (tenant_id, external_id) WHERE external_id IS NOT NULL;
+
+-- ═══ Portfolio & investor operations (tenant-scoped) ═══
+ALTER TABLE users   ADD COLUMN IF NOT EXISTS investor_id TEXT;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS investor_id TEXT;
+ALTER TABLE users   DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users   ADD  CONSTRAINT users_role_check   CHECK (role IN ('admin','agent','investor'));
+ALTER TABLE invites DROP CONSTRAINT IF EXISTS invites_role_check;
+ALTER TABLE invites ADD  CONSTRAINT invites_role_check CHECK (role IN ('admin','agent','investor'));
+
+CREATE TABLE IF NOT EXISTS portfolio_config (
+  tenant_id INT PRIMARY KEY REFERENCES tenants(id) ON DELETE CASCADE,
+  config JSONB NOT NULL, months JSONB NOT NULL, periods JSONB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS portfolios (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, name TEXT NOT NULL, strategy TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS assets (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, portfolio_id TEXT NOT NULL,
+  name TEXT NOT NULL, type TEXT NOT NULL, location TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'Stabilised',
+  capacity NUMERIC NOT NULL DEFAULT 0, unit TEXT NOT NULL DEFAULT 'units', acquired DATE NOT NULL, cost NUMERIC NOT NULL CHECK (cost > 0),
+  valuation_value NUMERIC, valuation_date DATE, valuation_source TEXT, target_yield NUMERIC, internal_note TEXT NOT NULL DEFAULT '',
+  gpr NUMERIC NOT NULL DEFAULT 0, other_income NUMERIC NOT NULL DEFAULT 0, opex JSONB NOT NULL DEFAULT '{}', occupancy JSONB NOT NULL DEFAULT '[]', one_off JSONB NOT NULL DEFAULT '{}',
+  PRIMARY KEY (tenant_id, id), FOREIGN KEY (tenant_id, portfolio_id) REFERENCES portfolios (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS leases (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id SERIAL, asset_id TEXT NOT NULL, tenant_name TEXT NOT NULL, space TEXT NOT NULL DEFAULT '', lease_end DATE NOT NULL, note TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS documents (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, scope TEXT NOT NULL CHECK (scope IN ('asset','investor')), ref TEXT NOT NULL,
+  name TEXT NOT NULL, type TEXT NOT NULL, status TEXT NOT NULL, doc_date DATE, expires DATE, owner_name TEXT NOT NULL DEFAULT '', due_date DATE,
+  visibility TEXT NOT NULL DEFAULT 'internal' CHECK (visibility IN ('internal','investor')), period TEXT,
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS tasks (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, asset_id TEXT NOT NULL, title TEXT NOT NULL, owner_name TEXT NOT NULL DEFAULT '',
+  due_date DATE, priority TEXT NOT NULL DEFAULT 'Medium', status TEXT NOT NULL DEFAULT 'Open' CHECK (status IN ('Open','Done')),
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS investors (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, name TEXT NOT NULL, type TEXT NOT NULL DEFAULT '', contact TEXT NOT NULL DEFAULT '', holdings JSONB NOT NULL DEFAULT '{}',
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS communications (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, investor_id TEXT NOT NULL, at DATE NOT NULL, direction TEXT NOT NULL, subject TEXT NOT NULL, internal BOOLEAN NOT NULL DEFAULT false,
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE TABLE IF NOT EXISTS statements (
+  tenant_id INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, id TEXT NOT NULL, investor_id TEXT NOT NULL, period TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('Draft','In review','Published')), prepared_by TEXT NOT NULL DEFAULT '', prepared_by_user INT, approved_by TEXT,
+  snapshot JSONB, notes JSONB NOT NULL DEFAULT '[]', reviewed BOOLEAN NOT NULL DEFAULT false,
+  PRIMARY KEY (tenant_id, id), UNIQUE (tenant_id, investor_id, period)
+);
+CREATE TABLE IF NOT EXISTS audit_events (
+  id BIGSERIAL PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  actor TEXT NOT NULL, action TEXT NOT NULL, entity TEXT NOT NULL, detail TEXT NOT NULL DEFAULT '', user_id INT
+);
+CREATE INDEX IF NOT EXISTS audit_events_tenant_idx ON audit_events (tenant_id, at DESC);
+-- Append-only: the database itself refuses edits and deletes of audit rows.
+CREATE OR REPLACE FUNCTION audit_events_immutable() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'audit_events is append-only'; END; $$ LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS audit_events_no_change ON audit_events;
+CREATE TRIGGER audit_events_no_change BEFORE UPDATE OR DELETE ON audit_events FOR EACH ROW EXECUTE FUNCTION audit_events_immutable();

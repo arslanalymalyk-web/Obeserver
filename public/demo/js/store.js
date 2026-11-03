@@ -97,5 +97,60 @@
         holdings: Object.entries(inv.holdings).map(([id, share]) => { const a = D.assets.find(x => x.id === id); return { id, name: a.name, type: a.type, location: a.location, share }; }) });
     },
   };
+
+  // ── Connected mode ─────────────────────────────────────────────────────────────────────────────
+  // Auto-detected in init(). From file:// (or any host without the Observer API) nothing above changes and no request is made.
+  // When served by Observer and signed in, data comes from /api/portfolio/*, every write goes through the server (which
+  // enforces roles, maker/checker, investor isolation and the audit trail), and the browser keeps only a read copy.
+  let mode = 'standalone', session = null;
+  const standalone = {};
+  ['setConfig', 'toggleTask', 'reviewDocument', 'prepareStatement', 'submitStatement', 'decideStatement', 'reset', 'getInvestorWorkspace'].forEach(k => { standalone[k] = Store[k]; });
+  const call = async (method, path, body) => {
+    const r = await fetch(path, { method, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || 'Request failed (' + r.status + ')'), { status: r.status });
+    return j;
+  };
+  const refresh = async () => { const b = await call('GET', '/api/portfolio/bootstrap'); if (b.empty) return b; const { empty, me, ...data } = b; D = data; return b; };
+  const connected = () => mode === 'connected';
+
+  Store.getMode = () => ({ mode, me: session });
+  Store.useStandalone = () => { mode = 'standalone'; session = null; };
+  Store.init = async () => {
+    if (!/^https?:$/.test(root.location.protocol)) return { mode };
+    let r; try { r = await fetch('/api/auth/me', { credentials: 'same-origin' }); } catch { return { mode }; }
+    if (r.status === 401) { mode = 'signin'; return { mode }; }
+    if (!r.ok || !/json/.test(r.headers.get('content-type') || '')) return { mode };
+    session = await r.json();
+    if (session.role === 'investor') { mode = 'investor'; return { mode, me: session }; }
+    const b = await refresh(); session = { ...session, label: b.me.label };
+    mode = b.empty ? 'connected-empty' : 'connected';
+    return { mode, me: session };
+  };
+  // Re-read the agency's data so changes made by other users are visible. Called on every navigation in connected mode.
+  Store.sync = async () => { if (connected()) await refresh(); };
+  Store.loadSample = async () => { await call('POST', '/api/portfolio/seed'); const b = await refresh(); mode = 'connected'; return b; };
+  Store.signOut = async () => { try { await call('POST', '/api/auth/logout', {}); } finally { root.location.href = '/login.html?next=/demo/index.html'; } };
+
+  Store.setConfig = async patch => { if (!connected()) return standalone.setConfig(patch); await call('PATCH', '/api/portfolio/config', patch); await refresh(); return clone(D.config); };
+  Store.toggleTask = async (id, role) => { if (!connected()) return standalone.toggleTask(id, role); const t = await call('POST', `/api/portfolio/tasks/${encodeURIComponent(id)}/toggle`); await refresh(); return t; };
+  Store.reviewDocument = async (id, decision, role) => { if (!connected()) return standalone.reviewDocument(id, decision, role); const d = await call('POST', `/api/portfolio/documents/${encodeURIComponent(id)}/review`, { decision }); await refresh(); return d; };
+  Store.prepareStatement = async (investorId, periodId, role) => {
+    if (!connected()) return standalone.prepareStatement(investorId, periodId, role);
+    const { id } = await call('POST', '/api/portfolio/statements', { investorId, period: periodId }); await refresh(); return clone(D.statements.find(x => x.id === id));
+  };
+  Store.submitStatement = async (id, role, ack) => { if (!connected()) return standalone.submitStatement(id, role, ack); await call('POST', `/api/portfolio/statements/${encodeURIComponent(id)}/submit`, { acknowledged: !!ack }); await refresh(); return clone(D.statements.find(x => x.id === id)); };
+  Store.decideStatement = async (id, decision, role) => { if (!connected()) return standalone.decideStatement(id, decision, role); await call('POST', `/api/portfolio/statements/${encodeURIComponent(id)}/decide`, { decision }); await refresh(); return clone(D.statements.find(x => x.id === id)); };
+  Store.reset = () => connected() ? fail('Reset is only available in standalone mode. In connected mode the data lives in the Observer database.') : standalone.reset();
+  Store.getInvestorWorkspace = async investorId => {
+    if (mode === 'investor') return call('GET', '/api/portfolio/investor-view');
+    if (connected()) return call('GET', '/api/portfolio/investor-view?investorId=' + encodeURIComponent(investorId)); // server-built preview of exactly what that investor receives
+    return standalone.getInvestorWorkspace(investorId);
+  };
+  // Only meaningful when connected (the standalone sample is fixed).
+  Store.createAsset = async payload => { if (!connected()) return fail('Creating assets needs connected mode (the standalone sample is read-only).'); const r = await call('POST', '/api/portfolio/assets', payload); await refresh(); return r; };
+  Store.recordValuation = async (id, payload) => { if (!connected()) return fail('Recording valuations needs connected mode.'); const r = await call('POST', `/api/portfolio/assets/${encodeURIComponent(id)}/valuation`, payload); await refresh(); return r; };
+  Store.getPortfolioList = () => ok(D.portfolios);
+
   root.DemoStore = Store;
 })(window);

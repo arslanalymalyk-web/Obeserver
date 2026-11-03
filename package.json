@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node test/api.test.js",
+    "test": "node test/api.test.js && node test/portfolio.test.js",
     "test:demo": "node test/demo-calc.test.js"
   },
   "dependencies": {

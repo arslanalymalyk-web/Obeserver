@@ -70,7 +70,9 @@ $('f').onsubmit = async e => {
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || 'Something went wrong');
-    location.href = '/platform.html';
+    // Investors go to their portfolio view; others to ?next= (same-origin paths only) or the lead workspace.
+    const next = new URLSearchParams(location.search).get('next');
+    location.href = j.role === 'investor' ? '/demo/index.html' : (next && /^\/[^\/\\]/.test(next) ? next : '/platform.html');
   } catch (er) { $('err').textContent = er.message; $('go').disabled = false; }
 };
 </script>

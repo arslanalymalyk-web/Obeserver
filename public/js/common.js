@@ -44,13 +44,14 @@ async function api(method, path, body) {
   const r = await fetch(path, { method, headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
   if (r.status === 401 && !path.startsWith('/api/auth/')) { location.href = '/login.html'; throw new Error('Signed out'); }
-  if (!r.ok) throw new Error(j.error || 'Request failed (' + r.status + ')');
+  if (!r.ok) throw Object.assign(new Error(j.error || 'Request failed (' + r.status + ')'), { status: r.status });
   return j;
 }
 async function signOut() { try { await api('POST', '/api/auth/logout', {}); } finally { location.href = '/login.html'; } }
 // Require a session, optionally load leads into window.__leads, then run the page script.
 function bootApp(src, withLeads = true) {
-  Promise.all([api('GET', '/api/auth/me'), withLeads ? api('GET', '/api/leads') : []])
+  api('GET', '/api/auth/me').then(me => { if (me.role === 'investor') { location.href = '/demo/index.html'; throw new Error('Signed out'); } return me; })
+    .then(me => Promise.all([me, withLeads ? api('GET', '/api/leads') : []]))
     .then(([me, leads]) => {
       window.__me = me; window.__leads = leads;
       // Load scripts one after another so later ones can use the earlier ones' globals.
@@ -58,5 +59,8 @@ function bootApp(src, withLeads = true) {
         const s = document.createElement('script'); s.src = f; s.onload = ok; s.onerror = () => no(new Error('failed to load ' + f)); document.body.appendChild(s);
       })), Promise.resolve()).catch(e => { document.body.textContent = e.message; });
     })
-    .catch(e => { if (e.message !== 'Signed out') document.body.textContent = 'Could not load: ' + e.message; });
+    .catch(e => {
+      if (e.status === 401) { location.href = '/login.html'; return; } // not signed in (or the account was removed)
+      if (e.message !== 'Signed out') document.body.textContent = 'Could not load: ' + e.message;
+    });
 }
