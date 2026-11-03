@@ -1,6 +1,6 @@
 // Browser test (needs Playwright: `npm i -D playwright` or a global install; run: node test/browser/demo-flow.js [screenshot-dir]).
 const {chromium}=require('playwright');const path=require('path');const {pathToFileURL}=require('url');
-const PAGE=pathToFileURL(path.join(__dirname,'../../public/demo/index.html')).href;const S=process.argv[2]||require('os').tmpdir();
+const PAGE=process.env.PAGE||pathToFileURL(path.join(__dirname,'../../public/demo/index.html')).href;const S=process.argv[2]||require('os').tmpdir();
 const fs0=require('fs');let fails=0;const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)fails++};
 (async()=>{fs0.mkdirSync(S+'/shots/demo',{recursive:true});const b=await chromium.launch();const c=await b.newContext({viewport:{width:1440,height:900},acceptDownloads:true});const p=await c.newPage();
 const errs=[],reqs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});

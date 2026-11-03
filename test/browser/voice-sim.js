@@ -1,6 +1,6 @@
 // Browser test (needs Playwright: `npm i -D playwright` or a global install; run: node test/browser/voice-sim.js [screenshot-dir]).
 const {chromium}=require('playwright');const path=require('path');const {pathToFileURL}=require('url');
-const PAGE=pathToFileURL(path.join(__dirname,'../../public/demo/voice.html')).href;let fails=0;const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)fails++};
+const PAGE=process.env.PAGE||pathToFileURL(path.join(__dirname,'../../public/demo/voice.html')).href;let fails=0;const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)fails++};
 (async()=>{const b=await chromium.launch();const p=await (await b.newContext({viewport:{width:1440,height:900}})).newPage();
 const errs=[],reqs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});p.on('request',r=>{if(!/^(file|data|blob):/.test(r.url()))reqs.push(r.url())});
 await p.goto(PAGE);await p.waitForTimeout(800);
@@ -14,7 +14,7 @@ await p.waitForTimeout(12000);t=await p.locator('#transcript-area').innerText();
 await p.click('button:has-text("Handoff")');await p.waitForTimeout(300);ok(/simulated/i.test(await p.locator('#transcript-area').innerText()),'handoff is marked simulated');
 await p.click('#handoff-alert button');await p.waitForTimeout(200);ok(/nobody was notified/.test(await p.locator('#transcript-area').innerText()),'handoff confirm says nobody was notified');
 // lead -> property link
-const href=await p.locator('#call-asset-link').getAttribute('href');ok(href==='index.html#/assets/A7','active lead links to demo asset A7 ('+href+')');
+const href=await p.locator('#call-asset-link').getAttribute('href');ok(/\.html#\/assets\/A7$/.test(href||''),'active lead links to demo asset A7 ('+href+')');
 await p.evaluate(()=>showView('queue'));await p.waitForTimeout(300);ok(/Harbor Point Residences/.test(await p.locator('#view-queue').innerText()),'queue shows linked properties');
 await p.evaluate(()=>{showView('live');selectQueueItem(6)});ok(await p.locator('#call-asset-link').isHidden(),'investor enquiry has no asset link');
 await p.evaluate(()=>showView('settings'));await p.waitForTimeout(300);t=await p.locator('#view-settings').innerText();ok(/Not implemented/.test(t)&&/consent/i.test(t)&&/regulations/i.test(t),'settings lists compliance requirements as not implemented');

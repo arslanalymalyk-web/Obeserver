@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio &amp; Investor Operations — concept prototype</title>
+<meta name="description" content="Concept prototype with fictional sample data: real-estate portfolio and investor operations.">
+<style>
+/* Concept prototype styles. No external fonts or images: system fonts only, so the page makes no network requests. */
+:root{
+  --bg:#f5f6f8;--surface:#fff;--surface2:#f0f2f6;--text:#18202d;--muted:#566174;--border:#dde1e8;--border-strong:#c3cad6;
+  --accent:#0f5c63;--accent-ink:#fff;--accent-soft:#e3f1f2;
+  --good:#1b7444;--good-bg:#e5f4ec;--warn:#8a5200;--warn-bg:#fff2dc;--bad:#b02a22;--bad-bg:#fde8e6;--info:#1f4a9c;--info-bg:#e7eefb;
+  --investor:#3d3a8c;--investor-soft:#ecebfa;--banner:#2a2f3a;--banner-ink:#f3f4f7;
+  --shadow:0 1px 2px rgba(20,28,40,.06),0 4px 14px rgba(20,28,40,.05);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Noto Sans Arabic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0e131a;--surface:#161d27;--surface2:#1d2633;--text:#e7ebf1;--muted:#9eaabb;--border:#2a3443;--border-strong:#3a4658;
+  --accent:#5fc4cd;--accent-ink:#06292c;--accent-soft:#143a3f;
+  --good:#5fd08f;--good-bg:#12301f;--warn:#f0b659;--warn-bg:#36280e;--bad:#ff8f86;--bad-bg:#3b1815;--info:#8cb4ff;--info-bg:#15264a;
+  --investor:#a9a6ff;--investor-soft:#24234a;--banner:#05080c;--banner-ink:#e7ebf1;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);}}
+:root[data-theme=dark]{
+  --bg:#0e131a;--surface:#161d27;--surface2:#1d2633;--text:#e7ebf1;--muted:#9eaabb;--border:#2a3443;--border-strong:#3a4658;
+  --accent:#5fc4cd;--accent-ink:#06292c;--accent-soft:#143a3f;
+  --good:#5fd08f;--good-bg:#12301f;--warn:#f0b659;--warn-bg:#36280e;--bad:#ff8f86;--bad-bg:#3b1815;--info:#8cb4ff;--info-bg:#15264a;
+  --investor:#a9a6ff;--investor-soft:#24234a;--banner:#05080c;--banner-ink:#e7ebf1;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 var(--font)}
+h1,h2,h3{margin:0;line-height:1.25;font-weight:650}
+h1{font-size:20px}h2{font-size:15px}h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+p{margin:0}a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;inset-inline-start:8px;top:-60px;background:var(--accent);color:var(--accent-ink);padding:8px 12px;border-radius:6px;z-index:100}
+.skip:focus{top:8px}
+
+/* Persistent prototype banner */
+.proto-banner{background:var(--banner);color:var(--banner-ink);padding:7px 16px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.proto-banner strong{background:#f5b84a;color:#2b1d00;padding:1px 8px;border-radius:99px;font-size:11.5px;white-space:nowrap}
+.proto-banner a{color:inherit;margin-inline-start:auto;text-decoration:underline;font-size:12px}
+
+/* Layout */
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:calc(100vh - 36px)}
+.side{background:var(--surface);border-inline-end:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:36px;align-self:start;height:calc(100vh - 36px);overflow:auto}
+.brand{padding:4px 10px 14px}
+.brand b{display:block;font-size:15px}.brand span{font-size:12px;color:var(--muted)}
+.nav a{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-weight:500}
+.nav a:hover{background:var(--surface2)}
+.nav a[aria-current=page]{background:var(--accent-soft);color:var(--accent);font-weight:650}
+.nav a .count{margin-inline-start:auto;font-size:11.5px;background:var(--bad-bg);color:var(--bad);border-radius:99px;padding:0 7px;font-weight:650}
+.side .sep{height:1px;background:var(--border);margin:10px 4px}
+.side .opt{font-size:12.5px;color:var(--muted);padding:6px 10px}
+.side .opt a{display:block;margin-top:4px}
+.main{padding:20px 24px 48px;min-width:0}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.top .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.ctrl{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+select,input[type=text],input[type=search],input[type=number],textarea{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px;min-height:36px;max-width:100%}
+textarea{width:100%;min-height:70px}
+.btn{font:inherit;font-weight:600;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:8px;padding:7px 12px;min-height:36px;cursor:pointer}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{min-height:30px;padding:3px 10px;font-size:12.5px}
+.btn[disabled],.btn[aria-disabled=true]{opacity:.55;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;background:var(--surface);color:var(--text);border:0;padding:6px 11px;cursor:pointer;min-height:34px}
+.seg button+button{border-inline-start:1px solid var(--border-strong)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:650}
+
+/* Cards, grids, tables */
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.cols2{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.cols2e{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card>header{display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:10px;flex-wrap:wrap}
+.kpi .label{font-size:12.5px;color:var(--muted)}
+.kpi .value{font-size:24px;font-weight:700;margin:2px 0;font-variant-numeric:tabular-nums}
+.kpi .note{font-size:12px;color:var(--muted)}
+.delta.up{color:var(--good)}.delta.down{color:var(--bad)}.delta.flat{color:var(--muted)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;text-align:start;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;background:var(--surface2)}
+td.num,th.num{text-align:end}
+tr.click{cursor:pointer}tr.click:hover{background:var(--surface2)}
+caption{text-align:start;font-weight:650;padding:0 0 8px;color:var(--text)}
+.pill{display:inline-block;font-size:11.5px;font-weight:650;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.info{background:var(--info-bg);color:var(--info)}.pill.neutral{background:var(--surface2);color:var(--muted)}
+.tag-sample{font-size:11px;color:var(--muted);border:1px dashed var(--border-strong);border-radius:6px;padding:0 6px;white-space:nowrap}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.list li:last-child{border-bottom:0}
+.list .t{font-weight:600}.list .d{font-size:12.5px;color:var(--muted)}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--border-strong);border-radius:10px}
+.notice{border-radius:10px;padding:10px 12px;font-size:13px;border:1px solid}
+.notice.info{background:var(--info-bg);color:var(--info);border-color:transparent}
+.notice.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.notice.bad{background:var(--bad-bg);color:var(--bad);border-color:transparent}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto}
+.tabs a{padding:9px 14px;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;white-space:nowrap}
+.tabs a[aria-current=page]{color:var(--accent);border-bottom-color:var(--accent)}
+.dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:0}
+.dl dt{color:var(--muted);font-size:12.5px}.dl dd{margin:0;font-weight:500}
+details.method{border:1px solid var(--border);border-radius:10px;padding:8px 12px;background:var(--surface2)}
+details.method summary{cursor:pointer;font-weight:650}
+code,.mono{font-family:var(--mono);font-size:12.5px}
+.formula{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin:6px 0;display:block}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-size:11px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline-end:5px;vertical-align:middle}
+.toast{position:fixed;inset-inline:0;bottom:18px;margin:auto;width:max-content;max-width:90vw;background:var(--banner);color:var(--banner-ink);padding:10px 16px;border-radius:10px;box-shadow:var(--shadow);z-index:80}
+.toast.bad{background:var(--bad);color:#fff}
+dialog{border:1px solid var(--border-strong);border-radius:14px;background:var(--surface);color:var(--text);padding:0;max-width:min(640px,94vw);width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,14,20,.55)}
+dialog .dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+/* Investor workspace: visibly different chrome */
+body.investor-mode .side{background:var(--investor-soft)}
+body.investor-mode .nav a[aria-current=page]{background:var(--investor);color:#fff}
+.inv-band{background:var(--investor);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.inv-band strong{background:#fff;color:var(--investor);border-radius:99px;padding:1px 10px;font-size:12px}
+.inv-band span{font-size:13px}
+.demo-ctrl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;background:rgba(255,255,255,.14);border-radius:8px;padding:4px 8px}
+.demo-ctrl select{min-height:30px;padding:3px 8px}
+.ops-band{border:1px dashed var(--border-strong);border-radius:12px;padding:8px 14px;margin-bottom:14px;color:var(--muted);font-size:12.5px}
+
+/* Assistant */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:12.5px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:99px;padding:5px 12px;cursor:pointer}
+.chip:hover{background:var(--surface2)}
+.answer{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--surface);margin-top:12px}
+.answer .q{font-weight:650;margin-bottom:8px}
+.answer ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px}
+.answer .kind{font-size:11px;font-weight:700;border-radius:4px;padding:0 5px;margin-inline-end:6px}
+.answer .kind.fact{background:var(--good-bg);color:var(--good)}.answer .kind.inference{background:var(--warn-bg);color:var(--warn)}
+.answer .srcs{margin-top:10px;font-size:12.5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* Responsive */
+@media (max-width:1000px){.cols2{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;border-inline-end:0;border-bottom:1px solid var(--border);padding:8px 10px}
+  .brand{padding:2px 8px}.side .sep,.side .opt{display:none}
+  .nav{display:flex;gap:2px;overflow-x:auto;flex:1}
+  .nav a{white-space:nowrap;padding:8px 10px}
+  .main{padding:14px 14px 40px}
+}
+@media print{.side,.proto-banner .nav,.ctrls,.btn{display:none!important}}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main" id="skip">Skip to content</a>
+<div class="proto-banner" role="note" id="banner"></div>
+<div class="shell">
+  <aside class="side" aria-label="Primary" id="side"></aside>
+  <main class="main" id="main" tabindex="-1"><p class="muted">Loading sample data…</p></main>
+</div>
+<dialog id="dlg" aria-labelledby="dlg-title"><div class="dh"><h2 id="dlg-title"></h2><button class="btn small" id="dlg-x" aria-label="Close">✕</button></div><div class="db" id="dlg-body"></div><div class="df" id="dlg-foot"></div></dialog>
+<div id="toast-host" aria-live="polite" role="status"></div>
+<script>
+/* Sample data for the concept prototype. ALL VALUES ARE FICTIONAL.
+   Nothing here is real, live, or from any client system. Replace this file (via store.js) with a backend later.
+   Monetary values are whole units of config.currency; there is no FX conversion anywhere in the demo. */
+(function (root) {
+  const MONTHS = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09'];
+  const q = (id, label, from, to, prior) => ({ id, label, months: MONTHS.slice(from, to + 1), prior });
+  const DemoData = {
+    config: {
+      // Sample configuration, not assumptions about any real organisation.
+      currency: 'USD', locale: 'en-US',
+      demoToday: '2026-10-05',        // fixed so the demo is deterministic (not the real current date)
+      dataThrough: '2026-09-30',      // last closed financial month in the sample
+      financialsSource: 'Sample general-ledger extract (fictional)',
+      targetYield: 0.06,              // target NOI yield on cost, annualised; per-asset override: asset.targetYield
+      thresholds: { valuationMaxAgeDays: 365, leaseExpiryDays: 90, occupancyMin: 0.9, docExpiryDays: 60, yieldShortfall: 0.005 },
+    },
+    months: MONTHS,
+    periods: [
+      q('2026-Q3', 'Q3 2026 (Jul–Sep)', 9, 11, '2026-Q2'), q('2026-Q2', 'Q2 2026 (Apr–Jun)', 6, 8, '2026-Q1'),
+      q('2026-Q1', 'Q1 2026 (Jan–Mar)', 3, 5, '2025-Q4'), q('2025-Q4', 'Q4 2025 (Oct–Dec)', 0, 2, null),
+      q('2026-09', 'Sep 2026', 11, 11, '2026-08'), q('2026-08', 'Aug 2026', 10, 10, '2026-07'), q('2026-07', 'Jul 2026', 9, 9, '2026-06'),
+      q('2026-06', 'Jun 2026', 8, 8, '2026-05'), q('2026-05', 'May 2026', 7, 7, '2026-04'), q('2026-04', 'Apr 2026', 6, 6, '2026-03'),
+      q('2026-03', 'Mar 2026', 5, 5, '2026-02'), q('2026-02', 'Feb 2026', 4, 4, '2026-01'), q('2026-01', 'Jan 2026', 3, 3, '2025-12'),
+      q('2025-12', 'Dec 2025', 2, 2, '2025-11'), q('2025-11', 'Nov 2025', 1, 1, '2025-10'), q('2025-10', 'Oct 2025', 0, 0, null),
+      q('T12M', 'Trailing 12 months', 0, 11, null),
+    ],
+    portfolios: [
+      { id: 'P1', name: 'Meridian Income Portfolio', strategy: 'Income-focused (sample)' },
+      { id: 'P2', name: 'Cedar Growth Portfolio', strategy: 'Value-add and lease-up (sample)' },
+    ],
+    // monthly = gross potential rent; occ = occupancy per month (Oct 2025 .. Sep 2026); opex lines are monthly; oneOff = extra cost by month index
+    assets: [
+      { id: 'A1', name: 'Harbor Point Residences', type: 'Multifamily', portfolio: 'P1', location: 'Harborview District', status: 'Stabilised', capacity: 120, unit: 'units', acquired: '2021-04-15', cost: 31000000,
+        valuation: { value: 34500000, date: '2026-03-31', source: 'Independent appraisal (sample)' }, gpr: 260000, other: 8000, opex: { maintenance: 30000, utilities: 18000, management: 12000, taxInsurance: 34000 },
+        occ: [.94, .95, .95, .96, .95, .95, .96, .96, .95, .95, .94, .93], oneOff: {},
+        internalNote: 'Sample internal note: refinancing discussion pending (not visible to investors).' },
+      { id: 'A2', name: 'Northgate Office Park', type: 'Office', portfolio: 'P1', location: 'Northgate Business Zone', status: 'Stabilised', capacity: 18000, unit: 'sqm', acquired: '2020-09-01', cost: 42000000,
+        valuation: { value: 43200000, date: '2025-06-30', source: 'Internal estimate (sample)' }, gpr: 330000, other: 15000, opex: { maintenance: 34000, utilities: 26000, management: 15000, taxInsurance: 42000 },
+        occ: [.91, .91, .9, .9, .89, .89, .88, .88, .87, .86, .86, .85], oneOff: {},
+        internalNote: 'Sample internal note: two tenants have signalled they may not renew.' },
+      { id: 'A3', name: 'Linden Retail Court', type: 'Retail', portfolio: 'P1', location: 'Linden Quarter', status: 'Stabilised', capacity: 6500, unit: 'sqm', acquired: '2022-02-10', cost: 18000000,
+        valuation: { value: 17400000, date: '2026-06-30', source: 'Independent appraisal (sample)' }, gpr: 135000, other: 5000, opex: { maintenance: 14000, utilities: 9000, management: 7000, taxInsurance: 20000 },
+        occ: [.97, .97, .97, .97, .97, .97, .97, .97, .97, .97, .97, .97], oneOff: {}, internalNote: '' },
+      { id: 'A4', name: 'Riverside Logistics Hub', type: 'Industrial', portfolio: 'P1', location: 'Riverside Industrial Estate', status: 'Stabilised', capacity: 32000, unit: 'sqm', acquired: '2019-11-20', cost: 26500000,
+        valuation: { value: 29800000, date: '2026-04-30', source: 'Independent appraisal (sample)' }, gpr: 190000, other: 2000, opex: { maintenance: 10000, utilities: 8000, management: 8000, taxInsurance: 18000 },
+        occ: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], oneOff: {}, internalNote: '' },
+      { id: 'A5', name: 'Cedar Row Townhomes', type: 'Residential', portfolio: 'P2', location: 'Cedar Park', status: 'Refurbishment', capacity: 36, unit: 'units', acquired: '2023-05-05', cost: 14200000,
+        valuation: { value: 15000000, date: '2026-01-31', source: 'Internal estimate (sample)' }, gpr: 125000, other: 3000, opex: { maintenance: 18000, utilities: 8000, management: 6000, taxInsurance: 15000 },
+        occ: [.78, .78, .78, .78, .78, .78, .72, .72, .72, .8, .86, .89], oneOff: { 6: 22000 },
+        internalNote: 'Sample internal note: refurbishment phase 2 scope under review.' },
+      { id: 'A6', name: 'Atlas Business Centre', type: 'Office', portfolio: 'P2', location: 'Atlas Commercial Row', status: 'Stabilised', capacity: 9200, unit: 'sqm', acquired: '2022-08-18', cost: 21000000,
+        valuation: null, gpr: 160000, other: 6000, opex: { maintenance: 17000, utilities: 12000, management: 8000, taxInsurance: 21000 },
+        occ: [.93, .93, .94, .94, .94, .93, .93, .92, .92, .92, .91, .91], oneOff: {}, internalNote: '' },
+      { id: 'A7', name: 'Marlow Street Mixed-Use', type: 'Mixed-use', portfolio: 'P2', location: 'Marlow Street', status: 'Lease-up', capacity: 60, unit: 'units', acquired: '2024-03-01', cost: 19500000,
+        valuation: { value: 20400000, date: '2026-05-31', source: 'Independent appraisal (sample)' }, gpr: 170000, other: 4000, opex: { maintenance: 16000, utilities: 10000, management: 9000, taxInsurance: 24000 },
+        occ: [.55, .6, .64, .68, .72, .75, .78, .8, .82, .85, .87, .88], oneOff: {}, internalNote: '' },
+      { id: 'A8', name: 'Quayside Serviced Apartments', type: 'Serviced apartments', portfolio: 'P2', location: 'Quayside', status: 'Stabilised', capacity: 60, unit: 'units', acquired: '2021-10-12', cost: 23800000,
+        valuation: { value: 26000000, date: '2026-06-30', source: 'Independent appraisal (sample)' }, gpr: 240000, other: 18000, opex: { maintenance: 38000, utilities: 24000, management: 22000, taxInsurance: 30000 },
+        occ: [.86, .82, .8, .84, .88, .9, .92, .93, .92, .9, .91, .92], oneOff: {}, internalNote: '' },
+    ],
+    leases: [
+      { assetId: 'A3', tenant: 'Anchor Grocer Co. (sample)', space: 'Unit A', end: '2026-12-15', note: 'Anchor tenant' },
+      { assetId: 'A2', tenant: 'Helio Analytics Ltd. (sample)', space: 'Floor 3', end: '2026-11-30', note: '' },
+      { assetId: 'A2', tenant: 'Northwind Legal LLP (sample)', space: 'Floors 4–5', end: '2027-01-31', note: '' },
+      { assetId: 'A6', tenant: 'Orbit Software Inc. (sample)', space: 'Suite 200', end: '2026-12-31', note: '' },
+      { assetId: 'A1', tenant: '9 residential leases (aggregate, sample)', space: 'Various units', end: '2026-11-30', note: 'Aggregate of expiries in the month' },
+      { assetId: 'A7', tenant: 'Ground-floor café (sample)', space: 'Retail 1', end: '2028-03-31', note: '' },
+    ],
+    documents: [
+      { id: 'D1', scope: 'asset', ref: 'A1', name: 'Valuation report — Mar 2026', type: 'Valuation report', status: 'Approved', date: '2026-03-31', expires: null, owner: 'Asset Manager A', due: null, visibility: 'internal' },
+      { id: 'D2', scope: 'asset', ref: 'A2', name: 'Valuation memo — Jun 2025', type: 'Valuation report', status: 'Approved', date: '2025-06-30', expires: null, owner: 'Asset Manager A', due: null, visibility: 'internal' },
+      { id: 'D3', scope: 'asset', ref: 'A6', name: 'Valuation report', type: 'Valuation report', status: 'Missing', date: null, expires: null, owner: 'Asset Manager B', due: '2026-10-20', visibility: 'internal' },
+      { id: 'D4', scope: 'asset', ref: 'A6', name: 'Property insurance certificate', type: 'Insurance certificate', status: 'Expired', date: '2025-08-31', expires: '2026-08-31', owner: 'Operations Coordinator', due: '2026-10-12', visibility: 'internal' },
+      { id: 'D5', scope: 'asset', ref: 'A5', name: 'Property insurance certificate', type: 'Insurance certificate', status: 'Approved', date: '2025-11-15', expires: '2026-11-15', owner: 'Operations Coordinator', due: '2026-11-01', visibility: 'internal' },
+      { id: 'D6', scope: 'asset', ref: 'A3', name: 'Fire-safety compliance certificate', type: 'Compliance certificate', status: 'Pending review', date: '2026-09-18', expires: '2027-09-18', owner: 'Compliance Reviewer', due: '2026-10-10', visibility: 'internal' },
+      { id: 'D7', scope: 'asset', ref: 'A4', name: 'Title / ownership record', type: 'Title record', status: 'Approved', date: '2019-11-20', expires: null, owner: 'Asset Manager A', due: null, visibility: 'internal' },
+      { id: 'D8', scope: 'investor', ref: 'INV-01', name: 'Q2 2026 investor statement', type: 'Investor statement', status: 'Approved', date: '2026-07-22', expires: null, owner: 'Investor Relations', due: null, visibility: 'investor', period: '2026-Q2' },
+      { id: 'D9', scope: 'investor', ref: 'INV-02', name: 'Q2 2026 investor statement', type: 'Investor statement', status: 'Approved', date: '2026-07-22', expires: null, owner: 'Investor Relations', due: null, visibility: 'investor', period: '2026-Q2' },
+      { id: 'D10', scope: 'investor', ref: 'INV-03', name: 'Q2 2026 investor statement', type: 'Investor statement', status: 'Approved', date: '2026-07-23', expires: null, owner: 'Investor Relations', due: null, visibility: 'investor', period: '2026-Q2' },
+      { id: 'D11', scope: 'investor', ref: 'INV-01', name: 'Internal call notes — refinancing', type: 'Internal note', status: 'Approved', date: '2026-09-02', expires: null, owner: 'Investor Relations', due: null, visibility: 'internal' },
+      { id: 'D12', scope: 'investor', ref: 'INV-02', name: 'Annual information pack 2025', type: 'Investor report', status: 'Approved', date: '2026-02-10', expires: null, owner: 'Investor Relations', due: null, visibility: 'investor' },
+    ],
+    tasks: [
+      { id: 'T1', assetId: 'A6', title: 'Commission valuation (none on file)', owner: 'Asset Manager B', due: '2026-10-20', priority: 'High', status: 'Open' },
+      { id: 'T2', assetId: 'A6', title: 'Obtain renewed insurance certificate', owner: 'Operations Coordinator', due: '2026-10-12', priority: 'High', status: 'Open' },
+      { id: 'T3', assetId: 'A2', title: 'Review occupancy decline and renewal plan', owner: 'Asset Manager A', due: '2026-10-25', priority: 'Medium', status: 'Open' },
+      { id: 'T4', assetId: 'A3', title: 'Open anchor-lease renewal discussion', owner: 'Asset Manager A', due: '2026-10-30', priority: 'High', status: 'Open' },
+      { id: 'T5', assetId: 'A5', title: 'Confirm refurbishment phase 2 budget', owner: 'Asset Manager B', due: '2026-11-05', priority: 'Medium', status: 'Open' },
+      { id: 'T6', assetId: 'A1', title: 'File Q3 maintenance summary', owner: 'Operations Coordinator', due: '2026-09-28', priority: 'Low', status: 'Done' },
+    ],
+    investors: [
+      { id: 'INV-01', name: 'Alder Family Office (sample)', type: 'Family office', contact: 'Sample contact 01', holdings: { A1: 0.4, A2: 0.25, A3: 0.5, A4: 0.3 } },
+      { id: 'INV-02', name: 'Kestrel Capital Partners (sample)', type: 'Fund', contact: 'Sample contact 02', holdings: { A1: 0.35, A4: 0.45, A5: 0.6, A7: 0.5, A8: 0.4 } },
+      { id: 'INV-03', name: 'Private Investor C (sample)', type: 'Individual', contact: 'Sample contact 03', holdings: { A5: 0.25, A6: 0.3, A7: 0.2, A8: 0.35 } },
+    ],
+    communications: [
+      { id: 'C1', investorId: 'INV-01', at: '2026-07-22', direction: 'Sent', subject: 'Q2 2026 statement published', internal: false },
+      { id: 'C2', investorId: 'INV-01', at: '2026-09-02', direction: 'Internal', subject: 'Call notes: refinancing options', internal: true },
+      { id: 'C3', investorId: 'INV-01', at: '2026-09-10', direction: 'Received', subject: 'Question on Northgate occupancy', internal: false },
+      { id: 'C4', investorId: 'INV-02', at: '2026-07-22', direction: 'Sent', subject: 'Q2 2026 statement published', internal: false },
+      { id: 'C5', investorId: 'INV-02', at: '2026-08-14', direction: 'Received', subject: 'Request for Cedar Row refurbishment update', internal: false },
+      { id: 'C6', investorId: 'INV-02', at: '2026-08-20', direction: 'Sent', subject: 'Cedar Row refurbishment update (sample)', internal: false },
+      { id: 'C7', investorId: 'INV-03', at: '2026-07-23', direction: 'Sent', subject: 'Q2 2026 statement published', internal: false },
+      { id: 'C8', investorId: 'INV-03', at: '2026-09-15', direction: 'Internal', subject: 'Note: investor asked about valuation timing for Atlas', internal: true },
+    ],
+    statements: [
+      { id: 'S1', investorId: 'INV-01', period: '2026-Q2', status: 'Published', preparedBy: 'Analyst (sample)', approvedBy: 'Approver (sample)' },
+      { id: 'S2', investorId: 'INV-02', period: '2026-Q2', status: 'Published', preparedBy: 'Analyst (sample)', approvedBy: 'Approver (sample)' },
+      { id: 'S3', investorId: 'INV-03', period: '2026-Q2', status: 'Published', preparedBy: 'Analyst (sample)', approvedBy: 'Approver (sample)' },
+    ],
+    audit: [
+      { id: 'L1', at: '2026-09-28T09:14:00Z', actor: 'Operations Coordinator (sample)', action: 'Task completed', entity: 'A1', detail: 'File Q3 maintenance summary' },
+      { id: 'L2', at: '2026-09-18T14:02:00Z', actor: 'Compliance Reviewer (sample)', action: 'Document uploaded', entity: 'A3', detail: 'Fire-safety compliance certificate, pending review' },
+      { id: 'L3', at: '2026-09-15T11:30:00Z', actor: 'Investor Relations (sample)', action: 'Note added', entity: 'INV-03', detail: 'Internal note on valuation timing' },
+      { id: 'L4', at: '2026-09-02T10:05:00Z', actor: 'Investor Relations (sample)', action: 'Note added', entity: 'INV-01', detail: 'Internal call notes recorded' },
+      { id: 'L5', at: '2026-08-31T00:00:00Z', actor: 'System (sample)', action: 'Document expired', entity: 'A6', detail: 'Property insurance certificate passed its expiry date' },
+      { id: 'L6', at: '2026-07-31T16:40:00Z', actor: 'Asset Manager B (sample)', action: 'Field changed', entity: 'A5', detail: 'Status changed from "Stabilised" to "Refurbishment" (effective Apr 2026, recorded late)' },
+      { id: 'L7', at: '2026-07-22T08:00:00Z', actor: 'Approver (sample)', action: 'Statement approved', entity: 'INV-01', detail: 'Q2 2026 statement approved and published' },
+      { id: 'L8', at: '2026-06-30T12:00:00Z', actor: 'Asset Manager A (sample)', action: 'Valuation recorded', entity: 'A3', detail: 'Independent appraisal 17,400,000 (as at 2026-06-30)' },
+      { id: 'L9', at: '2026-06-30T12:10:00Z', actor: 'Asset Manager B (sample)', action: 'Valuation recorded', entity: 'A8', detail: 'Independent appraisal 26,000,000 (as at 2026-06-30)' },
+    ],
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = DemoData; else root.DemoData = DemoData;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* Pure calculations. No DOM, no network, no randomness. Every figure shown in the UI comes from these functions,
+   from the visible inputs in data.js. Formulas are repeated in the UI "Methodology" panels.
+   Definitions (sample methodology, not an accounting standard):
+     rental income   = gross potential rent x occupancy (rounded to a whole unit)
+     total income    = rental income + other income
+     opex            = sum of operating cost lines + one-off costs in that month (excludes capex, debt service, tax on income)
+     NOI             = total income - opex
+     annualised NOI  = period NOI x 12 / months in period
+     yield on cost   = annualised NOI / acquisition cost
+     yield on value  = annualised NOI / current valuation (n/a when no valuation is on file)
+     rent-weighted occupancy = sum(gross potential rent x occupancy) / sum(gross potential rent)  */
+(function (root) {
+  const C = {};
+  const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+  const day = iso => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10));
+  C.daysBetween = (fromIso, toIso) => Math.round((day(toIso) - day(fromIso)) / 864e5);
+  C.period = (D, id) => D.periods.find(p => p.id === id);
+  C.targetFor = (D, asset) => asset.targetYield ?? D.config.targetYield;
+  C.opexLines = a => Object.values(a.opex).reduce((s, v) => s + v, 0);
+
+  C.assetMonth = (D, a, m) => {
+    const i = D.months.indexOf(m), occ = a.occ[i];
+    const rental = Math.round(a.gpr * occ), other = a.other, income = rental + other;
+    const opex = C.opexLines(a) + (a.oneOff[i] || 0);
+    return { month: m, occ, gpr: a.gpr, rental, other, income, opex, noi: income - opex };
+  };
+  C.assetPeriod = (D, a, periodId) => {
+    const p = C.period(D, periodId), rows = p.months.map(m => C.assetMonth(D, a, m));
+    const income = sum(rows, r => r.income), opex = sum(rows, r => r.opex), noi = income - opex, factor = 12 / rows.length;
+    return {
+      assetId: a.id, periodId, months: rows.length, rows, income, opex, noi, annualNoi: noi * factor,
+      occupancy: sum(rows, r => r.occ) / rows.length,
+      yieldOnCost: (noi * factor) / a.cost,
+      yieldOnValue: a.valuation ? (noi * factor) / a.valuation.value : null,
+      target: C.targetFor(D, a),
+    };
+  };
+  C.portfolioPeriod = (D, assets, periodId) => {
+    const per = assets.map(a => C.assetPeriod(D, a, periodId));
+    const income = sum(per, r => r.income), opex = sum(per, r => r.opex), noi = income - opex, factor = 12 / (per[0]?.months || 1);
+    const cost = sum(assets, a => a.cost), valued = assets.filter(a => a.valuation);
+    const gprTotal = sum(assets, a => a.gpr);
+    return {
+      periodId, assets: per, income, opex, noi, annualNoi: noi * factor, cost,
+      value: sum(valued, a => a.valuation.value), valuedCount: valued.length, assetCount: assets.length,
+      costOfValued: sum(valued, a => a.cost),
+      occupancy: gprTotal ? sum(assets, (a, i) => a.gpr * per[assets.indexOf(a)].occupancy) / gprTotal : 0,
+      yieldOnCost: cost ? (noi * factor) / cost : 0,
+    };
+  };
+  // Variance of a figure vs the prior period; null when there is no comparable prior period.
+  C.vsPrior = (D, assets, periodId) => {
+    const p = C.period(D, periodId);
+    if (!p.prior) return null;
+    const cur = C.portfolioPeriod(D, assets, periodId), prev = C.portfolioPeriod(D, assets, p.prior);
+    return { prior: p.prior, noiDelta: cur.noi - prev.noi, noiPct: prev.noi ? (cur.noi - prev.noi) / Math.abs(prev.noi) : null, incomeDelta: cur.income - prev.income, opexDelta: cur.opex - prev.opex, occDelta: cur.occupancy - prev.occupancy };
+  };
+  C.monthlyNoiSeries = (D, assets) => D.months.map(m => ({ month: m, noi: sum(assets, a => C.assetMonth(D, a, m).noi), income: sum(assets, a => C.assetMonth(D, a, m).income) }));
+
+  // ── Exceptions: transparent rules, no scoring model. Each carries the rule and the evidence used. ──
+  C.exceptions = (D, periodId) => {
+    const T = D.config.thresholds, today = D.config.demoToday, out = [], sev = { high: 0, medium: 1, low: 2 };
+    const push = (e) => out.push(e);
+    const latest = D.months[D.months.length - 1];
+    D.assets.forEach(a => {
+      if (!a.valuation) push({ id: 'val-missing-' + a.id, severity: 'high', type: 'Missing data', assetId: a.id, title: `${a.name}: no valuation on file`, detail: 'Yield on value cannot be calculated. Portfolio value excludes this asset.', rule: 'Asset has no valuation record', evidence: [`asset ${a.id}`] });
+      else {
+        const age = C.daysBetween(a.valuation.date, today);
+        if (age > T.valuationMaxAgeDays) push({ id: 'val-stale-' + a.id, severity: 'medium', type: 'Stale data', assetId: a.id, title: `${a.name}: valuation is ${age} days old`, detail: `Valuation dated ${a.valuation.date} (${a.valuation.source}).`, rule: `Valuation older than ${T.valuationMaxAgeDays} days at ${today}`, evidence: [`asset ${a.id} valuation date ${a.valuation.date}`] });
+      }
+      const m = C.assetMonth(D, a, latest);
+      if (m.occ < T.occupancyMin) push({ id: 'occ-' + a.id, severity: a.status === 'Stabilised' ? 'medium' : 'low', type: 'Performance', assetId: a.id, title: `${a.name}: occupancy ${(m.occ * 100).toFixed(0)}% in the latest month`, detail: a.status === 'Stabilised' ? 'Below the configured occupancy threshold for a stabilised asset.' : `Status is ${a.status}; threshold shown for reference.`, rule: `Latest-month occupancy below ${(T.occupancyMin * 100).toFixed(0)}%`, evidence: [`asset ${a.id} ${latest} occupancy`] });
+      const per = C.assetPeriod(D, a, periodId);
+      if (per.target - per.yieldOnCost > T.yieldShortfall) push({ id: 'yield-' + a.id, severity: 'medium', type: 'Performance', assetId: a.id, title: `${a.name}: yield on cost ${(per.yieldOnCost * 100).toFixed(2)}% vs target ${(per.target * 100).toFixed(2)}%`, detail: `For the selected period (${periodId}), annualised.`, rule: `Yield on cost below target by more than ${(T.yieldShortfall * 100).toFixed(1)} percentage points`, evidence: [`asset ${a.id} NOI ${periodId}`] });
+    });
+    D.leases.forEach(l => {
+      const d = C.daysBetween(today, l.end);
+      if (d >= 0 && d <= T.leaseExpiryDays) push({ id: 'lease-' + l.assetId + '-' + l.end, severity: l.note === 'Anchor tenant' ? 'high' : 'medium', type: 'Lease event', assetId: l.assetId, title: `${D.assets.find(a => a.id === l.assetId).name}: lease expiry in ${d} days`, detail: `${l.tenant}, ${l.space}, ends ${l.end}.`, rule: `Lease ends within ${T.leaseExpiryDays} days of ${today}`, evidence: [`lease ${l.tenant}`] });
+    });
+    D.documents.filter(d => d.scope === 'asset').forEach(d => {
+      const a = D.assets.find(x => x.id === d.ref);
+      if (d.status === 'Expired') push({ id: 'doc-exp-' + d.id, severity: 'high', type: 'Record', assetId: d.ref, title: `${a.name}: ${d.type} expired`, detail: `${d.name}, expired ${d.expires}.`, rule: 'Document status Expired', evidence: [`document ${d.id}`] });
+      else if (d.expires) { const left = C.daysBetween(today, d.expires); if (left >= 0 && left <= T.docExpiryDays) push({ id: 'doc-soon-' + d.id, severity: 'medium', type: 'Record', assetId: d.ref, title: `${a.name}: ${d.type} expires in ${left} days`, detail: `${d.name}, expires ${d.expires}.`, rule: `Document expires within ${T.docExpiryDays} days`, evidence: [`document ${d.id}`] }); }
+      if (d.status === 'Pending review') push({ id: 'doc-rev-' + d.id, severity: 'low', type: 'Approval', assetId: d.ref, title: `${a.name}: ${d.type} awaiting review`, detail: `${d.name}; owner ${d.owner}, due ${d.due}.`, rule: 'Document status Pending review', evidence: [`document ${d.id}`] });
+    });
+    return out.sort((x, y) => sev[x.severity] - sev[y.severity] || x.id.localeCompare(y.id));
+  };
+
+  // ── Investor share of a period (pro-rata of asset figures by ownership %; sample methodology) ──
+  C.investorPeriod = (D, inv, periodId) => {
+    const rows = Object.entries(inv.holdings).map(([id, share]) => {
+      const a = D.assets.find(x => x.id === id), p = C.assetPeriod(D, a, periodId);
+      return { assetId: id, name: a.name, share, income: Math.round(p.income * share), opex: Math.round(p.opex * share), noi: Math.round(p.noi * share), valueShare: a.valuation ? Math.round(a.valuation.value * share) : null, valuationDate: a.valuation?.date || null, valuationSource: a.valuation?.source || null, costShare: Math.round(a.cost * share) };
+    });
+    return { investorId: inv.id, periodId, rows, income: sum(rows, r => r.income), opex: sum(rows, r => r.opex), noi: sum(rows, r => r.noi), valueShare: sum(rows.filter(r => r.valueShare != null), r => r.valueShare), missingValuation: rows.filter(r => r.valueShare == null).map(r => r.name), costShare: sum(rows, r => r.costShare) };
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = C; else root.DemoCalc = C;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* Data-access boundary. The UI talks ONLY to this file (all methods return Promises, like a future HTTP client would).
+   Today it reads the local sample data in data.js and keeps changes in memory (lost on reload; nothing is persisted).
+   To connect a real backend, replace the bodies here; views and calc.js do not need to change.
+   Investor filtering below is a visual demonstration only: real access control must be enforced on a server. */
+(function (root) {
+  const D0 = root.DemoData, C = root.DemoCalc;
+  const clone = x => JSON.parse(JSON.stringify(x));
+  let D, nextId;
+  const reset = () => {
+    D = clone(D0); nextId = 1000;
+    // Sample published statements get a snapshot generated from the sample data (a real system would store what was approved).
+    D.statements.forEach(s => { if (s.status === 'Published' && !s.snapshot) { s.snapshot = C.investorPeriod(D, D.investors.find(i => i.id === s.investorId), s.period); s.notes = []; } });
+  };
+  reset();
+  const ok = v => Promise.resolve(clone(v));
+  const stamp = () => new Date().toISOString();
+  const audit = (actor, action, entity, detail) => { D.audit.unshift({ id: 'L' + nextId++, at: stamp(), actor, action, entity, detail, session: true }); };
+  const scope = pid => (!pid || pid === 'all') ? D.assets : D.assets.filter(a => a.portfolio === pid);
+  const fail = msg => Promise.reject(new Error(msg));
+
+  const Store = {
+    reset: () => { reset(); return ok(true); },
+    getConfig: () => ok(D.config),
+    setConfig: patch => { // sample configuration only; no FX conversion is performed
+      const allowed = ['currency', 'locale', 'targetYield']; allowed.forEach(k => { if (patch[k] !== undefined) D.config[k] = patch[k]; });
+      return ok(D.config);
+    },
+    getPeriods: () => ok(D.periods.map(p => ({ id: p.id, label: p.label, prior: p.prior, months: p.months.length }))),
+    getPortfolios: () => ok(D.portfolios),
+    getAssets: (f = {}, periodId = '2026-Q3') => {
+      const ex = C.exceptions(D, periodId);
+      let list = scope(f.portfolio).filter(a => (!f.type || a.type === f.type) && (!f.status || a.status === f.status) &&
+        (!f.q || (a.name + ' ' + a.location + ' ' + a.type).toLowerCase().includes(f.q.toLowerCase())) && (!f.exceptionsOnly || ex.some(e => e.assetId === a.id)));
+      return ok(list.map(a => ({ ...a, period: C.assetPeriod(D, a, periodId), exceptionCount: ex.filter(e => e.assetId === a.id).length })));
+    },
+    getAsset: (id, periodId = '2026-Q3') => {
+      const a = D.assets.find(x => x.id === id); if (!a) return fail('Asset not found');
+      return ok({ asset: a, period: C.assetPeriod(D, a, periodId), prior: C.period(D, periodId).prior ? C.assetPeriod(D, a, C.period(D, periodId).prior) : null,
+        portfolio: D.portfolios.find(p => p.id === a.portfolio), leases: D.leases.filter(l => l.assetId === id), documents: D.documents.filter(d => d.scope === 'asset' && d.ref === id),
+        tasks: D.tasks.filter(t => t.assetId === id), exceptions: C.exceptions(D, periodId).filter(e => e.assetId === id), history: D.audit.filter(l => l.entity === id),
+        periodMonths: C.period(D, periodId).months, monthly: D.months.map(m => C.assetMonth(D, a, m)), owners: D.investors.filter(i => i.holdings[id]).map(i => ({ id: i.id, name: i.name, share: i.holdings[id] })) });
+    },
+    getSummary: (pid, periodId) => { const as = scope(pid), p = C.period(D, periodId); return ok({ current: C.portfolioPeriod(D, as, periodId), vsPrior: C.vsPrior(D, as, periodId), prior: p.prior ? C.portfolioPeriod(D, as, p.prior) : null,
+      series: C.monthlyNoiSeries(D, as), targetMonthlyNoi: as.reduce((s, a) => s + a.cost * C.targetFor(D, a) / 12, 0), periodMonths: p.months, statusCounts: as.reduce((m, a) => (m[a.status] = (m[a.status] || 0) + 1, m), {}),
+      oldestValuation: as.filter(a => a.valuation).map(a => a.valuation.date).sort()[0] || null }); },
+    getExceptions: (periodId, pid) => { const ids = new Set(scope(pid).map(a => a.id)); return ok(C.exceptions(D, periodId).filter(e => ids.has(e.assetId))); },
+    getFacets: () => ok({ types: [...new Set(D.assets.map(a => a.type))].sort(), statuses: [...new Set(D.assets.map(a => a.status))].sort() }),
+    getDocuments: (f = {}) => ok(D.documents.filter(d => (!f.status || d.status === f.status) && (!f.scope || d.scope === f.scope))),
+    getTasks: (f = {}) => ok(D.tasks.filter(t => !f.status || t.status === f.status)),
+    getAudit: (f = {}) => ok(D.audit.filter(l => !f.entity || l.entity === f.entity).sort((a, b) => b.at.localeCompare(a.at))),
+    getAuditSince: iso => ok(D.audit.filter(l => l.at >= iso).sort((a, b) => b.at.localeCompare(a.at))),
+    getInvestors: () => ok(D.investors.map(i => ({ ...i, statements: D.statements.filter(s => s.investorId === i.id) }))),
+    // Internal (operator) view of every investor's pro-rata share for a period, with statement status.
+    getInvestorSummaries: periodId => ok(D.investors.map(i => ({ ...i, statements: D.statements.filter(s => s.investorId === i.id).map(({ snapshot, ...s }) => s), snap: C.investorPeriod(D, i, periodId) }))),
+    getStatements: () => ok(D.statements),
+    getAllForAssistant: () => ok({ assets: D.assets, config: D.config }),
+
+    toggleTask: (id, role) => { const t = D.tasks.find(x => x.id === id); if (!t) return fail('Task not found');
+      t.status = t.status === 'Done' ? 'Open' : 'Done'; audit(role + ' (demo role)', t.status === 'Done' ? 'Task completed' : 'Task reopened', t.assetId, t.title); return ok(t); },
+    reviewDocument: (id, decision, role) => { const d = D.documents.find(x => x.id === id); if (!d) return fail('Document not found');
+      if (role !== 'Approver') return fail('Only the Approver demo role can review documents (visual demonstration; a real system must enforce this on the server).');
+      if (d.status !== 'Pending review') return fail('Document is not pending review');
+      d.status = decision === 'approve' ? 'Approved' : 'Rejected'; audit('Approver (demo role)', decision === 'approve' ? 'Document approved' : 'Document rejected', d.ref, d.name); return ok(d); },
+
+    // Investor statements: Draft -> In review -> Published, with maker/checker and an audit entry at each step.
+    prepareStatement: (investorId, periodId, role) => {
+      const inv = D.investors.find(i => i.id === investorId); if (!inv) return fail('Investor not found');
+      let s = D.statements.find(x => x.investorId === investorId && x.period === periodId);
+      if (s && s.status === 'Published') return fail('A statement for this investor and period is already published.');
+      const snap = C.investorPeriod(D, inv, periodId), notes = [];
+      snap.missingValuation.forEach(n => notes.push(`No valuation on file for ${n}; its value share is excluded.`));
+      inv.holdings && Object.keys(inv.holdings).forEach(id => C.exceptions(D, periodId).filter(e => e.assetId === id && (e.type === 'Stale data')).forEach(e => notes.push(e.title + '.')));
+      if (!s) { s = { id: 'S' + nextId++, investorId, period: periodId, status: 'Draft', preparedBy: role, approvedBy: null }; D.statements.push(s); }
+      s.snapshot = snap; s.notes = notes; s.status = 'Draft'; s.preparedBy = role; s.reviewed = false;
+      audit(role + ' (demo role)', 'Statement drafted', investorId, `${periodId} statement generated from sample data`); return ok(s);
+    },
+    submitStatement: (id, role, acknowledged) => { const s = D.statements.find(x => x.id === id); if (!s || s.status !== 'Draft') return fail('Only a draft can be submitted');
+      if (!acknowledged) return fail('Confirm that you have reviewed the data notes before submitting.');
+      s.status = 'In review'; s.reviewed = true; audit(role + ' (demo role)', 'Statement submitted for review', s.investorId, `${s.period} statement`); return ok(s); },
+    decideStatement: (id, decision, role) => { const s = D.statements.find(x => x.id === id); if (!s || s.status !== 'In review') return fail('Statement is not in review');
+      if (role !== 'Approver') return fail('Only the Approver demo role can decide (visual demonstration; real enforcement must be server-side).');
+      if (s.preparedBy === role) return fail('Maker/checker rule: the person who prepared a statement cannot approve it. Switch the demo role to Analyst to prepare, then Approver to approve.');
+      if (decision === 'approve') { s.status = 'Published'; s.approvedBy = role; audit('Approver (demo role)', 'Statement approved', s.investorId, `${s.period} statement approved and published to the investor view`); }
+      else { s.status = 'Draft'; audit('Approver (demo role)', 'Statement returned', s.investorId, `${s.period} statement returned to draft`); }
+      return ok(s); },
+
+    // Visual demonstration of role-appropriate visibility. NOT a security boundary.
+    getInvestorWorkspace: (investorId) => {
+      const inv = D.investors.find(i => i.id === investorId); if (!inv) return fail('Investor not found');
+      const order = id => D.periods.findIndex(p => p.id === id);
+      const mine = D.statements.filter(s => s.investorId === investorId && s.status === 'Published').sort((x, y) => order(x.period) - order(y.period));
+      // Only approved (published) statement snapshots are exposed: no live figures for unapproved periods.
+      return ok({ investor: { id: inv.id, name: inv.name, type: inv.type },
+        statements: mine.map(s => ({ id: s.id, period: s.period, periodLabel: C.period(D, s.period).label, status: s.status, snapshot: s.snapshot, notes: s.notes || [] })),
+        documents: D.documents.filter(d => d.scope === 'investor' && d.ref === investorId && d.visibility === 'investor' && d.status === 'Approved'),
+        communications: D.communications.filter(c => c.investorId === investorId && !c.internal).sort((x, y) => y.at.localeCompare(x.at)),
+        holdings: Object.entries(inv.holdings).map(([id, share]) => { const a = D.assets.find(x => x.id === id); return { id, name: a.name, type: a.type, location: a.location, share }; }) });
+    },
+  };
+
+  // ── Connected mode ─────────────────────────────────────────────────────────────────────────────
+  // Auto-detected in init(). From file:// (or any host without the Observer API) nothing above changes and no request is made.
+  // When served by Observer and signed in, data comes from /api/portfolio/*, every write goes through the server (which
+  // enforces roles, maker/checker, investor isolation and the audit trail), and the browser keeps only a read copy.
+  let mode = 'standalone', session = null;
+  const standalone = {};
+  ['setConfig', 'toggleTask', 'reviewDocument', 'prepareStatement', 'submitStatement', 'decideStatement', 'reset', 'getInvestorWorkspace'].forEach(k => { standalone[k] = Store[k]; });
+  const call = async (method, path, body) => {
+    const r = await fetch(path, { method, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || 'Request failed (' + r.status + ')'), { status: r.status });
+    return j;
+  };
+  const refresh = async () => { const b = await call('GET', '/api/portfolio/bootstrap'); if (b.empty) return b; const { empty, me, ...data } = b; D = data; return b; };
+  const connected = () => mode === 'connected';
+
+  Store.getMode = () => ({ mode, me: session });
+  Store.useStandalone = () => { mode = 'standalone'; session = null; };
+  Store.init = async () => {
+    if (!/^https?:$/.test(root.location.protocol)) return { mode };
+    let r; try { r = await fetch('/api/auth/me', { credentials: 'same-origin' }); } catch { return { mode }; }
+    if (r.status === 401) { mode = 'signin'; return { mode }; }
+    if (!r.ok || !/json/.test(r.headers.get('content-type') || '')) return { mode };
+    session = await r.json();
+    if (session.role === 'investor') { mode = 'investor'; return { mode, me: session }; }
+    const b = await refresh(); session = { ...session, label: b.me.label };
+    mode = b.empty ? 'connected-empty' : 'connected';
+    return { mode, me: session };
+  };
+  // Re-read the agency's data so changes made by other users are visible. Called on every navigation in connected mode.
+  Store.sync = async () => { if (connected()) await refresh(); };
+  Store.loadSample = async () => { await call('POST', '/api/portfolio/seed'); const b = await refresh(); mode = 'connected'; return b; };
+  Store.signOut = async () => { try { await call('POST', '/api/auth/logout', {}); } finally { root.location.href = '/login.html?next=/demo/index.html'; } };
+
+  Store.setConfig = async patch => { if (!connected()) return standalone.setConfig(patch); await call('PATCH', '/api/portfolio/config', patch); await refresh(); return clone(D.config); };
+  Store.toggleTask = async (id, role) => { if (!connected()) return standalone.toggleTask(id, role); const t = await call('POST', `/api/portfolio/tasks/${encodeURIComponent(id)}/toggle`); await refresh(); return t; };
+  Store.reviewDocument = async (id, decision, role) => { if (!connected()) return standalone.reviewDocument(id, decision, role); const d = await call('POST', `/api/portfolio/documents/${encodeURIComponent(id)}/review`, { decision }); await refresh(); return d; };
+  Store.prepareStatement = async (investorId, periodId, role) => {
+    if (!connected()) return standalone.prepareStatement(investorId, periodId, role);
+    const { id } = await call('POST', '/api/portfolio/statements', { investorId, period: periodId }); await refresh(); return clone(D.statements.find(x => x.id === id));
+  };
+  Store.submitStatement = async (id, role, ack) => { if (!connected()) return standalone.submitStatement(id, role, ack); await call('POST', `/api/portfolio/statements/${encodeURIComponent(id)}/submit`, { acknowledged: !!ack }); await refresh(); return clone(D.statements.find(x => x.id === id)); };
+  Store.decideStatement = async (id, decision, role) => { if (!connected()) return standalone.decideStatement(id, decision, role); await call('POST', `/api/portfolio/statements/${encodeURIComponent(id)}/decide`, { decision }); await refresh(); return clone(D.statements.find(x => x.id === id)); };
+  Store.reset = () => connected() ? fail('Reset is only available in standalone mode. In connected mode the data lives in the Observer database.') : standalone.reset();
+  Store.getInvestorWorkspace = async investorId => {
+    if (mode === 'investor') return call('GET', '/api/portfolio/investor-view');
+    if (connected()) return call('GET', '/api/portfolio/investor-view?investorId=' + encodeURIComponent(investorId)); // server-built preview of exactly what that investor receives
+    return standalone.getInvestorWorkspace(investorId);
+  };
+  // Only meaningful when connected (the standalone sample is fixed).
+  Store.createAsset = async payload => { if (!connected()) return fail('Creating assets needs connected mode (the standalone sample is read-only).'); const r = await call('POST', '/api/portfolio/assets', payload); await refresh(); return r; };
+  Store.recordValuation = async (id, payload) => { if (!connected()) return fail('Recording valuations needs connected mode.'); const r = await call('POST', `/api/portfolio/assets/${encodeURIComponent(id)}/valuation`, payload); await refresh(); return r; };
+  Store.getPortfolioList = () => ok(D.portfolios);
+
+  root.DemoStore = Store;
+})(window);
+
+</script>
+<script>
+/* SIMULATED assistant: deterministic, rule-based answers over the sample records. There is no AI model, no network call and
+   no learning. Every answer lists the records it used, separates facts from rule-based inferences, names gaps, and refuses
+   advice/forecasts. To use a real model, replace answer() with a server call; the UI contract (summary/sources/gaps) can stay. */
+(function (root) {
+  const S = root.DemoStore, C = root.DemoCalc;
+  const pct = x => (x * 100).toFixed(2) + '%';
+  const num = n => Math.round(n).toLocaleString('en-US');
+  const REFUSE = /(should i|should we|recommend|invest in|buy|sell|worth buying|forecast|predict|projection|will (it|the|this)|expected return|guarantee|best asset|tax advice|legal advice)/i;
+
+  async function answer(q, ctx) {
+    const text = String(q || '').trim(), low = text.toLowerCase(), periodId = ctx.periodId;
+    const { assets } = await S.getAllForAssistant();
+    const out = { question: text, summary: [], sources: [], gaps: [], refused: false };
+    const fact = t => out.summary.push({ type: 'fact', text: t }), infer = t => out.summary.push({ type: 'inference', text: t });
+    const src = (label, href) => { if (!out.sources.some(s => s.label === label)) out.sources.push({ label, href }); };
+    if (!text) { out.summary.push({ type: 'fact', text: 'Ask a question or pick a suggestion.' }); return out; }
+    if (REFUSE.test(low)) {
+      out.refused = true;
+      fact('I cannot give investment, valuation, tax or legal advice, forecasts, or recommendations to buy or sell. This demo only describes the sample records.');
+      infer('Try: "Which assets are below target?", "What needs attention?", or "What changed since last period?"');
+      return out;
+    }
+    const words = low.split(/\W+/);
+    const named = assets.find(a => low.includes(a.name.toLowerCase()) || words.includes(a.name.split(' ')[0].toLowerCase()));
+    const exs = await S.getExceptions(periodId, 'all');
+    if (named) {
+      const d = await S.getAsset(named.id, periodId), p = d.period, a = d.asset;
+      fact(`${a.name} (${a.type}, ${a.location}, status ${a.status}). Period ${periodId}: income ${num(p.income)}, operating costs ${num(p.opex)}, NOI ${num(p.noi)} ${ctx.currency}.`);
+      fact(`Occupancy averaged ${(p.occupancy * 100).toFixed(1)}%. Yield on cost ${pct(p.yieldOnCost)} against a target of ${pct(p.target)} (annualised).`);
+      a.valuation ? fact(`Valuation ${num(a.valuation.value)} dated ${a.valuation.date}, source: ${a.valuation.source}.`) : out.gaps.push('No valuation on file, so yield on value and value share cannot be shown.');
+      if (p.target - p.yieldOnCost > 0) infer(`Yield on cost is ${((p.target - p.yieldOnCost) * 100).toFixed(2)} percentage points below the configured target (rule-based comparison, not a judgement of cause).`);
+      d.exceptions.forEach(e => { fact(`Open item: ${e.title}.`); });
+      d.tasks.filter(t => t.status === 'Open').forEach(t => fact(`Task: ${t.title} (owner ${t.owner}, due ${t.due}).`));
+      src(`Asset record ${a.id}`, `#/assets/${a.id}`); src(`Financials ${periodId}`, `#/assets/${a.id}?tab=financials`); src('Exceptions and tasks', `#/assets/${a.id}?tab=tasks`);
+    } else if (/(attention|exception|issue|risk|problem|review|urgent|overdue)/.test(low)) {
+      const top = exs.slice(0, 6);
+      fact(`${exs.length} open items under the current rules for ${periodId}; the ${top.length} highest-severity are listed.`);
+      top.forEach(e => fact(`[${e.severity}] ${e.title}. Rule: ${e.rule}.`));
+      infer('Ordering is by fixed severity rules (high, medium, low), not by financial impact.');
+      src('Overview: needs attention', '#/overview'); src('Records: tasks', '#/records?tab=tasks');
+    } else if (/(below|target|underperform|lagging|under target|behind)/.test(low)) {
+      const rows = (await S.getAssets({}, periodId)).map(a => ({ a, p: a.period })).filter(r => r.p.yieldOnCost < r.p.target);
+      fact(`${rows.length} of ${assets.length} assets have a yield on cost below their target for ${periodId}.`);
+      rows.sort((x, y) => (x.p.yieldOnCost - x.p.target) - (y.p.yieldOnCost - y.p.target)).forEach(r => fact(`${r.a.name}: ${pct(r.p.yieldOnCost)} vs ${pct(r.p.target)} target.`));
+      infer('The target is a sample setting you can change in Settings. Assets in lease-up or refurbishment are expected to sit below a stabilised target; the rules do not account for that.');
+      src('Performance', '#/performance');
+    } else if (/(change|changed|since|last period|prior|previous|vs |compare|movement)/.test(low)) {
+      const v = (await S.getSummary('all', periodId)).vsPrior;
+      if (!v) out.gaps.push(`No comparable prior period exists in the sample data for ${periodId}.`);
+      else {
+        fact(`Versus ${v.prior}: NOI ${v.noiDelta >= 0 ? 'up' : 'down'} ${num(Math.abs(v.noiDelta))} ${ctx.currency}${v.noiPct == null ? '' : ' (' + (v.noiPct * 100).toFixed(1) + '%)'}, income ${v.incomeDelta >= 0 ? '+' : '-'}${num(Math.abs(v.incomeDelta))}, operating costs ${v.opexDelta >= 0 ? '+' : '-'}${num(Math.abs(v.opexDelta))}, occupancy ${(v.occDelta * 100 >= 0 ? '+' : '') + (v.occDelta * 100).toFixed(1)} points.`);
+        const rec = await S.getAuditSince('2026-09-01T00:00:00Z'); rec.slice(0, 4).forEach(l => fact(`Record change ${l.at.slice(0, 10)}: ${l.action} (${l.entity}) ${l.detail}.`));
+        infer('The sample data does not say why figures moved; causes would need to come from operator commentary.');
+      }
+      src('Overview: changes', '#/overview'); src('Audit history', '#/records?tab=audit');
+    } else if (/(missing|stale|fresh|data quality|gap|outdated|valuation|document|record)/.test(low)) {
+      const gaps = exs.filter(e => e.type === 'Missing data' || e.type === 'Stale data' || e.type === 'Record');
+      gaps.forEach(e => fact(`${e.type}: ${e.title}. ${e.detail}`));
+      if (!gaps.length) fact('No missing or stale records under the current rules.');
+      fact(`Financials in the sample are closed through ${ctx.cfg.dataThrough}; source: ${ctx.cfg.financialsSource}. Demo reference date: ${ctx.cfg.demoToday}.`);
+      src('Records: documents', '#/records?tab=documents'); src('Assets', '#/assets');
+    } else if (/(investor|statement|report to|publish)/.test(low)) {
+      const inv = await S.getInvestors();
+      inv.forEach(i => fact(`${i.name}: ${i.statements.map(s => `${s.period} ${s.status}`).join(', ') || 'no statements'}.`));
+      infer('A Q3 2026 statement can be drafted under Investors; publishing requires a second (Approver) demo role.');
+      src('Investors', '#/investors');
+    } else {
+      out.gaps.push('I can only answer from the sample records in this demo and did not recognise the question.');
+      infer('Try asking about attention items, assets below target, changes since the last period, missing or stale data, an asset by name, or investor statements.');
+    }
+    return out;
+  }
+  root.DemoAssistant = { answer, suggestions: ['What needs attention?', 'Which assets are below target?', 'What changed since last period?', 'Which data is missing or stale?', 'Summarise Northgate Office Park', 'What is the status of investor statements?'] };
+})(window);
+
+</script>
+<script>
+/* English is the source text: t('English text') returns the Arabic when one exists, otherwise the English itself.
+   Arabic covers interface text only; sample record names, assistant answers and exception sentences are English (stated in the UI). */
+(function (root) {
+  const AR = {};
+  let lang = 'en';
+  root.DemoI18n = {
+    register: dict => Object.assign(AR, dict),
+    t: s => (lang === 'ar' && AR[s]) || s,
+    get lang() { return lang; },
+    set: l => { lang = l; document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; },
+  };
+})(window);
+
+</script>
+<script>
+/* Arabic interface strings (English text -> Arabic). Interface text only: sample record names, assistant answers and
+   exception sentences stay in English. Review by a native speaker is recommended before any external use. */
+window.DemoAR = {
+  'Overview': 'نظرة عامة', 'Assets': 'الأصول', 'Performance': 'الأداء', 'Investors': 'المستثمرون', 'Records': 'السجلات', 'Assistant (simulated)': 'المساعد (محاكى)', 'Settings': 'الإعدادات',
+  'Summary': 'الملخص', 'Financials': 'البيانات المالية', 'Occupancy and leases': 'الإشغال وعقود الإيجار', 'Tasks and exceptions': 'المهام والاستثناءات',
+  'Portfolio & Investor Operations': 'عمليات المحافظ والمستثمرين', 'Concept prototype': 'نموذج مفاهيمي', 'concept prototype': 'نموذج مفاهيمي',
+  'Concept prototype — sample data': 'نموذج مفاهيمي — بيانات تجريبية',
+  'Fictional assets, figures and people. Not connected to any production system. Nothing is saved.': 'أصول وأرقام وأشخاص وهميون. غير متصل بأي نظام تشغيلي. لا يتم حفظ أي شيء.',
+  'Lead engagement module (optional, separate)': 'وحدة التفاعل مع العملاء المحتملين (اختيارية ومنفصلة)', 'Skip to content': 'انتقل إلى المحتوى', 'Primary': 'رئيسي',
+  'sample data': 'بيانات تجريبية', 'Portfolio overview': 'نظرة عامة على المحفظة', 'Reporting period': 'فترة التقرير', 'Portfolio': 'المحفظة', 'All portfolios': 'كل المحافظ',
+  'Currency': 'العملة', 'sample configuration, no FX conversion': 'إعداد تجريبي، دون تحويل عملات', 'Source': 'المصدر', 'Closed through': 'مغلقة حتى',
+  'Portfolio value': 'قيمة المحفظة', 'From': 'من', 'of': 'من', 'assets with a valuation on file': 'أصول لها تقييم مسجل', 'oldest dated': 'أقدم تقييم بتاريخ', 'Mixed valuation dates and sources.': 'تواريخ ومصادر التقييم مختلطة.',
+  'Income': 'الدخل', 'Operating costs': 'تكاليف التشغيل', 'Net operating income': 'صافي الدخل التشغيلي', 'NOI yield on cost (annualised)': 'عائد صافي الدخل على التكلفة (سنوي)', 'Occupancy (rent-weighted)': 'الإشغال (موزون بالإيجار)',
+  'Target': 'المستهدف', 'vs': 'مقابل', 'At or above target': 'عند المستهدف أو أعلى', 'Slightly below target': 'أقل قليلًا من المستهدف', 'Below target': 'أقل من المستهدف', 'no prior period in sample': 'لا توجد فترة سابقة في العينة',
+  'Monthly net operating income': 'صافي الدخل التشغيلي الشهري', 'Dashed line is the target-yield monthly NOI.': 'الخط المتقطع هو صافي الدخل الشهري عند العائد المستهدف.', 'Selected period': 'الفترة المحددة', 'Other months': 'أشهر أخرى',
+  'Target-yield monthly NOI': 'صافي الدخل الشهري عند العائد المستهدف', 'Chart data (table)': 'بيانات الرسم (جدول)', 'Month': 'الشهر',
+  'Data freshness and coverage': 'حداثة البيانات وتغطيتها', 'Financials closed through': 'البيانات المالية مغلقة حتى', 'Financial source': 'المصدر المالي', 'Demo reference date': 'تاريخ المرجع التجريبي', 'fixed, not today': 'ثابت وليس اليوم',
+  'Valuation coverage': 'تغطية التقييم', 'Connections': 'الاتصالات', 'Not connected': 'غير متصل', 'ledger, valuations, documents, identity': 'السجل المالي، التقييمات، المستندات، الهوية',
+  'Needs attention': 'يحتاج إلى انتباه', 'Open records': 'فتح السجلات', 'Rule': 'القاعدة', 'No open items under the current rules.': 'لا توجد بنود مفتوحة وفق القواعد الحالية.', 'high': 'مرتفع', 'medium': 'متوسط', 'low': 'منخفض', 'High': 'مرتفع', 'Medium': 'متوسط', 'Low': 'منخفض',
+  'Recent changes': 'التغييرات الأخيرة', 'Audit history': 'سجل التدقيق', 'Methodology and assumptions': 'المنهجية والافتراضات',
+  'Sample methodology for demonstration, not an accounting standard. Every figure can be reproduced from the monthly inputs on each asset’s Financials tab.': 'منهجية تجريبية للعرض وليست معيارًا محاسبيًا. يمكن إعادة احتساب كل رقم من المدخلات الشهرية في تبويب البيانات المالية لكل أصل.',
+  'Total income': 'إجمالي الدخل', 'gross potential rent': 'الإيجار الإجمالي المحتمل', 'occupancy': 'الإشغال', 'other income': 'دخل آخر', 'total income': 'إجمالي الدخل', 'operating costs': 'تكاليف التشغيل',
+  'excludes capex, debt service and income tax': 'لا يشمل النفقات الرأسمالية وخدمة الدين وضريبة الدخل', 'Yield on cost': 'العائد على التكلفة', 'months in period': 'عدد الأشهر في الفترة', 'acquisition cost': 'تكلفة الاستحواذ',
+  'Yield on value': 'العائد على القيمة', 'annualised NOI': 'صافي الدخل السنوي', 'current valuation': 'التقييم الحالي', 'not shown when no valuation is on file': 'لا يظهر عند عدم وجود تقييم مسجل', 'Rent-weighted occupancy': 'الإشغال الموزون بالإيجار',
+  'Target yield is a configurable setting': 'العائد المستهدف إعداد قابل للتغيير', 'Annualising a short period assumes it repeats and is not a forecast.': 'تحويل فترة قصيرة إلى سنوية يفترض تكرارها وليس توقعًا.',
+  'Asset registry': 'سجل الأصول', 'Search': 'بحث', 'Name, location or type': 'الاسم أو الموقع أو النوع', 'Type': 'النوع', 'Status': 'الحالة', 'All': 'الكل', 'Only assets with open items': 'الأصول ذات البنود المفتوحة فقط',
+  'Asset': 'الأصل', 'Occupancy': 'الإشغال', 'vs target': 'مقابل المستهدف', 'Valuation (date)': 'التقييم (التاريخ)', 'Open items': 'بنود مفتوحة', 'No valuation on file': 'لا يوجد تقييم مسجل', 'No assets match these filters.': 'لا توجد أصول تطابق هذه المرشحات.',
+  'Asset sections': 'أقسام الأصل', 'Documents': 'المستندات', 'Change history': 'سجل التغييرات', 'Record': 'السجل', 'Location': 'الموقع', 'Ownership': 'الملكية', 'Remaining ownership is not recorded in the sample.': 'باقي الملكية غير مسجل في العينة.',
+  'Acquired': 'تاريخ الاستحواذ', 'Acquisition cost': 'تكلفة الاستحواذ', 'Current valuation': 'التقييم الحالي', 'As at': 'بتاريخ', 'days old': 'يومًا', 'Yield on value and value share cannot be calculated.': 'لا يمكن احتساب العائد على القيمة وحصة القيمة.',
+  'Capacity': 'السعة', 'average of months': 'متوسط الأشهر', 'Needs a valuation': 'يحتاج إلى تقييم', 'Internal-only note': 'ملاحظة داخلية فقط', 'never shown in the investor view': 'لا تظهر أبدًا في عرض المستثمر',
+  'Monthly inputs and results': 'المدخلات والنتائج الشهرية', 'Export CSV': 'تصدير CSV', 'Rental income': 'دخل الإيجار', 'Other income': 'دخل آخر', 'Highlighted rows are in the selected period.': 'الصفوف المظللة ضمن الفترة المحددة.', 'Gross potential rent': 'الإيجار الإجمالي المحتمل', 'month': 'شهر',
+  'Leases and lease events': 'عقود الإيجار وأحداثها', 'Tenant': 'المستأجر', 'Space': 'المساحة', 'Lease end': 'نهاية العقد', 'Time to expiry': 'المدة حتى الانتهاء', 'Note': 'ملاحظة', 'days': 'يومًا', 'No lease records in the sample for this asset.': 'لا توجد عقود إيجار في العينة لهذا الأصل.',
+  'Latest-month occupancy': 'إشغال آخر شهر', 'Lease events are flagged within': 'تُنبَّه أحداث العقود خلال', 'days of the demo reference date': 'يومًا من تاريخ المرجع التجريبي',
+  'Sample records only: no files are stored and nothing here is secured or enforced by a backend.': 'سجلات تجريبية فقط: لا تُخزَّن ملفات ولا يوجد تأمين أو فرض للصلاحيات من خادم خلفي.', 'Sample records only: no files are stored.': 'سجلات تجريبية فقط: لا تُخزَّن ملفات.',
+  'Exceptions': 'الاستثناءات', 'No open exceptions.': 'لا توجد استثناءات مفتوحة.', 'Tasks': 'المهام', 'Document': 'المستند', 'Subject': 'الموضوع', 'Owner': 'المسؤول', 'Due': 'الاستحقاق', 'Expires': 'الانتهاء', 'Visible to': 'مرئي لـ', 'Review': 'مراجعة',
+  'Investor': 'المستثمر', 'Internal only': 'داخلي فقط', 'Approve': 'اعتماد', 'Reject': 'رفض', 'No documents.': 'لا توجد مستندات.', 'Task': 'المهمة', 'Priority': 'الأولوية', 'Reopen': 'إعادة فتح', 'Mark done': 'تحديد كمكتملة', 'No tasks.': 'لا توجد مهام.',
+  'Changes are kept in memory for this session only and are recorded in the audit history.': 'تُحفظ التغييرات في الذاكرة لهذه الجلسة فقط وتُسجَّل في سجل التدقيق.',
+  'When': 'الوقت', 'Action': 'الإجراء', 'Detail': 'التفاصيل', 'By': 'بواسطة', 'this session': 'هذه الجلسة', 'No history recorded.': 'لا يوجد سجل.',
+  'Performance and financials': 'الأداء والبيانات المالية', 'Asset performance': 'أداء الأصول', 'Compared with': 'مقارنة مع', 'No comparable prior period in the sample for this selection': 'لا توجد فترة سابقة قابلة للمقارنة في العينة لهذا الاختيار', 'Change in NOI': 'التغير في صافي الدخل', 'Total': 'الإجمالي',
+  '"n/a" means no valuation is on file; it is not zero.': '"غير متاح" يعني عدم وجود تقييم مسجل وليس صفرًا.', 'Exceptions needing review': 'استثناءات تحتاج إلى مراجعة', 'No performance exceptions.': 'لا توجد استثناءات أداء.',
+  'Statement workflow: draft, submit, approve (second demo role), publish': 'سير البيان: مسودة، إرسال، اعتماد (بدور تجريبي ثانٍ)، نشر', 'Demo role': 'الدور التجريبي', 'Analyst': 'محلل', 'Approver': 'معتمِد',
+  'Roles here are a visual demonstration only; a real system must enforce them on a server. Approval needs a different role from the preparer.': 'الأدوار هنا للعرض البصري فقط؛ يجب على النظام الحقيقي فرضها من الخادم. يتطلب الاعتماد دورًا مختلفًا عن المُعِد.',
+  'Holdings': 'الحيازات', 'Share of income': 'حصة الدخل', 'Share of NOI': 'حصة صافي الدخل', 'Statement': 'البيان', 'assets': 'أصول', 'Not started': 'لم يبدأ', 'Generate draft': 'إنشاء مسودة', 'View': 'عرض', 'Investor view': 'عرض المستثمر',
+  'Review draft': 'مراجعة المسودة', 'Review and decide': 'مراجعة وقرار', 'Shares are pro-rata by recorded ownership percentage (sample methodology). Figures are internal until a statement is approved and published.': 'الحصص تناسبية حسب نسبة الملكية المسجلة (منهجية تجريبية). الأرقام داخلية إلى أن يُعتمد البيان وينشر.',
+  'Draft generated from sample data.': 'تم إنشاء المسودة من بيانات تجريبية.', 'Prepared by': 'أعدّه', 'Data notes': 'ملاحظات البيانات', 'No data notes for this statement.': 'لا توجد ملاحظات بيانات لهذا البيان.',
+  'I have reviewed the figures and data notes above. A human review is required before anything reaches an investor.': 'راجعت الأرقام وملاحظات البيانات أعلاه. المراجعة البشرية مطلوبة قبل وصول أي شيء إلى المستثمر.',
+  'Submit for review': 'إرسال للمراجعة', 'Submitted for review.': 'تم الإرسال للمراجعة.', 'Switch the demo role to Approver (and not the person who prepared it).': 'بدّل الدور التجريبي إلى معتمِد (وبشرط ألا يكون من أعدّ البيان).',
+  'Return to draft': 'إعادة إلى مسودة', 'Returned to draft.': 'أُعيد إلى مسودة.', 'Approve and publish to investor view': 'اعتماد ونشر في عرض المستثمر', 'Approved and published (audit entry recorded).': 'تم الاعتماد والنشر (سُجّل في التدقيق).', 'Investor statement': 'بيان المستثمر',
+  'Value share': 'حصة القيمة', 'Share = asset figure × ownership %. Value share uses each asset’s latest valuation on file (dates shown); assets without one are excluded.': 'الحصة = رقم الأصل × نسبة الملكية. تستخدم حصة القيمة أحدث تقييم مسجل لكل أصل (مع التواريخ)؛ ولا تشمل الأصول بلا تقييم.',
+  'INVESTOR VIEW': 'عرض المستثمر', 'Demo control, not part of the investor’s view': 'أداة العرض، ليست جزءًا من عرض المستثمر', 'Visual demonstration of what one investor might see. Filtering here is done in the browser; real access control must be enforced by a server.': 'عرض بصري لما قد يراه مستثمر واحد. التصفية هنا تتم في المتصفح؛ يجب فرض التحكم الحقيقي بالوصول من الخادم.',
+  'Back to operator view': 'العودة إلى عرض المشغّل', 'View as investor': 'عرض كمستثمر', 'Latest approved period': 'أحدث فترة معتمدة', 'Only approved statements are shown here.': 'تظهر هنا البيانات المعتمدة فقط.', 'Your share of income': 'حصتك من الدخل', 'Your share of NOI': 'حصتك من صافي الدخل',
+  'Value share (latest valuations)': 'حصة القيمة (أحدث التقييمات)', 'Excludes assets with no valuation on file': 'تستثني الأصول التي لا تقييم لها', 'All holdings valued': 'كل الحيازات مقيّمة', 'No approved statements yet.': 'لا توجد بيانات معتمدة بعد.', 'Your holdings': 'حيازاتك',
+  'Statements': 'البيانات', 'Approved and published': 'معتمد ومنشور', 'Open': 'مفتوح', 'None published.': 'لا شيء منشور.', 'Approved': 'معتمد', 'No approved documents.': 'لا توجد مستندات معتمدة.', 'Communication history': 'سجل المراسلات', 'No messages.': 'لا توجد رسائل.',
+  'Not shown to investors: internal notes, draft or unapproved statements, other investors’ information.': 'لا يظهر للمستثمرين: الملاحظات الداخلية، والبيانات المسودة أو غير المعتمدة، ومعلومات المستثمرين الآخرين.', 'My portfolio': 'محفظتي',
+  'Records sections': 'أقسام السجلات', 'Documents and records': 'المستندات والسجلات', 'Approvals': 'الموافقات', 'Pending review': 'قيد المراجعة', 'Missing': 'مفقود', 'Expired': 'منتهي', 'Rejected': 'مرفوض', 'Draft': 'مسودة', 'In review': 'قيد المراجعة', 'Published': 'منشور', 'Done': 'مكتمل',
+  'Documents, tasks, approvals and audit': 'المستندات والمهام والموافقات والتدقيق', 'Operational records': 'السجلات التشغيلية', 'Only the Approver role can approve. This is a visual demonstration, not enforced permissions.': 'المعتمِد فقط يستطيع الاعتماد. هذا عرض بصري وليس صلاحيات مفروضة.',
+  'Documents awaiting review': 'مستندات بانتظار المراجعة', 'Nothing waiting.': 'لا شيء بانتظار.', 'Statements awaiting approval': 'بيانات بانتظار الاعتماد', 'Nothing waiting. Prepare a statement under Investors.': 'لا شيء بانتظار. أعدّ بيانًا من صفحة المستثمرين.',
+  'Entries marked “this session” were created by your actions in this demo and are lost on reload. A real audit trail needs server-side, tamper-evident storage.': 'الإدخالات المعلّمة «هذه الجلسة» أنشأتها إجراءاتك في هذا العرض وتُفقد عند إعادة التحميل. يحتاج سجل التدقيق الحقيقي إلى تخزين على الخادم يكشف التلاعب.',
+  'Document review recorded in the audit history.': 'سُجّلت مراجعة المستند في سجل التدقيق.', 'Task updated and recorded in the audit history.': 'تم تحديث المهمة وتسجيلها في سجل التدقيق.', 'Demo data reset.': 'أُعيد ضبط البيانات التجريبية.',
+  'Rule-based answers from the sample records. Not an AI model.': 'إجابات قائمة على قواعد من السجلات التجريبية. وليست نموذج ذكاء اصطناعي.', 'Simulated assistant': 'مساعد محاكى',
+  'No AI model and no network call is involved. Answers use only the sample data, list the records they used, separate facts from rule-based inferences and name gaps. It does not give investment advice or forecasts. Valuations, investor communications, approvals and decisions need human review.': 'لا يوجد نموذج ذكاء اصطناعي ولا اتصال بالشبكة. تستخدم الإجابات البيانات التجريبية فقط، وتذكر السجلات المستخدمة، وتفصل الحقائق عن الاستنتاجات القائمة على القواعد، وتسمّي الفجوات. لا تقدّم نصائح استثمارية أو توقعات. التقييمات ومراسلات المستثمرين والموافقات والقرارات تحتاج إلى مراجعة بشرية.',
+  'Suggested questions': 'أسئلة مقترحة', 'Your question': 'سؤالك', 'Ask about the sample portfolio…': 'اسأل عن المحفظة التجريبية…', 'Ask': 'اسأل', 'Not answered: advice, valuation opinions and forecasts are out of scope.': 'لم تتم الإجابة: النصائح وآراء التقييم والتوقعات خارج النطاق.',
+  'FACT': 'حقيقة', 'INFERENCE': 'استنتاج', 'Gaps': 'فجوات', 'Based on': 'استنادًا إلى', 'Simulated, rule-based answer. Human review is required before acting.': 'إجابة محاكاة قائمة على قواعد. المراجعة البشرية مطلوبة قبل التصرف.',
+  'Settings and configuration': 'الإعدادات والتهيئة', 'Sample configuration for the demonstration; not assumptions about any real organisation.': 'تهيئة تجريبية للعرض؛ وليست افتراضات عن أي جهة حقيقية.', 'Presentation': 'العرض', 'Currency label of the sample data': 'وسم عملة البيانات التجريبية',
+  'Relabels the unit only. The sample values are not converted between currencies.': 'يغيّر الوسم فقط. لا تُحوَّل القيم التجريبية بين العملات.', 'Number and date format': 'تنسيق الأرقام والتواريخ', 'Target NOI yield on cost (%)': 'العائد المستهدف لصافي الدخل على التكلفة (%)', 'Theme': 'السمة', 'System': 'النظام', 'Light': 'فاتح', 'Dark': 'داكن', 'Language': 'اللغة',
+  'Arabic covers interface text. Sample record names, assistant answers and exception sentences remain in English.': 'العربية تغطي نص الواجهة. تبقى أسماء السجلات التجريبية وإجابات المساعد وجمل الاستثناءات بالإنجليزية.',
+  'Data connections': 'اتصالات البيانات', 'General ledger / accounting': 'السجل المالي / المحاسبة', 'Sample extract in the page': 'مقتطف تجريبي داخل الصفحة', 'Valuation provider': 'مزوّد التقييم', 'Sample records': 'سجلات تجريبية', 'Document store': 'مخزن المستندات', 'Sample records, no files': 'سجلات تجريبية بلا ملفات',
+  'Identity and permissions': 'الهوية والصلاحيات', 'Visual demo roles only': 'أدوار تجريبية بصرية فقط', 'Lead engagement (voice) module': 'وحدة التفاعل (الصوتية) مع العملاء المحتملين', 'Separate scripted simulation': 'محاكاة مكتوبة مسبقًا ومنفصلة',
+  'Reset demo data': 'إعادة ضبط البيانات التجريبية', 'Clears this session’s changes.': 'يمسح تغييرات هذه الجلسة.', 'About this prototype': 'حول هذا النموذج',
+  'Concept prototype with fictional data. Not a production platform and not connected to any real system. What is simulated, what is missing and what a production build needs is documented in IMPLEMENTATION_NOTES.md.': 'نموذج مفاهيمي ببيانات وهمية. ليس منصة إنتاجية وغير متصل بأي نظام حقيقي. ما هو محاكى وما هو ناقص وما يحتاجه الإنتاج موثّق في IMPLEMENTATION_NOTES.md.',
+  'Visual only: not enforced.': 'بصري فقط: غير مفروض.', 'Page not found.': 'الصفحة غير موجودة.', 'Go to overview': 'الذهاب إلى النظرة العامة', 'Could not load this view.': 'تعذّر تحميل هذا العرض.', 'Retry': 'إعادة المحاولة', 'Close': 'إغلاق',
+  "A valuation needs a value, an as-at date and a named source. It is recorded in the audit history.": "يحتاج التقييم إلى قيمة وتاريخ ومصدر مسمّى. ويُسجَّل في سجل التدقيق.",
+  "Add asset": "إضافة أصل",
+  "Ask an admin to load the sample portfolio.": "اطلب من المسؤول تحميل المحفظة التجريبية.",
+  "Asset created and recorded in the audit history.": "تم إنشاء الأصل وتسجيله في سجل التدقيق.",
+  "Connected": "متصل",
+  "Connected mode: fictional sample data stored in your agency’s Observer database. Roles and investor access are enforced by the server.": "وضع الاتصال: بيانات تجريبية وهمية مخزّنة في قاعدة بيانات وكالتك في أوبزرفر. يفرض الخادم الأدوار ووصول المستثمرين.",
+  "Continue with the local sample": "المتابعة بالعينة المحلية",
+  "Create asset": "إنشاء الأصل",
+  "Creates an asset with no valuation. Missing required records are flagged automatically.": "ينشئ أصلًا بلا تقييم. تُنبَّه السجلات المطلوبة الناقصة تلقائيًا.",
+  "Gross potential rent per month": "الإيجار الإجمالي المحتمل شهريًا",
+  "Investor access": "وصول المستثمر",
+  "Load the sample portfolio": "تحميل المحفظة التجريبية",
+  "Name": "الاسم",
+  "Needs connected mode": "يتطلب وضع الاتصال",
+  "No portfolio data yet": "لا توجد بيانات محفظة بعد",
+  "Only an Approver can change these; they apply to the whole agency.": "المعتمِد فقط يمكنه تغيير هذه؛ وتسري على الوكالة كلها.",
+  "Only an Approver can record valuations": "المعتمِد فقط يمكنه تسجيل التقييمات",
+  "Open the lead workspace": "فتح مساحة العملاء المحتملين",
+  "Operating costs per month": "تكاليف التشغيل شهريًا",
+  "Other income per month": "دخل آخر شهريًا",
+  "Record valuation": "تسجيل تقييم",
+  "Role enforced by the server.": "الدور مفروض من الخادم.",
+  "Sample portfolio loaded.": "تم تحميل المحفظة التجريبية.",
+  "Save valuation": "حفظ التقييم",
+  "Server-built preview of exactly what this investor receives. An investor account sees only this, enforced by the server.": "معاينة مبنية على الخادم لما يستلمه هذا المستثمر بالضبط. حساب المستثمر يرى هذا فقط، والخادم يفرض ذلك.",
+  "Sign in": "تسجيل الدخول",
+  "Sign out": "تسجيل الخروج",
+  "Standalone sample (nothing saved)": "عينة مستقلة (لا يُحفظ شيء)",
+  "These settings are saved for the whole agency.": "تُحفظ هذه الإعدادات للوكالة كلها.",
+  "This agency has no portfolio records. Loading the sample adds the fictional demonstration portfolio to this agency’s database.": "ليس لدى هذه الوكالة سجلات محفظة. يضيف التحميل المحفظة التجريبية الوهمية إلى قاعدة بيانات الوكالة.",
+  "This page is served by an Observer server. Sign in to use connected mode (data stored per agency, roles and investor access enforced by the server), or continue with the local sample (nothing saved).": "تُقدَّم هذه الصفحة من خادم أوبزرفر. سجّل الدخول لاستخدام وضع الاتصال (بيانات مخزنة لكل وكالة، والخادم يفرض الأدوار ووصول المستثمرين)، أو تابع بالعينة المحلية (لا يُحفظ شيء).",
+  "Typical occupancy (%) applied to every month": "الإشغال المعتاد (%) يُطبَّق على كل شهر",
+  "Unit": "الوحدة",
+  "Use the local sample instead": "استخدام العينة المحلية بدلًا من ذلك",
+  "Valuation": "التقييم",
+  "Valuation recorded.": "تم تسجيل التقييم.",
+  "Value": "القيمة",
+  "You can see only your own approved statements and documents. This is enforced by the server. Fictional sample data.": "يمكنك رؤية بياناتك ومستنداتك المعتمدة فقط. يفرض الخادم ذلك. بيانات تجريبية وهمية.",
+  "Your access is limited by the server to your own approved statements and documents.": "يقتصر وصولك، بحسب الخادم، على بياناتك ومستنداتك المعتمدة فقط.",
+  "Observer backend": "خادم أوبزرفر",
+  "Agency database, roles and audit enforced by the server": "قاعدة بيانات الوكالة والأدوار والتدقيق يفرضها الخادم",
+  "Sample data stored in the database": "بيانات تجريبية مخزّنة في قاعدة البيانات",
+};
+
+</script>
+<script>
+/* Portfolio & Investor Operations: concept prototype UI. Vanilla JS, no dependencies, no network.
+   All data arrives through DemoStore (replaceable boundary); all numbers come from DemoCalc. */
+(function () {
+  const Store = window.DemoStore, Calc = window.DemoCalc, I = window.DemoI18n, Asst = window.DemoAssistant;
+  const t = I.t;
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const $ = id => document.getElementById(id);
+  const S = { periodId: '2026-Q3', portfolio: 'all', role: 'Analyst', theme: 'system', cfg: null, periods: [], portfolios: [], filter: { q: '', type: '', status: '', exceptionsOnly: false }, answers: [], docFilter: '', mode: 'standalone', me: null };
+
+  // ── formatting (driven by configuration, never hard-coded to a region) ──
+  const money = (n, compact) => n == null ? '—' : new Intl.NumberFormat(S.cfg.locale, { style: 'currency', currency: S.cfg.currency, maximumFractionDigits: compact ? 2 : 0, notation: compact ? 'compact' : 'standard' }).format(n);
+  const num = n => new Intl.NumberFormat(S.cfg.locale, { maximumFractionDigits: 0 }).format(n);
+  const pct = (x, dp = 1) => x == null ? '—' : new Intl.NumberFormat(S.cfg.locale, { style: 'percent', minimumFractionDigits: dp, maximumFractionDigits: dp }).format(x);
+  const pp = x => (x >= 0 ? '+' : '−') + new Intl.NumberFormat(S.cfg.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(x * 100)) + ' pp';
+  const date = iso => iso ? new Intl.DateTimeFormat(S.cfg.locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso)) : '—';
+  const monthLabel = m => new Intl.DateTimeFormat(S.cfg.locale, { month: 'short', year: '2-digit', timeZone: 'UTC' }).format(new Date(m + '-01T00:00:00Z'));
+  const signed = n => (n >= 0 ? '+' : '−') + money(Math.abs(n));
+  const periodLabel = id => (S.periods.find(p => p.id === id) || {}).label || id;
+
+  const pill = (text, kind) => `<span class="pill ${kind}">${esc(text)}</span>`;
+  const statusKind = s => ({ Approved: 'good', Published: 'good', 'Pending review': 'warn', 'In review': 'info', Draft: 'neutral', Missing: 'bad', Expired: 'bad', Rejected: 'bad', Done: 'good', Open: 'warn' }[s] || 'neutral');
+  const sevKind = s => ({ high: 'bad', medium: 'warn', low: 'neutral' }[s]);
+  const sample = () => `<span class="tag-sample">${esc(t('sample data'))}</span>`;
+  const targetPill = (y, target) => {
+    const d = y - target, short = S.cfg.thresholds.yieldShortfall;
+    return d >= 0 ? pill(t('At or above target'), 'good') : d > -short ? pill(t('Slightly below target'), 'warn') : pill(t('Below target'), 'bad');
+  };
+  // Arrow shows the direction of the change; colour shows whether it is good (green) or bad (red). For costs, lower is good.
+  const delta = (d, fmt, lowerIsGood) => d == null ? `<span class="delta flat">${esc(t('no prior period in sample'))}</span>` : `<span class="delta ${d === 0 ? 'flat' : (d > 0) !== !!lowerIsGood ? 'up' : 'down'}">${d > 0 ? '▲' : d < 0 ? '▼' : '■'} ${esc(fmt(d))}</span>`;
+
+  // ── routing ──
+  const parse = () => {
+    const h = location.hash.replace(/^#\/?/, ''), [path, qs] = h.split('?'), parts = (path || 'overview').split('/');
+    return { route: parts[0] || 'overview', id: parts[1] || null, q: Object.fromEntries(new URLSearchParams(qs || '')) };
+  };
+  const toast = (msg, bad) => { const el = document.createElement('div'); el.className = 'toast' + (bad ? ' bad' : ''); el.textContent = msg; $('toast-host').replaceChildren(el); setTimeout(() => el.remove(), 4500); };
+  const dlg = $('dlg');
+  $('dlg-x').onclick = () => dlg.close();
+  function openDialog(title, bodyHtml, actions = []) {
+    $('dlg-title').textContent = title; $('dlg-body').innerHTML = bodyHtml;
+    const foot = $('dlg-foot'); foot.replaceChildren();
+    [...actions, { label: t('Close'), onClick: () => dlg.close() }].forEach(a => {
+      const b = document.createElement('button'); b.className = 'btn' + (a.primary ? ' primary' : ''); b.textContent = a.label; if (a.disabled) { b.disabled = true; b.title = a.why || ''; }
+      b.onclick = async () => { try { await a.onClick(); } catch (e) { toast(e.message, true); } }; foot.appendChild(b);
+    });
+    if (!dlg.open) dlg.showModal();
+  }
+
+  // ── shared pieces ──
+  const periodSelect = () => `<label class="ctrl">${esc(t('Reporting period'))}<select data-bind="period">${S.periods.map(p => `<option value="${esc(p.id)}"${p.id === S.periodId ? ' selected' : ''}>${esc(p.label)}</option>`).join('')}</select></label>`;
+  const portfolioSelect = () => `<label class="ctrl">${esc(t('Portfolio'))}<select data-bind="portfolio"><option value="all">${esc(t('All portfolios'))}</option>${S.portfolios.map(p => `<option value="${esc(p.id)}"${p.id === S.portfolio ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>`;
+  const head = (title, sub, ctrls = '') => `<div class="top"><div><h1>${esc(title)}</h1>${sub ? `<p class="sub">${sub}</p>` : ''}</div><div class="ctrls">${ctrls}</div></div>`;
+  const assumptions = () => `${esc(t('Currency'))}: ${esc(S.cfg.currency)} (${esc(t('sample configuration, no FX conversion'))}) · ${esc(t('Source'))}: ${esc(S.cfg.financialsSource)} · ${esc(t('Closed through'))} ${esc(date(S.cfg.dataThrough))}`;
+  const empty = msg => `<div class="empty">${esc(msg)}</div>`;
+
+  function barChart(series, selected, targetLine) {
+    const W = 640, H = 230, pad = { l: 52, r: 8, t: 14, b: 30 }, max = Math.max(...series.map(s => s.noi), targetLine) * 1.12, bw = (W - pad.l - pad.r) / series.length;
+    const y = v => pad.t + (H - pad.t - pad.b) * (1 - v / max);
+    const grid = [0, .5, 1].map(f => { const val = max / 1.12 * f, yy = y(val).toFixed(1); return `<line x1="${pad.l}" x2="${W - pad.r}" y1="${yy}" y2="${yy}" stroke="var(--border)"/><text x="0" y="${(+yy + 4)}">${esc(money(val, true))}</text>`; }).join('');
+    const bars = series.map((s, i) => { const x = pad.l + i * bw + bw * .16, w = bw * .68, sel = selected.includes(s.month);
+      return `<g><title>${esc(monthLabel(s.month))}: ${esc(money(s.noi))}</title><rect x="${x.toFixed(1)}" y="${y(s.noi).toFixed(1)}" width="${w.toFixed(1)}" height="${(H - pad.b - y(s.noi)).toFixed(1)}" rx="3" fill="var(--accent)" opacity="${sel ? 1 : .38}"/><text x="${(x + w / 2).toFixed(1)}" y="${H - 10}" text-anchor="middle">${esc(monthLabel(s.month))}</text></g>`; }).join('');
+    const ty = y(targetLine).toFixed(1);
+    return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('Monthly net operating income'))}: ${esc(money(series[0].noi))} → ${esc(money(series[series.length - 1].noi))}. ${esc(t('Dashed line is the target-yield monthly NOI.'))}">${grid}${bars}<line x1="${pad.l}" x2="${W - pad.r}" y1="${ty}" y2="${ty}" stroke="var(--warn)" stroke-width="2" stroke-dasharray="6 4"/><text x="${W - pad.r}" y="${(ty - 5)}" text-anchor="end" style="fill:var(--warn);font-weight:600">${esc(t('Target'))} ${esc(money(targetLine, true))}</text></svg>
+      <div class="legend"><span><i style="background:var(--accent)"></i>${esc(t('Selected period'))}</span><span><i style="background:var(--accent);opacity:.38"></i>${esc(t('Other months'))}</span><span><i style="background:var(--warn)"></i>${esc(t('Target-yield monthly NOI'))}</span></div></div>
+      <details class="method" style="margin-top:10px"><summary>${esc(t('Chart data (table)'))}</summary><div class="tblwrap"><table><thead><tr><th>${esc(t('Month'))}</th><th class="num">${esc(t('Income'))}</th><th class="num">NOI</th></tr></thead><tbody>${series.map(s => `<tr><td>${esc(monthLabel(s.month))}</td><td class="num">${esc(money(s.income))}</td><td class="num">${esc(money(s.noi))}</td></tr>`).join('')}</tbody></table></div></details>`;
+  }
+
+  function csvDownload(name, rows) {
+    const cell = v => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const blob = new Blob(['﻿' + rows.map(r => r.map(cell).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // ── views ──
+  async function viewOverview() {
+    const [sum, ex, assets, audit] = await Promise.all([Store.getSummary(S.portfolio, S.periodId), Store.getExceptions(S.periodId, S.portfolio), Store.getAssets({ portfolio: S.portfolio }, S.periodId), Store.getAudit()]);
+    const c = sum.current, v = sum.vsPrior, tgt = sum.targetMonthlyNoi, yc = c.yieldOnCost, avgTarget = c.cost ? (tgt * 12) / c.cost : S.cfg.targetYield;
+    const stat = Object.entries(sum.statusCounts).map(([k, n]) => `${n} ${esc(k)}`).join(' · ');
+    const kpi = (label, value, note, extra = '') => `<div class="card kpi"><div class="label">${esc(label)}</div><div class="value">${value}</div><div class="note">${note}</div>${extra}</div>`;
+    return head(t('Portfolio overview'), `${esc(periodLabel(S.periodId))} · ${assumptions()}`, periodSelect() + portfolioSelect()) +
+      `<div class="grid kpis">
+        ${kpi(t('Assets'), num(c.assetCount), esc(stat))}
+        ${kpi(t('Portfolio value'), esc(money(c.value, true)), `${esc(t('From'))} ${c.valuedCount} ${esc(t('of'))} ${c.assetCount} ${esc(t('assets with a valuation on file'))}${sum.oldestValuation ? `; ${esc(t('oldest dated'))} ${esc(date(sum.oldestValuation))}` : ''}. ${esc(t('Mixed valuation dates and sources.'))}`)}
+        ${kpi(t('Income'), esc(money(c.income, true)), delta(v && v.incomeDelta, signed) + (v ? ` ${esc(t('vs'))} ${esc(periodLabel(v.prior))}` : ''))}
+        ${kpi(t('Operating costs'), esc(money(c.opex, true)), delta(v && v.opexDelta, signed, true) + (v ? ` ${esc(t('vs'))} ${esc(periodLabel(v.prior))}` : ''))}
+        ${kpi(t('Net operating income'), esc(money(c.noi, true)), delta(v && v.noiDelta, signed) + (v ? ` ${esc(t('vs'))} ${esc(periodLabel(v.prior))}` : ''))}
+        ${kpi(t('NOI yield on cost (annualised)'), esc(pct(yc, 2)), `${esc(t('Target'))} ${esc(pct(avgTarget, 2))} · ${targetPill(yc, avgTarget)}`)}
+        ${kpi(t('Occupancy (rent-weighted)'), esc(pct(c.occupancy)), delta(v && v.occDelta, d => pp(d)) + (v ? ` ${esc(t('vs'))} ${esc(periodLabel(v.prior))}` : ''))}
+      </div>
+      <div class="grid cols2" style="margin-top:14px">
+        <section class="card"><header><h2>${esc(t('Monthly net operating income'))}</h2>${sample()}</header>${barChart(sum.series, sum.periodMonths, tgt)}</section>
+        <section class="card"><header><h2>${esc(t('Data freshness and coverage'))}</h2></header>
+          <dl class="dl"><dt>${esc(t('Reporting period'))}</dt><dd>${esc(periodLabel(S.periodId))}</dd><dt>${esc(t('Financials closed through'))}</dt><dd>${esc(date(S.cfg.dataThrough))}</dd><dt>${esc(t('Financial source'))}</dt><dd>${esc(S.cfg.financialsSource)}</dd><dt>${esc(t('Demo reference date'))}</dt><dd>${esc(date(S.cfg.demoToday))} <span class="muted small">(${esc(t('fixed, not today'))})</span></dd><dt>${esc(t('Valuation coverage'))}</dt><dd>${c.valuedCount}/${c.assetCount}</dd><dt>${esc(t('Connections'))}</dt><dd>${pill(t('Not connected'), 'neutral')} <span class="muted small">${esc(t('ledger, valuations, documents, identity'))}</span></dd></dl></section>
+      </div>
+      <div class="grid cols2e" style="margin-top:14px">
+        <section class="card"><header><h2>${esc(t('Needs attention'))} (${ex.length})</h2><a href="#/records?tab=tasks">${esc(t('Open records'))}</a></header>
+          ${ex.length ? `<ul class="list">${ex.slice(0, 6).map(e => `<li><div><div class="t"><a href="#/assets/${esc(e.assetId)}?tab=tasks">${esc(e.title)}</a></div><div class="d">${esc(e.detail)} <span class="mono">${esc(t('Rule'))}: ${esc(e.rule)}</span></div></div><div>${pill(t(e.severity), sevKind(e.severity))}</div></li>`).join('')}</ul>` : empty(t('No open items under the current rules.'))}</section>
+        <section class="card"><header><h2>${esc(t('Recent changes'))}</h2><a href="#/records?tab=audit">${esc(t('Audit history'))}</a></header>
+          <ul class="list">${audit.slice(0, 6).map(l => `<li><div><div class="t">${esc(l.action)}</div><div class="d">${esc(l.detail)} · ${esc(l.actor)}</div></div><div class="muted small">${esc(date(l.at))}</div></li>`).join('')}</ul></section>
+      </div>
+      <details class="method" style="margin-top:14px"><summary>${esc(t('Methodology and assumptions'))}</summary>${methodology()}</details>`;
+  }
+
+  function methodology() {
+    return `<p class="small muted" style="margin:8px 0">${esc(t('Sample methodology for demonstration, not an accounting standard. Every figure can be reproduced from the monthly inputs on each asset’s Financials tab.'))}</p>
+      <code class="formula">${esc(t('Total income'))} = ${esc(t('gross potential rent'))} × ${esc(t('occupancy'))} + ${esc(t('other income'))}</code>
+      <code class="formula">NOI = ${esc(t('total income'))} − ${esc(t('operating costs'))} (${esc(t('excludes capex, debt service and income tax'))})</code>
+      <code class="formula">${esc(t('Yield on cost'))} = NOI × 12 ÷ ${esc(t('months in period'))} ÷ ${esc(t('acquisition cost'))}</code>
+      <code class="formula">${esc(t('Yield on value'))} = ${esc(t('annualised NOI'))} ÷ ${esc(t('current valuation'))} (${esc(t('not shown when no valuation is on file'))})</code>
+      <code class="formula">${esc(t('Rent-weighted occupancy'))} = Σ(${esc(t('gross potential rent'))} × ${esc(t('occupancy'))}) ÷ Σ ${esc(t('gross potential rent'))}</code>
+      <p class="small muted">${esc(t('Target yield is a configurable setting'))}: ${esc(pct(S.cfg.targetYield, 2))}. ${esc(t('Annualising a short period assumes it repeats and is not a forecast.'))}</p>`;
+  }
+
+  async function viewAssets() {
+    const [facets] = await Promise.all([Store.getFacets()]);
+    const f = S.filter;
+    return head(t('Asset registry'), `${esc(periodLabel(S.periodId))} · ${assumptions()}`, periodSelect() + portfolioSelect() + (S.mode === 'connected' ? `<button class="btn primary" data-act="add-asset">${esc(t('Add asset'))}</button>` : `<button class="btn" disabled title="${esc(t('Needs connected mode'))}">${esc(t('Add asset'))}</button>`)) +
+      `<section class="card"><div class="ctrls" style="margin-bottom:12px">
+        <label class="ctrl">${esc(t('Search'))}<input type="search" id="f-q" value="${esc(f.q)}" placeholder="${esc(t('Name, location or type'))}"></label>
+        <label class="ctrl">${esc(t('Type'))}<select id="f-type"><option value="">${esc(t('All'))}</option>${facets.types.map(x => `<option${f.type === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select></label>
+        <label class="ctrl">${esc(t('Status'))}<select id="f-status"><option value="">${esc(t('All'))}</option>${facets.statuses.map(x => `<option${f.status === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select></label>
+        <label class="ctrl" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="f-ex"${f.exceptionsOnly ? ' checked' : ''}> ${esc(t('Only assets with open items'))}</label></div>
+        <div id="asset-table" class="tblwrap" aria-live="polite"></div></section>`;
+  }
+  async function fillAssetTable() {
+    const f = S.filter, list = await Store.getAssets({ portfolio: S.portfolio, ...f }, S.periodId), box = $('asset-table'); if (!box) return;
+    box.innerHTML = list.length ? `<table><caption class="sr-only">${esc(t('Assets'))}</caption><thead><tr><th>${esc(t('Asset'))}</th><th>${esc(t('Type'))}</th><th>${esc(t('Status'))}</th><th class="num">${esc(t('Occupancy'))}</th><th class="num">NOI</th><th class="num">${esc(t('Yield on cost'))}</th><th>${esc(t('vs target'))}</th><th>${esc(t('Valuation (date)'))}</th><th class="num">${esc(t('Open items'))}</th></tr></thead><tbody>${list.map(a => `<tr class="click" data-href="#/assets/${esc(a.id)}"><td><a href="#/assets/${esc(a.id)}"><strong>${esc(a.name)}</strong></a><div class="muted small">${esc(a.location)} · ${esc(S.portfolios.find(p => p.id === a.portfolio).name)}</div></td><td>${esc(a.type)}</td><td>${pill(a.status, a.status === 'Stabilised' ? 'good' : 'info')}</td><td class="num">${esc(pct(a.period.occupancy))}</td><td class="num">${esc(money(a.period.noi))}</td><td class="num">${esc(pct(a.period.yieldOnCost, 2))}</td><td>${targetPill(a.period.yieldOnCost, a.period.target)}</td><td>${a.valuation ? `${esc(money(a.valuation.value, true))}<div class="muted small">${esc(date(a.valuation.date))}</div>` : pill(t('No valuation on file'), 'bad')}</td><td class="num">${a.exceptionCount ? pill(a.exceptionCount, 'warn') : '0'}</td></tr>`).join('')}</tbody></table>`
+      : empty(t('No assets match these filters.'));
+  }
+
+  async function viewAsset(id, tab) {
+    const d = await Store.getAsset(id, S.periodId), a = d.asset, p = d.period, tabs = ['summary', 'financials', 'leases', 'documents', 'tasks', 'history'];
+    tab = tabs.includes(tab) ? tab : 'summary';
+    const tabNav = `<nav class="tabs" aria-label="${esc(t('Asset sections'))}">${tabs.map(x => `<a href="#/assets/${esc(id)}?tab=${x}"${x === tab ? ' aria-current="page"' : ''}>${esc(t({ summary: 'Summary', financials: 'Financials', leases: 'Occupancy and leases', documents: 'Documents', tasks: 'Tasks and exceptions', history: 'Change history' }[x]))}</a>`).join('')}</nav>`;
+    let body = '';
+    if (tab === 'summary') {
+      const age = a.valuation ? Calc.daysBetween(a.valuation.date, S.cfg.demoToday) : null;
+      const stale = age != null && age > S.cfg.thresholds.valuationMaxAgeDays;
+      body = `<div class="grid cols2e"><section class="card"><header><h2>${esc(t('Record'))}</h2>${sample()}</header><dl class="dl">
+        <dt>${esc(t('Type'))}</dt><dd>${esc(a.type)}</dd><dt>${esc(t('Location'))}</dt><dd>${esc(a.location)}</dd><dt>${esc(t('Portfolio'))}</dt><dd>${esc(d.portfolio.name)}</dd>
+        <dt>${esc(t('Ownership'))}</dt><dd>${d.owners.length ? d.owners.map(o => `${esc(o.name)} ${esc(pct(o.share, 0))}`).join('<br>') : '—'}<div class="muted small">${esc(t('Remaining ownership is not recorded in the sample.'))}</div></dd>
+        <dt>${esc(t('Acquired'))}</dt><dd>${esc(date(a.acquired))}</dd><dt>${esc(t('Acquisition cost'))}</dt><dd>${esc(money(a.cost))}</dd>
+        <dt>${esc(t('Current valuation'))}</dt><dd>${a.valuation ? `${esc(money(a.valuation.value))}<div class="small muted">${esc(t('As at'))} ${esc(date(a.valuation.date))} · ${esc(a.valuation.source)} ${stale ? pill(`${age} ${t('days old')}`, 'warn') : ''}</div>` : `${pill(t('No valuation on file'), 'bad')}<div class="small muted">${esc(t('Yield on value and value share cannot be calculated.'))}</div>`}</dd>
+        <dt>${esc(t('Status'))}</dt><dd>${esc(a.status)}</dd>${S.mode === 'connected' ? `<dt>${esc(t('Valuation'))}</dt><dd><button class="btn small" data-act="valuation" data-id="${esc(a.id)}"${S.role === 'Approver' ? '' : ' disabled title="' + esc(t('Only an Approver can record valuations')) + '"'}>${esc(t('Record valuation'))}</button></dd>` : ''}<dt>${esc(t('Capacity'))}</dt><dd>${esc(num(a.capacity))} ${esc(a.unit)}</dd></dl></section>
+        <section class="card"><header><h2>${esc(periodLabel(S.periodId))}</h2>${periodSelect()}</header><dl class="dl">
+        <dt>${esc(t('Income'))}</dt><dd>${esc(money(p.income))}</dd><dt>${esc(t('Operating costs'))}</dt><dd>${esc(money(p.opex))}</dd><dt>NOI</dt><dd>${esc(money(p.noi))} ${d.prior ? delta(p.noi - d.prior.noi, signed) + ` <span class="muted small">${esc(t('vs'))} ${esc(periodLabel(d.prior.periodId))}</span>` : ''}</dd>
+        <dt>${esc(t('Occupancy'))}</dt><dd>${esc(pct(p.occupancy))} <span class="muted small">(${esc(t('average of months'))})</span></dd>
+        <dt>${esc(t('Yield on cost'))}</dt><dd>${esc(pct(p.yieldOnCost, 2))} ${targetPill(p.yieldOnCost, p.target)}<div class="small muted">${esc(money(p.noi))} × ${12 / p.months} ÷ ${esc(money(a.cost))} · ${esc(t('Target'))} ${esc(pct(p.target, 2))}</div></dd>
+        <dt>${esc(t('Yield on value'))}</dt><dd>${p.yieldOnValue == null ? '—' : esc(pct(p.yieldOnValue, 2))}<div class="small muted">${a.valuation ? `${esc(money(p.noi))} × ${12 / p.months} ÷ ${esc(money(a.valuation.value))}` : esc(t('Needs a valuation'))}</div></dd></dl>
+        ${a.internalNote ? `<div class="notice warn" style="margin-top:12px"><strong>${esc(t('Internal-only note'))}</strong>: ${esc(a.internalNote)} <span class="muted">(${esc(t('never shown in the investor view'))})</span></div>` : ''}</section></div>`;
+    } else if (tab === 'financials') {
+      const sel = new Set(d.periodMonths);
+      body = `<section class="card"><header><h2>${esc(t('Monthly inputs and results'))}</h2><div class="ctrls">${periodSelect()}<button class="btn small" data-act="csv-asset" data-id="${esc(id)}">${esc(t('Export CSV'))}</button></div></header>
+        <p class="small muted" style="margin-bottom:8px">${assumptions()}</p><div class="tblwrap"><table><thead><tr><th>${esc(t('Month'))}</th><th class="num">${esc(t('Occupancy'))}</th><th class="num">${esc(t('Rental income'))}</th><th class="num">${esc(t('Other income'))}</th><th class="num">${esc(t('Total income'))}</th><th class="num">${esc(t('Operating costs'))}</th><th class="num">NOI</th></tr></thead><tbody>
+        ${d.monthly.map(m => `<tr${sel.has(m.month) ? ' style="background:var(--accent-soft)"' : ''}><td>${esc(monthLabel(m.month))}</td><td class="num">${esc(pct(m.occ, 0))}</td><td class="num">${esc(money(m.rental))}</td><td class="num">${esc(money(m.other))}</td><td class="num">${esc(money(m.income))}</td><td class="num">${esc(money(m.opex))}</td><td class="num"><strong>${esc(money(m.noi))}</strong></td></tr>`).join('')}
+        <tr><th>${esc(periodLabel(S.periodId))}</th><th class="num">${esc(pct(p.occupancy))}</th><th></th><th></th><th class="num">${esc(money(p.income))}</th><th class="num">${esc(money(p.opex))}</th><th class="num">${esc(money(p.noi))}</th></tr></tbody></table></div>
+        <p class="small muted" style="margin-top:8px">${esc(t('Highlighted rows are in the selected period.'))} ${esc(t('Gross potential rent'))}: ${esc(money(a.gpr))}/${esc(t('month'))}. ${esc(t('Rental income'))} = ${esc(t('gross potential rent'))} × ${esc(t('occupancy'))}.</p>
+        <details class="method" style="margin-top:10px"><summary>${esc(t('Methodology and assumptions'))}</summary>${methodology()}</details></section>`;
+    } else if (tab === 'leases') {
+      body = `<section class="card"><header><h2>${esc(t('Leases and lease events'))}</h2>${sample()}</header>${d.leases.length ? `<div class="tblwrap"><table><thead><tr><th>${esc(t('Tenant'))}</th><th>${esc(t('Space'))}</th><th>${esc(t('Lease end'))}</th><th>${esc(t('Time to expiry'))}</th><th>${esc(t('Note'))}</th></tr></thead><tbody>${d.leases.map(l => { const dd = Calc.daysBetween(S.cfg.demoToday, l.end); return `<tr><td>${esc(l.tenant)}</td><td>${esc(l.space)}</td><td>${esc(date(l.end))}</td><td>${dd <= S.cfg.thresholds.leaseExpiryDays ? pill(`${dd} ${t('days')}`, 'warn') : `${dd} ${esc(t('days'))}`}</td><td>${esc(l.note)}</td></tr>`; }).join('')}</tbody></table></div>` : empty(t('No lease records in the sample for this asset.'))}
+        <p class="small muted" style="margin-top:8px">${esc(t('Latest-month occupancy'))}: ${esc(pct(d.monthly[d.monthly.length - 1].occ, 0))} · ${esc(t('Capacity'))} ${esc(num(a.capacity))} ${esc(a.unit)}. ${esc(t('Lease events are flagged within'))} ${S.cfg.thresholds.leaseExpiryDays} ${esc(t('days of the demo reference date'))}.</p></section>`;
+    } else if (tab === 'documents') {
+      body = `<section class="card"><header><h2>${esc(t('Documents'))}</h2>${sample()}</header>${docTable(d.documents)}<p class="small muted" style="margin-top:8px">${esc(t('Sample records only: no files are stored and nothing here is secured or enforced by a backend.'))}</p></section>`;
+    } else if (tab === 'tasks') {
+      body = `<div class="grid cols2e"><section class="card"><header><h2>${esc(t('Exceptions'))} (${d.exceptions.length})</h2></header>${d.exceptions.length ? `<ul class="list">${d.exceptions.map(e => `<li><div><div class="t">${esc(e.title)}</div><div class="d">${esc(e.detail)}<br><span class="mono">${esc(t('Rule'))}: ${esc(e.rule)}</span></div></div>${pill(t(e.severity), sevKind(e.severity))}</li>`).join('')}</ul>` : empty(t('No open exceptions.'))}</section>
+        <section class="card"><header><h2>${esc(t('Tasks'))}</h2></header>${taskTable(d.tasks)}</section></div>`;
+    } else {
+      body = `<section class="card"><header><h2>${esc(t('Change history'))}</h2></header>${auditTable(d.history)}</section>`;
+    }
+    return `<p class="small" style="margin-bottom:8px"><a href="#/assets">← ${esc(t('Asset registry'))}</a></p>` + head(a.name, `${esc(a.type)} · ${esc(a.location)} · ${pill(a.status, a.status === 'Stabilised' ? 'good' : 'info')} ${sample()}`) + tabNav + body;
+  }
+
+  const docTable = (docs, withActions) => docs.length ? `<div class="tblwrap"><table><thead><tr><th>${esc(t('Document'))}</th><th>${esc(t('Subject'))}</th><th>${esc(t('Status'))}</th><th>${esc(t('Owner'))}</th><th>${esc(t('Due'))}</th><th>${esc(t('Expires'))}</th><th>${esc(t('Visible to'))}</th>${withActions ? `<th>${esc(t('Review'))}</th>` : ''}</tr></thead><tbody>${docs.map(d => `<tr><td><strong>${esc(d.name)}</strong><div class="muted small">${esc(d.type)}</div></td><td>${esc(d.ref)}</td><td>${pill(t(d.status), statusKind(d.status))}</td><td>${esc(d.owner)}</td><td>${esc(date(d.due))}</td><td>${esc(date(d.expires))}</td><td>${esc(d.visibility === 'investor' ? t('Investor') : t('Internal only'))}</td>${withActions ? `<td>${d.status === 'Pending review' ? `<button class="btn small" data-act="doc" data-d="approve" data-id="${esc(d.id)}">${esc(t('Approve'))}</button> <button class="btn small" data-act="doc" data-d="reject" data-id="${esc(d.id)}">${esc(t('Reject'))}</button>` : ''}</td>` : ''}</tr>`).join('')}</tbody></table></div>` : empty(t('No documents.'));
+  const taskTable = tasks => tasks.length ? `<div class="tblwrap"><table><thead><tr><th>${esc(t('Task'))}</th><th>${esc(t('Owner'))}</th><th>${esc(t('Due'))}</th><th>${esc(t('Priority'))}</th><th>${esc(t('Status'))}</th><th></th></tr></thead><tbody>${tasks.map(x => `<tr><td>${esc(x.title)}<div class="muted small">${esc(x.assetId)}</div></td><td>${esc(x.owner)}</td><td>${esc(date(x.due))}</td><td>${esc(t(x.priority))}</td><td>${pill(t(x.status), statusKind(x.status))}</td><td><button class="btn small" data-act="task" data-id="${esc(x.id)}">${esc(x.status === 'Done' ? t('Reopen') : t('Mark done'))}</button></td></tr>`).join('')}</tbody></table></div><p class="small muted" style="margin-top:6px">${esc(t('Changes are kept in memory for this session only and are recorded in the audit history.'))}</p>` : empty(t('No tasks.'));
+  const auditTable = rows => rows.length ? `<div class="tblwrap"><table><thead><tr><th>${esc(t('When'))}</th><th>${esc(t('Action'))}</th><th>${esc(t('Subject'))}</th><th>${esc(t('Detail'))}</th><th>${esc(t('By'))}</th></tr></thead><tbody>${rows.map(l => `<tr><td>${esc(date(l.at))}${l.session ? ` ${pill(t('this session'), 'info')}` : ''}</td><td>${esc(l.action)}</td><td>${esc(l.entity)}</td><td>${esc(l.detail)}</td><td>${esc(l.actor)}</td></tr>`).join('')}</tbody></table></div>` : empty(t('No history recorded.'));
+
+  async function viewPerformance() {
+    const [assets, sum, ex] = await Promise.all([Store.getAssets({ portfolio: S.portfolio }, S.periodId), Store.getSummary(S.portfolio, S.periodId), Store.getExceptions(S.periodId, S.portfolio)]);
+    const c = sum.current, priorByAsset = {};
+    if (sum.prior) sum.prior.assets.forEach(x => { priorByAsset[x.assetId] = x; });
+    const review = ex.filter(e => e.type === 'Performance' || e.type === 'Lease event');
+    return head(t('Performance and financials'), `${esc(periodLabel(S.periodId))} · ${assumptions()}`, periodSelect() + portfolioSelect() + `<button class="btn" data-act="csv-perf">${esc(t('Export CSV'))}</button>`) +
+      `<section class="card"><header><h2>${esc(t('Asset performance'))}</h2><span class="muted small">${esc(sum.prior ? `${t('Compared with')} ${periodLabel(sum.prior.periodId)}` : t('No comparable prior period in the sample for this selection'))}</span></header><div class="tblwrap"><table><thead><tr><th>${esc(t('Asset'))}</th><th class="num">${esc(t('Income'))}</th><th class="num">${esc(t('Operating costs'))}</th><th class="num">NOI</th><th class="num">${esc(t('Change in NOI'))}</th><th class="num">${esc(t('Occupancy'))}</th><th class="num">${esc(t('Yield on cost'))}</th><th class="num">${esc(t('Yield on value'))}</th><th class="num">${esc(t('Target'))}</th><th>${esc(t('vs target'))}</th></tr></thead><tbody>
+      ${assets.map(a => { const p = a.period, pr = priorByAsset[a.id]; return `<tr><td><a href="#/assets/${esc(a.id)}?tab=financials">${esc(a.name)}</a></td><td class="num">${esc(money(p.income))}</td><td class="num">${esc(money(p.opex))}</td><td class="num">${esc(money(p.noi))}</td><td class="num">${pr ? delta(p.noi - pr.noi, signed) : '—'}</td><td class="num">${esc(pct(p.occupancy))}</td><td class="num">${esc(pct(p.yieldOnCost, 2))}</td><td class="num">${p.yieldOnValue == null ? `<span title="${esc(t('No valuation on file'))}">n/a</span>` : esc(pct(p.yieldOnValue, 2))}</td><td class="num">${esc(pct(p.target, 2))}</td><td>${targetPill(p.yieldOnCost, p.target)}</td></tr>`; }).join('')}
+      <tr><th>${esc(t('Total'))}</th><th class="num">${esc(money(c.income))}</th><th class="num">${esc(money(c.opex))}</th><th class="num">${esc(money(c.noi))}</th><th class="num">${sum.vsPrior ? delta(sum.vsPrior.noiDelta, signed) : '—'}</th><th class="num">${esc(pct(c.occupancy))}</th><th class="num">${esc(pct(c.yieldOnCost, 2))}</th><th></th><th></th><th></th></tr></tbody></table></div>
+      <p class="small muted" style="margin-top:8px">${esc(t('"n/a" means no valuation is on file; it is not zero.'))} ${esc(t('Annualising a short period assumes it repeats and is not a forecast.'))}</p></section>
+      <div class="grid cols2" style="margin-top:14px"><section class="card"><header><h2>${esc(t('Monthly net operating income'))}</h2></header>${barChart(sum.series, sum.periodMonths, sum.targetMonthlyNoi)}</section>
+      <section class="card"><header><h2>${esc(t('Exceptions needing review'))}</h2></header>${review.length ? `<ul class="list">${review.slice(0, 8).map(e => `<li><div><div class="t"><a href="#/assets/${esc(e.assetId)}?tab=tasks">${esc(e.title)}</a></div><div class="d mono">${esc(t('Rule'))}: ${esc(e.rule)}</div></div>${pill(t(e.severity), sevKind(e.severity))}</li>`).join('')}</ul>` : empty(t('No performance exceptions.'))}</section></div>
+      <details class="method" style="margin-top:14px"><summary>${esc(t('Methodology and assumptions'))}</summary>${methodology()}</details>`;
+  }
+
+  async function viewInvestors() {
+    const rows = (await Store.getInvestorSummaries(S.periodId)).map(i => ({ i, snap: i.snap }));
+    const stmt = i => i.statements.find(s => s.period === S.periodId);
+    return head(t('Investors'), `${esc(periodLabel(S.periodId))} · ${esc(t('Statement workflow: draft, submit, approve (second demo role), publish'))}`, periodSelect()) +
+      `<div class="notice info" style="margin-bottom:14px">${esc(t('Demo role'))}: <strong>${esc(t(S.role))}</strong>. ${esc(t('Roles here are a visual demonstration only; a real system must enforce them on a server. Approval needs a different role from the preparer.'))}</div>
+      <section class="card"><div class="tblwrap"><table><thead><tr><th>${esc(t('Investor'))}</th><th>${esc(t('Holdings'))}</th><th class="num">${esc(t('Share of income'))}</th><th class="num">${esc(t('Share of NOI'))}</th><th>${esc(t('Statement'))} ${esc(periodLabel(S.periodId))}</th><th>${esc(t('Action'))}</th></tr></thead><tbody>
+      ${rows.map(({ i, snap }) => { const s = stmt(i); const act = !s ? `<button class="btn small primary" data-act="stmt-draft" data-id="${esc(i.id)}">${esc(t('Generate draft'))}</button>` : s.status === 'Published' ? `<button class="btn small" data-act="stmt-open" data-id="${esc(i.id)}">${esc(t('View'))}</button> <a class="btn small" href="#/investor/${esc(i.id)}" style="text-decoration:none;display:inline-block">${esc(t('Investor view'))}</a>` : `<button class="btn small primary" data-act="stmt-open" data-id="${esc(i.id)}">${esc(s.status === 'Draft' ? t('Review draft') : t('Review and decide'))}</button>`;
+        return `<tr><td><strong>${esc(i.name)}</strong><div class="muted small">${esc(i.type)}</div></td><td>${Object.keys(i.holdings).length} ${esc(t('assets'))}</td><td class="num">${esc(money(snap.income))}</td><td class="num">${esc(money(snap.noi))}</td><td>${s ? pill(t(s.status), statusKind(s.status)) : pill(t('Not started'), 'neutral')}</td><td>${act}</td></tr>`; }).join('')}</tbody></table></div>
+      <p class="small muted" style="margin-top:8px">${esc(t('Shares are pro-rata by recorded ownership percentage (sample methodology). Figures are internal until a statement is approved and published.'))}</p></section>`;
+  }
+
+  async function openStatement(investorId) {
+    const invs = await Store.getInvestors(), inv = invs.find(i => i.id === investorId); let s = inv.statements.find(x => x.period === S.periodId);
+    if (!s) { s = await Store.prepareStatement(investorId, S.periodId, S.role); toast(t('Draft generated from sample data.')); await render(); const fresh = (await Store.getInvestors()).find(i => i.id === investorId); s = fresh.statements.find(x => x.period === S.periodId); }
+    const body = `<p class="muted small">${esc(inv.name)} · ${esc(periodLabel(s.period))} · ${pill(t(s.status), statusKind(s.status))} · ${esc(t('Prepared by'))} ${esc(t(s.preparedBy))}</p>${stmtTable(s.snapshot)}
+      ${s.notes && s.notes.length ? `<div class="notice warn" style="margin-top:10px"><strong>${esc(t('Data notes'))}</strong><ul style="margin:6px 0 0;padding-inline-start:18px">${s.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul></div>` : `<p class="small muted" style="margin-top:10px">${esc(t('No data notes for this statement.'))}</p>`}
+      ${s.status === 'Draft' ? `<label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px"><input type="checkbox" id="ack"> <span>${esc(t('I have reviewed the figures and data notes above. A human review is required before anything reaches an investor.'))}</span></label>` : ''}`;
+    const acts = [];
+    if (s.status === 'Draft') acts.push({ label: t('Submit for review'), primary: true, onClick: async () => { await Store.submitStatement(s.id, S.role, $('ack').checked); dlg.close(); toast(t('Submitted for review.')); await render(); } });
+    if (s.status === 'In review') {
+      const can = S.role === 'Approver', why = t('Switch the demo role to Approver (and not the person who prepared it).');
+      acts.push({ label: t('Return to draft'), onClick: async () => { await Store.decideStatement(s.id, 'return', S.role); dlg.close(); toast(t('Returned to draft.')); await render(); }, disabled: !can, why });
+      acts.push({ label: t('Approve and publish to investor view'), primary: true, onClick: async () => { await Store.decideStatement(s.id, 'approve', S.role); dlg.close(); toast(t('Approved and published (audit entry recorded).')); await render(); }, disabled: !can, why });
+    }
+    openDialog(t('Investor statement'), body, acts);
+  }
+  const stmtTable = sn => `<div class="tblwrap"><table><thead><tr><th>${esc(t('Asset'))}</th><th class="num">${esc(t('Ownership'))}</th><th class="num">${esc(t('Income'))}</th><th class="num">${esc(t('Operating costs'))}</th><th class="num">NOI</th><th class="num">${esc(t('Value share'))}</th></tr></thead><tbody>${sn.rows.map(r => `<tr><td>${esc(r.name)}</td><td class="num">${esc(pct(r.share, 0))}</td><td class="num">${esc(money(r.income))}</td><td class="num">${esc(money(r.opex))}</td><td class="num">${esc(money(r.noi))}</td><td class="num">${r.valueShare == null ? 'n/a' : `${esc(money(r.valueShare))}<div class="muted small">${esc(date(r.valuationDate))}</div>`}</td></tr>`).join('')}<tr><th>${esc(t('Total'))}</th><th></th><th class="num">${esc(money(sn.income))}</th><th class="num">${esc(money(sn.opex))}</th><th class="num">${esc(money(sn.noi))}</th><th class="num">${esc(money(sn.valueShare))}</th></tr></tbody></table></div><p class="small muted" style="margin-top:6px">${esc(t('Share = asset figure × ownership %. Value share uses each asset’s latest valuation on file (dates shown); assets without one are excluded.'))} ${esc(S.cfg.currency)}.</p>`;
+
+  async function viewInvestorWorkspace(id) {
+    const only = S.mode === 'investor';
+    const invs = only ? [] : await Store.getInvestors(), w = await Store.getInvestorWorkspace(id), latest = w.statements[0];
+    if (only && w.config) S.cfg = { ...S.cfg, ...w.config };
+    // The switcher is demo chrome (an operator tool), kept inside the band and outside the investor's own content.
+    const sw = only ? '' : `<label class="demo-ctrl">${esc(t('Demo control, not part of the investor’s view'))}: ${esc(t('View as investor'))} <select data-bind="investor" data-demo-chrome>${invs.map(i => `<option value="${esc(i.id)}"${i.id === id ? ' selected' : ''}>${esc(i.name)}</option>`).join('')}</select></label>`;
+    const note = only ? t('Your access is limited by the server to your own approved statements and documents.') : (S.mode === 'connected' ? t('Server-built preview of exactly what this investor receives. An investor account sees only this, enforced by the server.') : t('Visual demonstration of what one investor might see. Filtering here is done in the browser; real access control must be enforced by a server.'));
+    return `<div class="inv-band" data-demo-chrome><strong>${esc(t('INVESTOR VIEW'))}</strong><span>${esc(note)}</span>${sw}${only ? '' : `<a href="#/overview" style="color:#fff;margin-inline-start:auto">${esc(t('Back to operator view'))}</a>`}</div><div id="investor-content">` +
+      head(w.investor.name, `${esc(w.investor.type)} · ${sample()}`) +
+      (latest ? `<div class="grid kpis"><div class="card kpi"><div class="label">${esc(t('Latest approved period'))}</div><div class="value" style="font-size:18px">${esc(latest.periodLabel)}</div><div class="note">${esc(t('Only approved statements are shown here.'))}</div></div>
+        <div class="card kpi"><div class="label">${esc(t('Your share of income'))}</div><div class="value">${esc(money(latest.snapshot.income, true))}</div><div class="note">${esc(latest.periodLabel)}</div></div>
+        <div class="card kpi"><div class="label">${esc(t('Your share of NOI'))}</div><div class="value">${esc(money(latest.snapshot.noi, true))}</div><div class="note">${esc(latest.periodLabel)}</div></div>
+        <div class="card kpi"><div class="label">${esc(t('Value share (latest valuations)'))}</div><div class="value">${esc(money(latest.snapshot.valueShare, true))}</div><div class="note">${latest.snapshot.missingValuation.length ? esc(t('Excludes assets with no valuation on file')) : esc(t('All holdings valued'))}</div></div></div>` : empty(t('No approved statements yet.'))) +
+      `<div class="grid cols2e" style="margin-top:14px"><section class="card" style="grid-column:1/-1"><header><h2>${esc(t('Your holdings'))}</h2></header><div class="tblwrap"><table><thead><tr><th>${esc(t('Asset'))}</th><th>${esc(t('Type'))}</th><th>${esc(t('Location'))}</th><th class="num">${esc(t('Ownership'))}</th></tr></thead><tbody>${w.holdings.map(h => `<tr><td>${esc(h.name)}</td><td>${esc(h.type)}</td><td>${esc(h.location)}</td><td class="num">${esc(pct(h.share, 0))}</td></tr>`).join('')}</tbody></table></div></section>
+        <section class="card"><header><h2>${esc(t('Statements'))}</h2></header>${w.statements.length ? `<ul class="list">${w.statements.map(s => `<li><div><div class="t">${esc(s.periodLabel)}</div><div class="d">${esc(t('Approved and published'))}</div></div><button class="btn small" data-act="inv-stmt" data-id="${esc(s.id)}" data-inv="${esc(id)}">${esc(t('Open'))}</button></li>`).join('')}</ul>` : empty(t('None published.'))}</section>
+        <section class="card"><header><h2>${esc(t('Documents'))}</h2></header>${w.documents.length ? `<ul class="list">${w.documents.map(d => `<li><div><div class="t">${esc(d.name)}</div><div class="d">${esc(d.type)} · ${esc(date(d.date))}</div></div>${pill(t('Approved'), 'good')}</li>`).join('')}</ul><p class="small muted" style="margin-top:6px">${esc(t('Sample records only: no files are stored.'))}</p>` : empty(t('No approved documents.'))}</section>
+        <section class="card"><header><h2>${esc(t('Communication history'))}</h2></header>${w.communications.length ? `<ul class="list">${w.communications.map(c => `<li><div><div class="t">${esc(c.subject)}</div><div class="d">${esc(c.direction)}</div></div><span class="muted small">${esc(date(c.at))}</span></li>`).join('')}</ul>` : empty(t('No messages.'))}</section></div>
+      <p class="small muted" style="margin-top:14px">${esc(t('Not shown to investors: internal notes, draft or unapproved statements, other investors’ information.'))}</p></div>`;
+  }
+
+  async function viewRecords(tab) {
+    tab = ['documents', 'tasks', 'approvals', 'audit'].includes(tab) ? tab : 'documents';
+    const [docs, tasks, audit, invs] = await Promise.all([Store.getDocuments(), Store.getTasks(), Store.getAudit(), Store.getInvestors()]);
+    const nav = `<nav class="tabs" aria-label="${esc(t('Records sections'))}">${[['documents', 'Documents'], ['tasks', 'Tasks'], ['approvals', 'Approvals'], ['audit', 'Audit history']].map(([k, l]) => `<a href="#/records?tab=${k}"${k === tab ? ' aria-current="page"' : ''}>${esc(t(l))}</a>`).join('')}</nav>`;
+    let body = '';
+    if (tab === 'documents') { const f = S.docFilter, list = docs.filter(d => !f || d.status === f);
+      body = `<section class="card"><header><h2>${esc(t('Documents and records'))}</h2><div class="ctrls"><label class="ctrl">${esc(t('Status'))}<select data-bind="docfilter"><option value="">${esc(t('All'))}</option>${['Approved', 'Pending review', 'Missing', 'Expired', 'Rejected'].map(x => `<option value="${x}"${f === x ? ' selected' : ''}>${esc(t(x))}</option>`).join('')}</select></label></div></header>${docTable(list)}<p class="small muted" style="margin-top:8px">${esc(t('Sample records only: no files are stored and nothing here is secured or enforced by a backend.'))}</p></section>`; }
+    else if (tab === 'tasks') body = `<section class="card"><header><h2>${esc(t('Tasks'))}</h2>${sample()}</header>${taskTable(tasks)}</section>`;
+    else if (tab === 'approvals') {
+      const pend = docs.filter(d => d.status === 'Pending review'), inrev = invs.flatMap(i => i.statements.filter(s => s.status === 'In review').map(s => ({ i, s })));
+      body = `<div class="notice info" style="margin-bottom:14px">${esc(t('Demo role'))}: <strong>${esc(t(S.role))}</strong>. ${esc(t('Only the Approver role can approve. This is a visual demonstration, not enforced permissions.'))}</div>
+        <div class="grid cols2e"><section class="card"><header><h2>${esc(t('Documents awaiting review'))}</h2></header>${pend.length ? docTable(pend, true) : empty(t('Nothing waiting.'))}</section>
+        <section class="card"><header><h2>${esc(t('Statements awaiting approval'))}</h2></header>${inrev.length ? `<ul class="list">${inrev.map(({ i, s }) => `<li><div><div class="t">${esc(i.name)}</div><div class="d">${esc(periodLabel(s.period))} · ${esc(t('Prepared by'))} ${esc(t(s.preparedBy))}</div></div><button class="btn small primary" data-act="stmt-open" data-id="${esc(i.id)}" data-period="${esc(s.period)}">${esc(t('Review'))}</button></li>`).join('')}</ul>` : empty(t('Nothing waiting. Prepare a statement under Investors.'))}</section></div>`;
+    } else body = `<section class="card"><header><h2>${esc(t('Audit history'))}</h2>${sample()}</header>${auditTable(audit)}<p class="small muted" style="margin-top:8px">${esc(t('Entries marked “this session” were created by your actions in this demo and are lost on reload. A real audit trail needs server-side, tamper-evident storage.'))}</p></section>`;
+    return head(t('Documents, tasks, approvals and audit'), `${esc(t('Operational records'))} · ${esc(t('sample data'))}`) + nav + body;
+  }
+
+  async function viewAssistant() {
+    return head(t('Assistant (simulated)'), esc(t('Rule-based answers from the sample records. Not an AI model.')), periodSelect()) +
+      `<div class="notice warn" style="margin-bottom:14px"><strong>${esc(t('Simulated assistant'))}</strong>: ${esc(t('No AI model and no network call is involved. Answers use only the sample data, list the records they used, separate facts from rule-based inferences and name gaps. It does not give investment advice or forecasts. Valuations, investor communications, approvals and decisions need human review.'))}</div>
+      <section class="card"><div class="chips" role="group" aria-label="${esc(t('Suggested questions'))}">${Asst.suggestions.map(q => `<button class="chip" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <form id="ask-form" style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><label class="sr-only" for="ask-q">${esc(t('Your question'))}</label><input type="text" id="ask-q" style="flex:1;min-width:220px" placeholder="${esc(t('Ask about the sample portfolio…'))}" maxlength="300"><button class="btn primary" type="submit">${esc(t('Ask'))}</button></form>
+      <div id="answers" aria-live="polite">${S.answers.map(answerHtml).join('')}</div></section>`;
+  }
+  const answerHtml = a => `<div class="answer"><div class="q">${esc(a.question)}</div>${a.refused ? `<div class="notice bad" style="margin-bottom:8px">${esc(t('Not answered: advice, valuation opinions and forecasts are out of scope.'))}</div>` : ''}<ul>${a.summary.map(s => `<li><span class="kind ${s.type}">${esc(s.type === 'fact' ? t('FACT') : t('INFERENCE'))}</span>${esc(s.text)}</li>`).join('')}</ul>${a.gaps.length ? `<div class="notice warn" style="margin-top:8px"><strong>${esc(t('Gaps'))}</strong><ul style="margin:4px 0 0;padding-inline-start:18px">${a.gaps.map(g => `<li>${esc(g)}</li>`).join('')}</ul></div>` : ''}${a.sources.length ? `<div class="srcs"><strong>${esc(t('Based on'))}:</strong> ${a.sources.map(s => `<a href="${esc(s.href)}">${esc(s.label)}</a>`).join(' · ')}</div>` : ''}<p class="small muted" style="margin-top:8px">${esc(t('Simulated, rule-based answer. Human review is required before acting.'))}</p></div>`;
+
+  async function viewSettings() {
+    const conn = S.mode === 'connected', lock = conn && S.role !== 'Approver' ? ' disabled' : '';
+    const cur = ['USD', 'EUR', 'GBP', 'AED', 'SAR', 'AUD'], loc = [['en-US', 'English (US)'], ['en-GB', 'English (UK)'], ['de-DE', 'Deutsch'], ['fr-FR', 'Français'], ['ar-AE', 'العربية (AE)'], ['ar-SA', 'العربية (SA)']];
+    return head(t('Settings and configuration'), esc(t('Sample configuration for the demonstration; not assumptions about any real organisation.'))) +
+      `<div class="grid cols2e"><section class="card"><header><h2>${esc(t('Presentation'))}</h2></header><div class="ctrls" style="flex-direction:column;align-items:stretch">
+        <label class="ctrl">${esc(t('Currency label of the sample data'))}<select data-bind="currency"${lock}>${cur.map(c => `<option${c === S.cfg.currency ? ' selected' : ''}>${c}</option>`).join('')}</select></label>
+        <p class="small muted">${esc(t('Relabels the unit only. The sample values are not converted between currencies.'))}</p>
+        <label class="ctrl">${esc(t('Number and date format'))}<select data-bind="locale"${lock}>${loc.map(([v, l]) => `<option value="${v}"${v === S.cfg.locale ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+        <label class="ctrl">${esc(t('Target NOI yield on cost (%)'))}<input type="number" step="0.1" min="0" max="30" value="${(S.cfg.targetYield * 100).toFixed(1)}" data-bind="target"${lock}></label>
+        ${conn ? `<p class="small muted">${esc(lock ? t('Only an Approver can change these; they apply to the whole agency.') : t('These settings are saved for the whole agency.'))}</p>` : ''}
+        <label class="ctrl">${esc(t('Theme'))}<select data-bind="theme"><option value="system"${S.theme === 'system' ? ' selected' : ''}>${esc(t('System'))}</option><option value="light"${S.theme === 'light' ? ' selected' : ''}>${esc(t('Light'))}</option><option value="dark"${S.theme === 'dark' ? ' selected' : ''}>${esc(t('Dark'))}</option></select></label>
+        <div class="seg" role="group" aria-label="${esc(t('Language'))}"><button data-act="lang" data-l="en" aria-pressed="${I.lang === 'en'}">English</button><button data-act="lang" data-l="ar" aria-pressed="${I.lang === 'ar'}">العربية</button></div>
+        <p class="small muted">${esc(t('Arabic covers interface text. Sample record names, assistant answers and exception sentences remain in English.'))}</p></div></section>
+        <section class="card"><header><h2>${esc(t('Data connections'))}</h2></header><ul class="list">${[...(conn ? [['Observer backend', 'Agency database, roles and audit enforced by the server']] : []), ['General ledger / accounting', conn ? 'Sample data stored in the database' : 'Sample extract in the page'], ['Valuation provider', 'Sample records'], ['Document store', 'Sample records, no files'], ['Identity and permissions', 'Visual demo roles only'], ['Lead engagement (voice) module', 'Separate scripted simulation']].map(([n, d]) => `<li><div><div class="t">${esc(t(n))}</div><div class="d">${esc(t(d))}</div></div>${n === 'Observer backend' ? pill(t('Connected'), 'good') : pill(t('Not connected'), 'neutral')}</li>`).join('')}</ul>
+        ${conn ? '' : `<div style="margin-top:12px"><button class="btn" data-act="reset">${esc(t('Reset demo data'))}</button> <span class="small muted">${esc(t('Clears this session’s changes.'))}</span></div>`}</section></div>
+      <details class="method" style="margin-top:14px"><summary>${esc(t('About this prototype'))}</summary><p class="small" style="margin-top:8px">${esc(t('Concept prototype with fictional data. Not a production platform and not connected to any real system. What is simulated, what is missing and what a production build needs is documented in IMPLEMENTATION_NOTES.md.'))}</p></details>`;
+  }
+
+  // ── shell ──
+  function renderShell(r) {
+    const inv = r.route === 'investor', invOnly = S.mode === 'investor', conn = S.mode === 'connected' || S.mode === 'connected-empty';
+    document.body.classList.toggle('investor-mode', inv);
+    $('skip').textContent = t('Skip to content');
+    $('banner').innerHTML = invOnly
+      ? `<strong>${esc(t('Investor access'))}</strong><span>${esc(t('You can see only your own approved statements and documents. This is enforced by the server. Fictional sample data.'))}</span><a href="#" data-act="signout">${esc(t('Sign out'))}</a>`
+      : conn
+        ? `<strong>${esc(t('Concept prototype — sample data'))}</strong><span>${esc(t('Connected mode: fictional sample data stored in your agency’s Observer database. Roles and investor access are enforced by the server.'))}</span><a href="voice-simulation.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`
+        : `<strong>${esc(t('Concept prototype — sample data'))}</strong><span>${esc(t('Fictional assets, figures and people. Not connected to any production system. Nothing is saved.'))}</span><a href="voice-simulation.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`;
+    const nav = [['overview', 'Overview'], ['assets', 'Assets'], ['performance', 'Performance'], ['investors', 'Investors'], ['records', 'Records'], ['assistant', 'Assistant (simulated)'], ['settings', 'Settings']];
+    const chip = invOnly ? `${esc(S.me.email)}` : conn ? `${esc(t('Connected'))}: ${esc(S.me.agency || '')}` : esc(t('Standalone sample (nothing saved)'));
+    const account = invOnly ? '' : conn
+      ? `<span class="small">${esc(S.me.email)} · <strong>${esc(t(S.role))}</strong></span><span class="small">${esc(t('Role enforced by the server.'))}</span><button class="btn small" data-act="signout" style="margin-top:6px">${esc(t('Sign out'))}</button>`
+      : `<label class="ctrl">${esc(t('Demo role'))}<select data-bind="role"><option value="Analyst"${S.role === 'Analyst' ? ' selected' : ''}>${esc(t('Analyst'))}</option><option value="Approver"${S.role === 'Approver' ? ' selected' : ''}>${esc(t('Approver'))}</option></select></label><span class="small">${esc(t('Visual only: not enforced.'))}</span>`;
+    $('side').innerHTML = `<div class="brand"><b>${esc(t('Portfolio & Investor Operations'))}</b><span>${esc(t('Concept prototype'))}</span><span class="small" style="display:block;margin-top:4px">${chip}</span></div>
+      <nav class="nav" aria-label="${esc(t('Primary'))}">${invOnly ? `<a href="#/investor/${esc(S.me.investorId)}" aria-current="page">${esc(t('My portfolio'))}</a>` : inv ? `<a href="#/investor/${esc(r.id || '')}" aria-current="page">${esc(t('My portfolio'))}</a><a href="#/overview">${esc(t('Back to operator view'))}</a>` : (S.mode === 'signin' || S.mode === 'connected-empty') ? '' : nav.map(([k, l]) => `<a href="#/${k}"${k === r.route ? ' aria-current="page"' : ''}>${esc(t(l))}</a>`).join('')}</nav>
+      <div class="sep"></div><div class="opt">${account}
+      <div class="seg" style="margin-top:8px" role="group" aria-label="${esc(t('Language'))}"><button data-act="lang" data-l="en" aria-pressed="${I.lang === 'en'}">EN</button><button data-act="lang" data-l="ar" aria-pressed="${I.lang === 'ar'}">AR</button></div>
+      ${invOnly ? '' : `<a href="voice-simulation.html">${esc(t('Lead engagement module (optional, separate)'))}</a>`}${conn ? `<a href="../platform.html">${esc(t('Open the lead workspace'))}</a>` : ''}</div>`;
+  }
+
+  let renderId = 0;
+  async function render() {
+    const my = ++renderId, r = parse(), main = $('main');
+    if (S.mode === 'investor') { r.route = 'investor'; r.id = S.me.investorId; }
+    renderShell(r);
+    try {
+      let html;
+      if (S.mode === 'connected') { await Store.sync(); S.cfg = await Store.getConfig(); S.portfolios = await Store.getPortfolios(); }
+      if (S.mode === 'signin') html = viewSignin();
+      else if (S.mode === 'connected-empty') html = viewEmptyConnected();
+      else if (r.route === 'overview') html = await viewOverview();
+      else if (r.route === 'assets') html = r.id ? await viewAsset(r.id, r.q.tab) : await viewAssets();
+      else if (r.route === 'performance') html = await viewPerformance();
+      else if (r.route === 'investors') html = await viewInvestors();
+      else if (r.route === 'investor') html = await viewInvestorWorkspace(r.id || 'INV-01');
+      else if (r.route === 'records') html = await viewRecords(r.q.tab);
+      else if (r.route === 'assistant') html = await viewAssistant();
+      else if (r.route === 'settings') html = await viewSettings();
+      else html = `<div class="empty">${esc(t('Page not found.'))} <a href="#/overview">${esc(t('Go to overview'))}</a></div>`;
+      if (my !== renderId) return;
+      main.innerHTML = html;
+      document.title = `${t('Portfolio & Investor Operations')} — ${t('concept prototype')}`;
+      if (r.route === 'assets' && !r.id) fillAssetTable();
+      if (r.route === 'assets' && !r.id && S.focusSearch) { const q = $('f-q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } S.focusSearch = false; }
+    } catch (e) {
+      if (my !== renderId) return;
+      main.innerHTML = `<div class="notice bad"><strong>${esc(t('Could not load this view.'))}</strong> ${esc(e.message)} <button class="btn small" data-act="retry">${esc(t('Retry'))}</button></div>`;
+    }
+  }
+
+  function viewSignin() {
+    return `<section class="card" style="max-width:640px"><h1>${esc(t('Portfolio & Investor Operations'))}</h1>
+      <p style="margin:10px 0">${esc(t('This page is served by an Observer server. Sign in to use connected mode (data stored per agency, roles and investor access enforced by the server), or continue with the local sample (nothing saved).'))}</p>
+      <p class="ctrls"><a class="btn primary" style="text-decoration:none;display:inline-block" href="/login.html?next=/demo/index.html">${esc(t('Sign in'))}</a><button class="btn" data-act="standalone">${esc(t('Continue with the local sample'))}</button></p></section>`;
+  }
+  function viewEmptyConnected() {
+    const admin = S.me.role === 'admin';
+    return `<section class="card" style="max-width:640px"><h1>${esc(t('No portfolio data yet'))}</h1>
+      <p style="margin:10px 0">${esc(t('This agency has no portfolio records. Loading the sample adds the fictional demonstration portfolio to this agency’s database.'))}</p>
+      ${admin ? `<button class="btn primary" data-act="load-sample">${esc(t('Load the sample portfolio'))}</button>` : `<div class="notice info">${esc(t('Ask an admin to load the sample portfolio.'))}</div>`}
+      <p class="small muted" style="margin-top:10px"><button class="btn small" data-act="standalone">${esc(t('Use the local sample instead'))}</button></p></section>`;
+  }
+
+  function openAssetDialog() {
+    const f = (id, label, input) => `<label class="ctrl" style="margin-bottom:8px">${esc(label)}${input}</label>`;
+    openDialog(t('Add asset'), `<p class="small muted" style="margin-bottom:10px">${esc(t('Creates an asset with no valuation. Missing required records are flagged automatically.'))}</p>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px">
+      ${f('n', t('Name'), '<input type="text" id="na-name" maxlength="120">')}${f('t', t('Type'), '<input type="text" id="na-type" maxlength="60" placeholder="Office">')}
+      ${f('p', t('Portfolio'), `<select id="na-port">${S.portfolios.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select>`)}${f('l', t('Location'), '<input type="text" id="na-loc" maxlength="120">')}
+      ${f('s', t('Status'), '<select id="na-status"><option>Stabilised</option><option>Lease-up</option><option>Refurbishment</option><option>Held for sale</option></select>')}${f('a', t('Acquired'), '<input type="date" id="na-acq">')}
+      ${f('c', t('Acquisition cost'), '<input type="number" id="na-cost" min="1" step="1">')}${f('cap', t('Capacity'), '<input type="number" id="na-cap" min="0" step="1" value="0">')}
+      ${f('u', t('Unit'), '<select id="na-unit"><option value="units">units</option><option value="sqm">sqm</option></select>')}${f('g', t('Gross potential rent per month'), '<input type="number" id="na-gpr" min="0" step="1" value="0">')}
+      ${f('o', t('Other income per month'), '<input type="number" id="na-other" min="0" step="1" value="0">')}${f('m', t('Operating costs per month'), '<input type="number" id="na-opex" min="0" step="1" value="0">')}
+      ${f('oc', t('Typical occupancy (%) applied to every month'), '<input type="number" id="na-occ" min="0" max="100" step="1" value="0">')}</div>`,
+      [{ label: t('Create asset'), primary: true, onClick: async () => {
+        const v = id => $(id).value, occ = Math.min(100, Math.max(0, Number(v('na-occ')) || 0)) / 100;
+        await Store.createAsset({ name: v('na-name'), type: v('na-type'), portfolio: v('na-port'), location: v('na-loc'), status: v('na-status'), acquired: v('na-acq'), cost: Number(v('na-cost')), capacity: Number(v('na-cap')), unit: v('na-unit'), gpr: Number(v('na-gpr')), other: Number(v('na-other')), opex: { maintenance: Number(v('na-opex')) }, occupancy: Array(12).fill(occ) });
+        dlg.close(); toast(t('Asset created and recorded in the audit history.')); await render();
+      } }]);
+  }
+  function openValuationDialog(id) {
+    openDialog(t('Record valuation'), `<p class="small muted" style="margin-bottom:10px">${esc(t('A valuation needs a value, an as-at date and a named source. It is recorded in the audit history.'))}</p>
+      <label class="ctrl" style="margin-bottom:8px">${esc(t('Value'))}<input type="number" id="nv-val" min="1" step="1"></label><label class="ctrl" style="margin-bottom:8px">${esc(t('As at'))}<input type="date" id="nv-date"></label><label class="ctrl">${esc(t('Source'))}<input type="text" id="nv-src" maxlength="120" placeholder="Independent appraisal"></label>`,
+      [{ label: t('Save valuation'), primary: true, onClick: async () => { await Store.recordValuation(id, { value: Number($('nv-val').value), date: $('nv-date').value, source: $('nv-src').value }); dlg.close(); toast(t('Valuation recorded.')); await render(); } }]);
+  }
+
+  // ── events ──
+  document.addEventListener('change', async e => { try { await onChange(e); } catch (err) { toast(err.message, true); await render(); } });
+  async function onChange(e) {
+    const el = e.target, b = el.dataset && el.dataset.bind;
+    if (el.id === 'f-type') { S.filter.type = el.value; return fillAssetTable(); }
+    if (el.id === 'f-status') { S.filter.status = el.value; return fillAssetTable(); }
+    if (el.id === 'f-ex') { S.filter.exceptionsOnly = el.checked; return fillAssetTable(); }
+    if (!b) return;
+    if (b === 'period') S.periodId = el.value;
+    else if (b === 'portfolio') S.portfolio = el.value;
+    else if (b === 'role') S.role = el.value;
+    else if (b === 'docfilter') S.docFilter = el.value;
+    else if (b === 'investor') { location.hash = '#/investor/' + el.value; return; }
+    else if (b === 'currency') { S.cfg = await Store.setConfig({ currency: el.value }); }
+    else if (b === 'locale') { S.cfg = await Store.setConfig({ locale: el.value }); }
+    else if (b === 'target') { const v = parseFloat(el.value); if (isFinite(v) && v >= 0 && v <= 30) S.cfg = await Store.setConfig({ targetYield: v / 100 }); }
+    else if (b === 'theme') { S.theme = el.value; if (el.value === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = el.value; }
+    render();
+  }
+  document.addEventListener('input', e => { if (e.target.id === 'f-q') { S.filter.q = e.target.value; fillAssetTable(); } });
+  document.addEventListener('submit', async e => {
+    if (e.target.id !== 'ask-form') return; e.preventDefault(); await ask($('ask-q').value);
+  });
+  async function ask(q) {
+    const ctx = { periodId: S.periodId, currency: S.cfg.currency, cfg: S.cfg };
+    S.answers.unshift(await Asst.answer(q, ctx)); S.answers = S.answers.slice(0, 8);
+    const box = $('answers'); if (box) box.innerHTML = S.answers.map(answerHtml).join(''); const inp = $('ask-q'); if (inp) { inp.value = ''; inp.focus(); }
+  }
+  document.addEventListener('click', async e => {
+    const row = e.target.closest('tr[data-href]'); if (row && !e.target.closest('a,button')) { location.hash = row.dataset.href; return; }
+    const el = e.target.closest('[data-act]'); if (!el) return;
+    const act = el.dataset.act;
+    try {
+      if (act === 'lang') { I.set(el.dataset.l); await render(); }
+      else if (act === 'retry') await render();
+      else if (act === 'signout') await Store.signOut();
+      else if (act === 'standalone') { Store.useStandalone(); S.mode = 'standalone'; S.me = null; S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); location.hash = '#/overview'; await render(); }
+      else if (act === 'load-sample') { await Store.loadSample(); S.mode = 'connected'; S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); toast(t('Sample portfolio loaded.')); location.hash = '#/overview'; await render(); }
+      else if (act === 'add-asset') openAssetDialog();
+      else if (act === 'valuation') openValuationDialog(el.dataset.id);
+      else if (act === 'ask') await ask(el.dataset.q);
+      else if (act === 'task') { await Store.toggleTask(el.dataset.id, S.role); toast(t('Task updated and recorded in the audit history.')); await render(); }
+      else if (act === 'doc') { await Store.reviewDocument(el.dataset.id, el.dataset.d, S.role); toast(t('Document review recorded in the audit history.')); await render(); }
+      else if (act === 'stmt-draft' || act === 'stmt-open') { if (el.dataset.period) S.periodId = el.dataset.period; await openStatement(el.dataset.id); }
+      else if (act === 'inv-stmt') { const w = await Store.getInvestorWorkspace(el.dataset.inv), s = w.statements.find(x => x.id === el.dataset.id); openDialog(`${t('Statement')} — ${s.periodLabel}`, stmtTable(s.snapshot) + (s.notes.length ? `<div class="notice warn" style="margin-top:10px"><ul style="margin:0;padding-inline-start:18px">${s.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul></div>` : '')); }
+      else if (act === 'reset') { await Store.reset(); S.answers = []; toast(t('Demo data reset.')); await render(); }
+      else if (act === 'csv-asset') { const d = await Store.getAsset(el.dataset.id, S.periodId); csvDownload(`${d.asset.id}-monthly-${S.cfg.currency}.csv`, [['Month', 'Occupancy', 'Rental income', 'Other income', 'Total income', 'Operating costs', 'NOI', 'Currency', 'Source'], ...d.monthly.map(m => [m.month, m.occ, m.rental, m.other, m.income, m.opex, m.noi, S.cfg.currency, S.cfg.financialsSource])]); }
+      else if (act === 'csv-perf') { const as = await Store.getAssets({ portfolio: S.portfolio }, S.periodId); csvDownload(`performance-${S.periodId}-${S.cfg.currency}.csv`, [['Asset', 'Period', 'Income', 'Operating costs', 'NOI', 'Occupancy', 'Yield on cost', 'Yield on value', 'Target yield', 'Currency', 'Source'], ...as.map(a => [a.name, S.periodId, a.period.income, a.period.opex, a.period.noi, a.period.occupancy.toFixed(4), a.period.yieldOnCost.toFixed(4), a.period.yieldOnValue == null ? '' : a.period.yieldOnValue.toFixed(4), a.period.target, S.cfg.currency, S.cfg.financialsSource])]); }
+    } catch (err) { toast(err.message, true); }
+  });
+  window.addEventListener('hashchange', () => { render(); $('main').focus({ preventScroll: true }); window.scrollTo(0, 0); });
+
+  (async function init() {
+    try {
+      const st = await Store.init();
+      S.mode = st.mode; S.me = st.me || null;
+      if (S.mode === 'connected' || S.mode === 'connected-empty') S.role = S.me.label || (S.me.role === 'admin' ? 'Approver' : 'Analyst');
+      if (S.mode === 'investor') S.cfg = { currency: 'USD', locale: 'en-US', thresholds: {} };
+      else { S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); }
+    } catch (e) { S.mode = 'standalone'; Store.useStandalone(); S.cfg = await Store.getConfig(); S.periods = await Store.getPeriods(); S.portfolios = await Store.getPortfolios(); }
+    window.DemoI18n.register(window.DemoAR || {});
+    if (!location.hash && S.mode !== 'investor') location.hash = '#/overview'; else render();
+  })();
+  window.DemoApp = { render };
+})();
+
+</script>
+</body>
+</html>
