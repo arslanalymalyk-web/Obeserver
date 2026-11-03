@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observer — AI Voice Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/voice.css">
+<link rel="stylesheet" href="css/a11y.css">
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">Observer</div>
+    <div class="logo-sub">Voice AI Agent</div>
+    <div class="logo-voice">📞 <span id="logo-status">CALLING ENGINE ACTIVE</span></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section" id="ns-live">Live Operations</div>
+    <div class="nav-item active" onclick="showView('live',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+      <span id="ni-live">Live Call Center</span>
+      <span class="nav-badge nb-green" id="badge-active">1</span>
+    </div>
+    <div class="nav-item" onclick="showView('queue',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-queue">Call Queue</span>
+      <span class="nav-badge nb-red" id="badge-queue">8</span>
+    </div>
+    <div class="nav-item" onclick="showView('campaigns',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 6h12" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span id="ni-campaigns">Campaigns</span>
+    </div>
+    <div class="nav-section" id="ns-scripts">Scripts & AI</div>
+    <div class="nav-item" onclick="showView('scripts',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 3h10v10H3V3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-scripts">Script Library</span>
+    </div>
+    <div class="nav-item" onclick="showView('objections',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l6 12H2L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 7v4M8 12.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-objections">Objection Handling</span>
+    </div>
+    <div class="nav-section" id="ns-analytics">Analytics</div>
+    <div class="nav-item" onclick="showView('analytics',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13V8M6 13V5M10 13V7M14 13V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-analytics">Call Analytics</span>
+    </div>
+    <div class="nav-item" onclick="showView('calllog',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M5 2h6a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-calllog">Call Log</span>
+    </div>
+    <div class="nav-section" id="ns-settings">System</div>
+    <div class="nav-item" onclick="showView('settings',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-settings">Voice Settings</span>
+    </div>
+    <div class="nav-item" onclick="showView('notifications',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 00-4 4v3l-1.5 2h11L12 9V6a4 4 0 00-4-4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6.5 13.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-notifications">Notifications</span>
+      <span class="nav-badge nb-red">6</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="agent-pill">
+      <div class="ag-av">SA</div>
+      <div><div class="ag-name">Sarah Ahmed</div><div class="ag-role">Senior Agent · Admin</div></div>
+      <div class="pulse-dot"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">Live Call Center</div>
+    <div class="live-badge"><span class="live-dot"></span> <span id="tb-live">Live</span></div>
+    <div class="ai-badge">📞 <span id="tb-ai">Voice AI Active</span></div>
+    <div class="topbar-right">
+      <div class="ctrl-strip">
+        <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">🌗<span class="ctrl-tip">Light / Dark</span></button>
+        <div class="ctrl-sep"></div>
+        <button class="ctrl-btn" onclick="toggleLang()" id="langBtn" style="font-size:11px;font-weight:700;width:32px"><span id="langLabel">AR</span><span class="ctrl-tip">عربي / English</span></button>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="showEndCallModal()">📞 <span id="tb-end">End All Calls</span></button>
+      <button class="btn btn-call" onclick="showNewCallModal()">📞 <span id="tb-new">New Call</span></button>
+    </div>
+  </div>
+
+  <div class="content">
+
+<!-- ═══ LIVE CALL CENTER ═══ -->
+<div class="view active" id="view-live">
+  <div class="metrics-row">
+    <div class="metric-card mc-call">
+      <div class="m-label" id="m-active-calls">Active Calls</div>
+      <div class="m-val" style="color:var(--call)" id="mv-active">1</div>
+      <div class="m-delta" id="md-active">🟢 Live now</div>
+      <div class="m-bar"><div class="m-bar-f" style="width:40%;background:var(--call)"></div></div>
+    </div>
+    <div class="metric-card mc-hot">
+      <div class="m-label" id="m-queue-size">Queue Size</div>
+      <div class="m-val" style="color:var(--warm)" id="mv-queue">8</div>
+      <div class="m-delta warn" id="md-queue">Waiting</div>
+      <div class="m-bar"><div class="m-bar-f" style="width:65%;background:var(--warm)"></div></div>
+    </div>
+    <div class="metric-card mc-warm">
+      <div class="m-label" id="m-today-calls">Calls Today</div>
+      <div class="m-val" id="mv-today">47</div>
+      <div class="m-delta" id="md-today">↑ 23 answered</div>
+      <div class="m-bar"><div class="m-bar-f" style="width:70%;background:var(--accent)"></div></div>
+    </div>
+    <div class="metric-card mc-purple">
+      <div class="m-label" id="m-connect-rate">Connect Rate</div>
+      <div class="m-val" style="color:#9b7fff" id="mv-connect">61%</div>
+      <div class="m-delta" style="color:#9b7fff" id="md-connect">↑ vs 48% avg</div>
+      <div class="m-bar"><div class="m-bar-f" style="width:61%;background:var(--purple)"></div></div>
+    </div>
+    <div class="metric-card mc-teal">
+      <div class="m-label" id="m-handoffs">Handoffs Today</div>
+      <div class="m-val" style="color:var(--teal)" id="mv-handoffs">9</div>
+      <div class="m-delta" style="color:var(--teal)" id="md-handoffs">Hot leads → agents</div>
+      <div class="m-bar"><div class="m-bar-f" style="width:55%;background:var(--teal)"></div></div>
+    </div>
+  </div>
+
+  <div class="call-workspace">
+    <!-- LEFT: QUEUE -->
+    <div class="call-queue">
+      <div class="cq-head">
+        <div class="cq-title" id="cq-title">Call Queue</div>
+        <div class="cq-sub" id="cq-sub">8 leads · Ordered by AI score</div>
+      </div>
+      <div class="cq-list" id="call-queue-list"></div>
+    </div>
+
+    <!-- CENTER: LIVE CALL -->
+    <div class="live-call-panel">
+      <!-- CALL HEADER -->
+      <div class="call-header">
+        <div class="ch-top">
+          <div class="call-avatar" id="call-avatar" style="background:linear-gradient(135deg,#1a3a28,#0d2a18);color:var(--call)">AK</div>
+          <div style="flex:1">
+            <div class="ch-name" id="call-name">Ahmed Al Khalidi</div>
+            <div class="ch-meta" id="call-meta">+971 50 234 5678 · Bayut · Dubai Hills</div>
+          </div>
+          <div class="call-timer" id="call-timer">02:34</div>
+          <div class="ch-controls">
+            <button class="btn btn-sm" onclick="toggleMute()" id="mute-btn" title="Mute">🔇</button>
+            <button class="btn btn-sm btn-wa" onclick="switchToWA()">💬 <span id="switch-wa">WA</span></button>
+            <button class="btn btn-sm" style="background:var(--purple-bg);color:#9b7fff;border-color:var(--purple)22" onclick="triggerHandoff()">👤 <span id="handoff-btn">Handoff</span></button>
+            <button class="btn btn-sm btn-red" onclick="endCurrentCall()">📵 <span id="end-call-btn">End</span></button>
+          </div>
+        </div>
+        <!-- SCORE BARS -->
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="score-bar-section">
+            <div class="score-label-sm" id="ai-score-label">AI Score</div>
+            <div class="score-track"><div class="score-fill" id="score-fill" style="width:87%;background:var(--hot)"></div></div>
+            <div class="score-num score-hot" id="score-num">87</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="qi-score hot" id="score-tier">HIGH INTENT</span>
+            <span style="font-size:10.5px;color:var(--text3);font-family:var(--font-m)" id="intent-tag">Buyer · Cash · Serious</span>
+            <span style="margin-left:auto;font-size:10.5px;color:var(--text3);font-family:var(--font-m)" id="call-source">Bayut → Dubai Hills</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WAVEFORM -->
+      <div class="waveform-section">
+        <div class="wf-label" id="wf-who">🤖 AI Agent</div>
+        <div class="waveform" id="waveform"></div>
+        <div class="wf-status speaking" id="wf-status">SPEAKING</div>
+      </div>
+
+      <!-- TRANSCRIPT -->
+      <div class="transcript-area" id="transcript-area"></div>
+
+      <!-- HANDOFF ALERT (hidden by default) -->
+      <div class="handoff-alert" id="handoff-alert" style="display:none;margin:0 14px 10px">
+        <div class="ha-icon">🚨</div>
+        <div class="ha-text"><strong>Handoff Triggered</strong> — Ahmed is a cash buyer ready now. Routing to specialist Sarah Ahmed...</div>
+        <button class="btn btn-sm btn-gold" onclick="confirmHandoff()" id="confirm-handoff">Confirm</button>
+      </div>
+
+      <!-- CALL ACTIONS -->
+      <div class="call-actions">
+        <div class="ca-label" id="ca-quick">⚡ Quick Actions</div>
+        <div class="ca-row" id="quick-actions"></div>
+        <div class="ca-label" id="ca-obj">🛡️ Objection Handlers</div>
+        <div class="ca-row" id="objection-quick"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SCRIPT PANEL -->
+    <div class="script-panel">
+      <div class="sp-head">
+        <div class="panel-title" id="sp-title">AI Script Router</div>
+        <div class="sp-route" id="script-route-chips"></div>
+      </div>
+      <div class="script-body" id="script-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CALL QUEUE VIEW ═══ -->
+<div class="view" id="view-queue">
+  <div class="metrics-row">
+    <div class="metric-card mc-hot"><div class="m-label" id="m-q-high">High Intent Waiting</div><div class="m-val" style="color:var(--hot)">3</div><div class="m-delta" id="md-q-high">Score 80+</div></div>
+    <div class="metric-card mc-warm"><div class="m-label" id="m-q-mid">Medium Intent</div><div class="m-val" style="color:var(--warm)">3</div><div class="m-delta warn" id="md-q-mid">Score 50–79</div></div>
+    <div class="metric-card"><div class="m-label" id="m-q-low">Low Intent</div><div class="m-val" style="color:var(--cold)">2</div><div class="m-delta" id="md-q-low">Score 0–49</div></div>
+    <div class="metric-card mc-teal"><div class="m-label" id="m-avg-wait">Avg Wait Time</div><div class="m-val" style="color:var(--teal)">4m</div><div class="m-delta" style="color:var(--teal)" id="md-wait">Target: &lt;2 min</div></div>
+    <div class="metric-card mc-purple"><div class="m-label" id="m-auto-rate">Auto-Dial Rate</div><div class="m-val" style="color:#9b7fff">3/min</div><div class="m-delta" style="color:#9b7fff" id="md-auto">AI-paced</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title" id="qv-title">Full Call Queue</span>
+      <div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span id="qv-live">Auto-dialing</span></div>
+      <button class="btn btn-sm btn-call" style="margin-left:auto" onclick="dialNext()" id="dial-next-btn">📞 Dial Next</button>
+    </div>
+    <div id="full-queue-table"></div>
+  </div>
+</div>
+
+<!-- ═══ CAMPAIGNS ═══ -->
+<div class="view" id="view-campaigns">
+  <div class="metrics-row">
+    <div class="metric-card mc-call"><div class="m-label" id="m-total-camps">Total Campaigns</div><div class="m-val">3</div><div class="m-delta">2 active</div></div>
+    <div class="metric-card"><div class="m-label" id="m-total-leads">Total Leads</div><div class="m-val">247</div><div class="m-delta">↑ Synced from CRM</div></div>
+    <div class="metric-card mc-warm"><div class="m-label" id="m-called">Called</div><div class="m-val" style="color:var(--warm)">142</div><div class="m-delta warn">57.5% coverage</div></div>
+    <div class="metric-card mc-hot"><div class="m-label" id="m-handoff-camp">Handoffs</div><div class="m-val" style="color:var(--hot)">31</div><div class="m-delta">21.8% handoff rate</div></div>
+    <div class="metric-card mc-teal"><div class="m-label" id="m-camp-rev">Revenue Pipeline</div><div class="m-val" style="color:var(--teal)">AED 4.2M</div><div class="m-delta" style="color:var(--teal)">From called leads</div></div>
+  </div>
+  <div id="campaigns-list"></div>
+</div>
+
+<!-- ═══ SCRIPT LIBRARY ═══ -->
+<div class="view" id="view-scripts">
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-sm on" onclick="filterScripts('all',this)" id="sf-all">All Scripts</button>
+    <button class="btn btn-sm" onclick="filterScripts('high',this)" id="sf-high">🔥 High Intent</button>
+    <button class="btn btn-sm" onclick="filterScripts('medium',this)" id="sf-medium">Warm</button>
+    <button class="btn btn-sm" onclick="filterScripts('low',this)" id="sf-low">Low Intent</button>
+    <button class="btn btn-sm" onclick="filterScripts('buyer',this)" id="sf-buyer">Buyers</button>
+    <button class="btn btn-sm" onclick="filterScripts('investor',this)" id="sf-investor">Investors</button>
+    <button class="btn btn-sm" onclick="filterScripts('tenant',this)" id="sf-tenant">Tenants</button>
+    <button class="btn btn-sm" onclick="filterScripts('objection',this)" id="sf-obj">Objections</button>
+    <div style="margin-left:auto;display:flex;gap:6px">
+      <button class="btn btn-sm" id="lang-en-btn" onclick="setScriptLang('en')" style="border-color:var(--accent);color:var(--accent)">EN</button>
+      <button class="btn btn-sm" id="lang-ar-btn" onclick="setScriptLang('ar')">AR</button>
+    </div>
+  </div>
+  <div id="scripts-list"></div>
+</div>
+
+<!-- ═══ OBJECTION HANDLING ═══ -->
+<div class="view" id="view-objections">
+  <div class="metrics-row">
+    <div class="metric-card"><div class="m-label" id="m-obj-today">Objections Today</div><div class="m-val">18</div><div class="m-delta">↑ Logged & handled</div></div>
+    <div class="metric-card mc-call"><div class="m-label" id="m-obj-resolved">Resolved Rate</div><div class="m-val" style="color:var(--call)">72%</div><div class="m-delta">Kept conversation</div></div>
+    <div class="metric-card mc-warm"><div class="m-label" id="m-obj-top">Most Common</div><div class="m-val" style="font-size:16px;color:var(--warm)" id="mv-obj-top">"Busy"</div><div class="m-delta warn">34% of objections</div></div>
+    <div class="metric-card mc-hot"><div class="m-label" id="m-obj-end">Calls Ended</div><div class="m-val" style="color:var(--hot)">5</div><div class="m-delta neg">Not interested</div></div>
+    <div class="metric-card mc-teal"><div class="m-label" id="m-obj-wa">Converted to WA</div><div class="m-val" style="color:var(--teal)">11</div><div class="m-delta" style="color:var(--teal)">Send details</div></div>
+  </div>
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" id="obj-en-title">English Objection Handlers</span></div>
+      <div class="panel-body" id="objections-en"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" id="obj-ar-title">Arabic Objection Handlers — ردود الاعتراضات</span></div>
+      <div class="panel-body" id="objections-ar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ANALYTICS ═══ -->
+<div class="view" id="view-analytics">
+  <div class="metrics-row">
+    <div class="metric-card mc-call"><div class="m-label" id="m-a-total">Total Calls</div><div class="m-val">142</div><div class="m-delta">This month</div></div>
+    <div class="metric-card mc-warm"><div class="m-label" id="m-a-answered">Answered</div><div class="m-val" style="color:var(--call)">87</div><div class="m-delta">61.3% connect</div></div>
+    <div class="metric-card mc-hot"><div class="m-label" id="m-a-high">High Score</div><div class="m-val" style="color:var(--hot)">34</div><div class="m-delta">Score 80+ calls</div></div>
+    <div class="metric-card mc-purple"><div class="m-label" id="m-a-handoff">Handoffs</div><div class="m-val" style="color:#9b7fff">31</div><div class="m-delta" style="color:#9b7fff">21.8% rate</div></div>
+    <div class="metric-card mc-teal"><div class="m-label" id="m-a-duration">Avg Duration</div><div class="m-val" style="color:var(--teal)">2m 18s</div><div class="m-delta" style="color:var(--teal)">Within target</div></div>
+  </div>
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" id="pa-outcomes">Call Outcomes</span></div>
+      <div class="panel-body" id="analytics-outcomes"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" id="pa-score-dist">Calls by AI Score Band</span></div>
+      <div class="panel-body" id="analytics-score-dist"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title" id="pa-daily">Daily Call Volume — Last 14 Days</span></div>
+    <div class="panel-body">
+      <div id="analytics-daily-chart" style="display:flex;align-items:flex-end;gap:4px;height:80px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CALL LOG ═══ -->
+<div class="view" id="view-calllog">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title" id="cl-title">Full Call Log</span><span class="panel-count" id="cl-count">47 calls today</span></div>
+    <table class="call-log-table">
+      <thead><tr><th id="clh-time">Time</th><th id="clh-lead">Lead</th><th id="clh-score">Score</th><th id="clh-intent">Intent</th><th id="clh-lang">Lang</th><th id="clh-duration">Duration</th><th id="clh-outcome">Outcome</th><th id="clh-next">Next Step</th></tr></thead>
+      <tbody id="call-log-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS ═══ -->
+<div class="view" id="view-settings">
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" id="sv-voice">Voice Settings</span></div>
+      <div class="panel-body">
+        <div id="voice-settings-list"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" id="sv-routing">Score Routing Logic</span></div>
+      <div class="panel-body">
+        <div id="routing-settings"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title" id="sv-vars">System Variables</span></div>
+    <div class="panel-body" id="system-vars"></div>
+  </div>
+</div>
+
+<!-- ═══ NOTIFICATIONS ═══ -->
+<div class="view" id="view-notifications">
+  <div class="panel"><div class="panel-header"><span class="panel-title" id="nv-title">Notifications</span><span class="panel-count">6 unread</span></div><div id="notif-list"></div></div>
+</div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<!-- NEW CALL MODAL -->
+<div class="modal-overlay" id="new-call-modal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="ncm-title">New Call</div><button class="modal-close" onclick="closeModal('new-call-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field-group"><div class="field-label" id="ncm-name">Lead Name</div><input class="field-input" placeholder="Mohammed Al Rashid" id="new-lead-name"></div>
+      <div class="field-group"><div class="field-label" id="ncm-phone">Phone / WhatsApp</div><input class="field-input" placeholder="+971 50 000 0000"></div>
+      <div class="field-group"><div class="field-label" id="ncm-score">AI Score</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="selectScore(this,87)" style="border-color:var(--hot)33;color:var(--hot);background:var(--hot-bg)">87 — High</button>
+          <button class="btn btn-sm" onclick="selectScore(this,65)" >65 — Medium</button>
+          <button class="btn btn-sm" onclick="selectScore(this,32)">32 — Low</button>
+        </div>
+      </div>
+      <div class="field-group"><div class="field-label" id="ncm-lang">Preferred Language</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="selectType(this)" style="border-color:var(--accent)33;color:var(--accent);background:var(--accent-bg)">English</button>
+          <button class="btn btn-sm" onclick="selectType(this)">العربية</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('new-call-modal')" id="ncm-cancel">Cancel</button>
+      <button class="btn btn-call" onclick="startNewCall()" id="ncm-start">📞 Start Call</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="js/voice.js"></script>
+</body>
+</html>
