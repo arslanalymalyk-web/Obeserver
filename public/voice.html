@@ -25,6 +25,11 @@
       <span id="ni-live">Live Call Center</span>
       <span class="nav-badge nb-green" id="badge-active">1</span>
     </div>
+    <div class="nav-item" onclick="showView('demo',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="6" y="2" width="4" height="8" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 8a4.5 4.5 0 009 0M8 12.5V14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="ni-demo">Live Voice Demo</span>
+      <span class="nav-badge nb-green">NEW</span>
+    </div>
     <div class="nav-item" onclick="showView('queue',this)">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       <span id="ni-queue">Call Queue</span>
@@ -315,6 +320,30 @@
   </div>
 </div>
 
+<!-- ═══ LIVE VOICE DEMO (real: mic -> Claude -> speech, saved per tenant) ═══ -->
+<div class="view" id="view-demo">
+  <div class="panel" style="max-width:860px;margin:0 auto">
+    <div class="panel-header"><span class="panel-title" id="demo-title">Talk to the AI agent</span><span class="panel-count" id="demo-state">Idle</span></div>
+    <div style="padding:14px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+        <div class="field-group" style="flex:2;min-width:180px;margin:0"><div class="field-label" id="demo-l-lead">Lead name</div><input class="field-input" id="demo-lead" list="demo-leads" placeholder="Ahmed Al Khalidi" maxlength="100"><datalist id="demo-leads"></datalist></div>
+        <div class="field-group" style="flex:1;min-width:130px;margin:0"><div class="field-label" id="demo-l-lang">Call language</div><select class="field-input" id="demo-lang"><option value="en">English</option><option value="ar">العربية</option></select></div>
+        <button class="btn btn-primary" id="demo-start" onclick="demoStart()">📞 <span id="demo-start-t">Start call</span></button>
+        <button class="btn btn-red" id="demo-end" onclick="demoEnd()" disabled>📵 <span id="demo-end-t">End call</span></button>
+      </div>
+      <div class="transcript-area" id="demo-log" style="min-height:300px;max-height:440px;overflow-y:auto" role="log" aria-live="polite"></div>
+      <div id="demo-status" role="status" style="font-size:12px;color:var(--text3);font-family:var(--font-m);min-height:18px"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn" id="demo-mic" onclick="demoMicToggle()" disabled aria-pressed="false" title="Microphone">🎙</button>
+        <input class="field-input" id="demo-text" style="flex:1" maxlength="500" disabled placeholder="Type instead of speaking…" onkeydown="if(event.key==='Enter')demoSendTyped()">
+        <button class="btn btn-primary" id="demo-send" onclick="demoSendTyped()" disabled>Send</button>
+      </div>
+      <label style="font-size:12px;color:var(--text3);display:flex;gap:6px;align-items:center"><input type="checkbox" id="demo-hands" checked> <span id="demo-hands-t">Hands-free: listen again after the agent speaks</span></label>
+      <div style="font-size:11px;color:var(--text3)" id="demo-note">Uses your browser's speech recognition and voice (Chrome or Edge work best; Arabic needs an Arabic voice installed). No phone call is placed. Transcripts are saved to the Call Log.</div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ SETTINGS ═══ -->
 <div class="view" id="view-settings">
   <div class="panel-grid">
@@ -347,6 +376,12 @@
 </div><!-- /app -->
 
 <!-- NEW CALL MODAL -->
+<div class="modal-overlay" id="call-detail-modal">
+  <div class="modal" style="width:560px">
+    <div class="modal-head"><div class="modal-title" id="cd-title">Call</div><button class="modal-close" onclick="closeModal('call-detail-modal')" aria-label="Close">✕</button></div>
+    <div class="modal-body"><div class="transcript-area" id="cd-body" style="max-height:60vh;overflow-y:auto"></div></div>
+  </div>
+</div>
 <div class="modal-overlay" id="new-call-modal">
   <div class="modal">
     <div class="modal-head"><div class="modal-title" id="ncm-title">New Call</div><button class="modal-close" onclick="closeModal('new-call-modal')">✕</button></div>
@@ -375,6 +410,6 @@
 </div>
 
 <script src="js/common.js"></script>
-<script>bootApp("js/voice.js",false)</script>
+<script>bootApp(["js/voice.js","js/voice-demo.js"],false)</script>
 </body>
 </html>

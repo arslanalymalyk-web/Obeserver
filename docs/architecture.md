@@ -20,6 +20,8 @@ Email + password (scrypt). Session is an HMAC-signed, HttpOnly, SameSite=Lax coo
 | GET/POST | `/api/leads` | |
 | PATCH/DELETE | `/api/leads/:id` | |
 | POST | `/api/leads/import` | `{csv}`, max 1MB / 2000 rows, header names match lead fields |
+| POST/GET | `/api/calls`, GET `/api/calls/:id` | create/list/read saved voice calls and transcripts |
+| POST | `/api/calls/:id/say`, `/api/calls/:id/end` | one agent turn (server-side prompt, EN/AR, history from DB); `text:""` connects the call |
 | POST | `/api/claude` | session-gated proxy, model and max_tokens fixed server-side |
 
 ## Configuration
@@ -29,4 +31,5 @@ See `.env.example`. `DATABASE_URL`, `SESSION_SECRET` (32+ chars) are required; `
 - Rate limits are in memory (per instance).
 - Roles exist (`admin`/`agent`) but are not enforced beyond tenant scoping yet; no invite flow for more users.
 - Pipeline kanban, funnel, ROI and the voice agent views still use mock data; the Leads view, scoring queue, hot leads and detail modal use real leads.
-- Next: save voice-agent transcripts per tenant, share the lead list with the voice agent, CRM adapter interface.
+- Voice demo (Live Voice Demo view): browser SpeechRecognition (`ar-AE`/`en-US`) -> `/api/calls/:id/say` -> Claude -> browser speechSynthesis. No telephony. Recognition needs Chrome/Edge; Arabic speech needs an Arabic voice installed (text still works). The queue console, scripts and analytics views remain mock.
+- Next: user invites with role enforcement, CRM adapter interface.

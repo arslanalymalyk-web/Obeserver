@@ -34,3 +34,24 @@ CREATE TABLE IF NOT EXISTS leads (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS leads_tenant_idx ON leads (tenant_id, id);
+
+CREATE TABLE IF NOT EXISTS calls (
+  id         SERIAL PRIMARY KEY,
+  tenant_id  INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  user_id    INT REFERENCES users(id) ON DELETE SET NULL,
+  lead_name  TEXT NOT NULL DEFAULT '',
+  lang       TEXT NOT NULL DEFAULT 'en' CHECK (lang IN ('en','ar')),
+  outcome    TEXT NOT NULL DEFAULT '',
+  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ended_at   TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS calls_tenant_idx ON calls (tenant_id, id DESC);
+CREATE TABLE IF NOT EXISTS call_turns (
+  id         SERIAL PRIMARY KEY,
+  call_id    INT NOT NULL REFERENCES calls(id) ON DELETE CASCADE,
+  tenant_id  INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  role       TEXT NOT NULL CHECK (role IN ('user','assistant')),
+  text       TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS call_turns_call_idx ON call_turns (call_id, id);

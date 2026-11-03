@@ -53,7 +53,10 @@ function bootApp(src, withLeads = true) {
   Promise.all([api('GET', '/api/auth/me'), withLeads ? api('GET', '/api/leads') : []])
     .then(([me, leads]) => {
       window.__me = me; window.__leads = leads;
-      const s = document.createElement('script'); s.src = src; document.body.appendChild(s);
+      // Load scripts one after another so later ones can use the earlier ones' globals.
+      [].concat(src).reduce((p, f) => p.then(() => new Promise((ok, no) => {
+        const s = document.createElement('script'); s.src = f; s.onload = ok; s.onerror = () => no(new Error('failed to load ' + f)); document.body.appendChild(s);
+      })), Promise.resolve()).catch(e => { document.body.textContent = e.message; });
     })
     .catch(e => { if (e.message !== 'Signed out') document.body.textContent = 'Could not load: ' + e.message; });
 }

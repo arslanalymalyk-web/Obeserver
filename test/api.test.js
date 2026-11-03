@@ -3,9 +3,17 @@ process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'test-secret-test-sec
 const assert = require('assert'), http = require('http');
 const { handle } = require('../lib/router');
 const { close } = require('../lib/db');
+// Mock Anthropic API: records requests, answers with a canned reply.
+const seen = [];
+const mock = http.createServer(async (q, r) => {
+  let b = ''; for await (const c of q) b += c; seen.push(JSON.parse(b));
+  r.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ content: [{ type: 'text', text: 'reply ' + seen.length }] }));
+});
 const srv = http.createServer(async (q, r) => { if (!(await handle(q, r))) r.writeHead(404).end(); });
 
 async function main() {
+  await new Promise(r => mock.listen(0, r));
+  process.env.ANTHROPIC_API_KEY = 'test'; process.env.ANTHROPIC_API_URL = 'http://127.0.0.1:' + mock.address().port;
   await new Promise(r => srv.listen(0, r));
   const base = 'http://127.0.0.1:' + srv.address().port;
   const mk = () => { let cookie = ''; return async (method, p, b, h = {}) => {
@@ -47,7 +55,24 @@ async function main() {
   assert.equal((await mk()('POST', '/api/auth/login', { email: `a${tag}@t.co`, password: 'wrong-password' })).s, 401);
   assert.equal((await a('POST', '/api/claude', { messages: [{ role: 'system', content: 'x' }] })).s, 400);
   const me = await a('GET', '/api/auth/me'); assert.equal(me.j.agency, 'A');
+  // voice calls
+  const call = (await a('POST', '/api/calls', { lead_name: 'ahmed al khalidi', lang: 'ar' })).j;
+  assert.equal((await b('GET', '/api/calls/' + call.id)).s, 404, 'other tenant cannot read call');
+  assert.equal((await b('POST', `/api/calls/${call.id}/say`, { text: 'hi' })).s, 404);
+  assert.equal((await a('POST', `/api/calls/${call.id}/say`, { text: '' })).j.reply, 'reply 1', 'greeting on connect');
+  assert.equal((await a('POST', `/api/calls/${call.id}/say`, { text: 'أريد فيلا' })).j.reply, 'reply 2');
+  const sys = seen[1].system;
+  assert.match(sys, /Arabic/); assert.match(sys, /A\b/, 'agency name in prompt'); assert.match(sys, /budget AED 4M/, 'lead context found by name');
+  assert.deepEqual(seen[1].messages.map(m => m.role), ['user', 'assistant', 'user'], 'roles alternate, start with user');
+  assert.equal(seen[1].max_tokens, 300);
+  assert.equal((await a('POST', `/api/calls/${call.id}/say`, { text: '' })).s, 400, 'empty text after greeting');
+  const full = (await a('GET', '/api/calls/' + call.id)).j;
+  assert.deepEqual(full.turns.map(t => t.role), ['assistant', 'user', 'assistant']);
+  assert.equal((await a('POST', `/api/calls/${call.id}/end`, { outcome: 'Viewing booked' })).j.outcome, 'Viewing booked');
+  assert.equal((await a('POST', `/api/calls/${call.id}/say`, { text: 'again' })).s, 400, 'cannot talk after end');
+  const list = (await a('GET', '/api/calls')).j; assert.equal(list[0].turns, 3);
+  assert.equal((await b('GET', '/api/calls')).j.length, 0, 'call list is tenant scoped');
   await a('POST', '/api/auth/logout', {});
   console.log('all API tests passed');
 }
-main().then(() => 0, e => { console.error(e); process.exitCode = 1; }).finally(() => { srv.close(); close(); });
+main().then(() => 0, e => { console.error(e); process.exitCode = 1; }).finally(() => { srv.close(); mock.close(); close(); });
