@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio &amp; Investor Operations — concept prototype</title>
+<meta name="description" content="Concept prototype with fictional sample data: real-estate portfolio and investor operations.">
+<link rel="stylesheet" href="css/demo.css">
+</head>
+<body>
+<a class="skip" href="#main" id="skip">Skip to content</a>
+<div class="proto-banner" role="note" id="banner"></div>
+<div class="shell">
+  <aside class="side" aria-label="Primary" id="side"></aside>
+  <main class="main" id="main" tabindex="-1"><p class="muted">Loading sample data…</p></main>
+</div>
+<dialog id="dlg" aria-labelledby="dlg-title"><div class="dh"><h2 id="dlg-title"></h2><button class="btn small" id="dlg-x" aria-label="Close">✕</button></div><div class="db" id="dlg-body"></div><div class="df" id="dlg-foot"></div></dialog>
+<div id="toast-host" aria-live="polite" role="status"></div>
+<script src="js/data.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/store.js"></script>
+<script src="js/assistant.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n-ar.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

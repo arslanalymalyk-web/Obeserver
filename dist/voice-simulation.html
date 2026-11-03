@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Observer — AI Voice Agent</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -338,9 +337,26 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
 .field-input:focus{border-color:var(--border4)}
 [dir="rtl"] .field-input{text-align:right;font-family:var(--font-ar)}
 .modal-foot{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:7px;justify-content:flex-end}
+
+</style>
+<style>
+/* Shared accessibility styles */
+:focus-visible { outline: 2px solid var(--accent, #4f8cff); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Persistent prototype banner (shared by the voice and CRM pages) */
+.proto-banner{background:#2a2f3a;color:#f3f4f7;padding:7px 16px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;line-height:1.4;position:relative;z-index:60}
+.proto-banner strong{background:#f5b84a;color:#2b1d00;padding:1px 8px;border-radius:99px;font-size:11.5px;white-space:nowrap}
+.proto-banner a{color:inherit;margin-inline-start:auto;text-decoration:underline;font-size:12px}
+body.has-banner{display:flex;flex-direction:column;height:100vh}
+body.has-banner .app{flex:1;min-height:0;height:auto}
+
 </style>
 </head>
-<body>
+<body class="has-banner">
+<div class="proto-banner" role="note"><strong>Concept prototype — sample data</strong><span>Optional lead-engagement module, separate from the portfolio product. A <b>scripted simulation</b>: no calls are placed, recorded or transcribed, no messages are sent, nothing syncs to a CRM. Names, numbers and metrics are fictional. Buttons only change what you see on screen.</span><a href="portfolio-prototype.html">← Portfolio &amp; Investor Operations prototype</a></div>
 <div class="app">
 
 <!-- ═══ SIDEBAR ═══ -->
@@ -348,7 +364,7 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
   <div class="logo">
     <div class="logo-mark">Observer</div>
     <div class="logo-sub">Voice AI Agent</div>
-    <div class="logo-voice">📞 <span id="logo-status">CALLING ENGINE ACTIVE</span></div>
+    <div class="logo-voice">📞 <span id="logo-status">SIMULATION · NO CALLS PLACED</span></div>
   </div>
   <nav class="nav">
     <div class="nav-section" id="ns-live">Live Operations</div>
@@ -398,7 +414,7 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
   <div class="sidebar-footer">
     <div class="agent-pill">
       <div class="ag-av">SA</div>
-      <div><div class="ag-name">Sarah Ahmed</div><div class="ag-role">Senior Agent · Admin</div></div>
+      <div><div class="ag-name">Demo user</div><div class="ag-role">Sample, no sign-in</div></div>
       <div class="pulse-dot"></div>
     </div>
   </div>
@@ -408,16 +424,16 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
 <main class="main">
   <div class="topbar">
     <div class="page-title" id="page-title">Live Call Center</div>
-    <div class="live-badge"><span class="live-dot"></span> <span id="tb-live">Live</span></div>
-    <div class="ai-badge">📞 <span id="tb-ai">Voice AI Active</span></div>
+    <div class="live-badge"><span class="live-dot"></span> <span id="tb-live">Demo</span></div>
+    <div class="ai-badge">📞 <span id="tb-ai">Scripted simulation</span></div>
     <div class="topbar-right">
       <div class="ctrl-strip">
         <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">🌗<span class="ctrl-tip">Light / Dark</span></button>
         <div class="ctrl-sep"></div>
         <button class="ctrl-btn" onclick="toggleLang()" id="langBtn" style="font-size:11px;font-weight:700;width:32px"><span id="langLabel">AR</span><span class="ctrl-tip">عربي / English</span></button>
       </div>
-      <button class="btn btn-red btn-sm" onclick="showEndCallModal()">📞 <span id="tb-end">End All Calls</span></button>
-      <button class="btn btn-call" onclick="showNewCallModal()">📞 <span id="tb-new">New Call</span></button>
+      <button class="btn btn-red btn-sm" onclick="showEndCallModal()">📞 <span id="tb-end">End simulated call</span></button>
+      <button class="btn btn-call" onclick="showNewCallModal()">📞 <span id="tb-new">New simulated call</span></button>
     </div>
   </div>
 
@@ -429,7 +445,7 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
     <div class="metric-card mc-call">
       <div class="m-label" id="m-active-calls">Active Calls</div>
       <div class="m-val" style="color:var(--call)" id="mv-active">1</div>
-      <div class="m-delta" id="md-active">🟢 Live now</div>
+      <div class="m-delta" id="md-active">Simulated</div>
       <div class="m-bar"><div class="m-bar-f" style="width:40%;background:var(--call)"></div></div>
     </div>
     <div class="metric-card mc-hot">
@@ -441,19 +457,19 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
     <div class="metric-card mc-warm">
       <div class="m-label" id="m-today-calls">Calls Today</div>
       <div class="m-val" id="mv-today">47</div>
-      <div class="m-delta" id="md-today">↑ 23 answered</div>
+      <div class="m-delta" id="md-today">Sample figure</div>
       <div class="m-bar"><div class="m-bar-f" style="width:70%;background:var(--accent)"></div></div>
     </div>
     <div class="metric-card mc-purple">
       <div class="m-label" id="m-connect-rate">Connect Rate</div>
       <div class="m-val" style="color:#9b7fff" id="mv-connect">61%</div>
-      <div class="m-delta" style="color:#9b7fff" id="md-connect">↑ vs 48% avg</div>
+      <div class="m-delta" style="color:#9b7fff" id="md-connect">Sample figure</div>
       <div class="m-bar"><div class="m-bar-f" style="width:61%;background:var(--purple)"></div></div>
     </div>
     <div class="metric-card mc-teal">
       <div class="m-label" id="m-handoffs">Handoffs Today</div>
       <div class="m-val" style="color:var(--teal)" id="mv-handoffs">9</div>
-      <div class="m-delta" style="color:var(--teal)" id="md-handoffs">Hot leads → agents</div>
+      <div class="m-delta" style="color:var(--teal)" id="md-handoffs">Sample figure</div>
       <div class="m-bar"><div class="m-bar-f" style="width:55%;background:var(--teal)"></div></div>
     </div>
   </div>
@@ -473,10 +489,11 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
       <!-- CALL HEADER -->
       <div class="call-header">
         <div class="ch-top">
-          <div class="call-avatar" id="call-avatar" style="background:linear-gradient(135deg,#1a3a28,#0d2a18);color:var(--call)">AK</div>
+          <div class="call-avatar" id="call-avatar" style="background:linear-gradient(135deg,#1a3a28,#0d2a18);color:var(--call)">AS</div>
           <div style="flex:1">
-            <div class="ch-name" id="call-name">Ahmed Al Khalidi</div>
-            <div class="ch-meta" id="call-meta">+971 50 234 5678 · Bayut · Dubai Hills</div>
+            <div class="ch-name" id="call-name">Ahmed (sample)</div>
+            <div class="ch-meta" id="call-meta">+000 555 0101 · Marlow Street Mixed-Use · 2-bedroom</div>
+            <a id="call-asset-link" href="#" style="font-size:11.5px;color:var(--accent)" hidden>Open this property in the portfolio prototype →</a>
           </div>
           <div class="call-timer" id="call-timer">02:34</div>
           <div class="ch-controls">
@@ -495,8 +512,8 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
           </div>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="qi-score hot" id="score-tier">HIGH INTENT</span>
-            <span style="font-size:10.5px;color:var(--text3);font-family:var(--font-m)" id="intent-tag">Buyer · Cash · Serious</span>
-            <span style="margin-left:auto;font-size:10.5px;color:var(--text3);font-family:var(--font-m)" id="call-source">Bayut → Dubai Hills</span>
+            <span style="font-size:10.5px;color:var(--text3);font-family:var(--font-m)" id="intent-tag">Tenant · EN</span>
+            <span style="margin-left:auto;font-size:10.5px;color:var(--text3);font-family:var(--font-m)" id="call-source">Marlow Street Mixed-Use · 2-bedroom</span>
           </div>
         </div>
       </div>
@@ -514,7 +531,7 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
       <!-- HANDOFF ALERT (hidden by default) -->
       <div class="handoff-alert" id="handoff-alert" style="display:none;margin:0 14px 10px">
         <div class="ha-icon">🚨</div>
-        <div class="ha-text"><strong>Handoff Triggered</strong> — Ahmed is a cash buyer ready now. Routing to specialist Sarah Ahmed...</div>
+        <div class="ha-text"><strong>Handoff rule met (simulated)</strong> — specific unit and a 6-week move-in. A real build would route to a human leasing agent.</div>
         <button class="btn btn-sm btn-gold" onclick="confirmHandoff()" id="confirm-handoff">Confirm</button>
       </div>
 
@@ -545,12 +562,12 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
     <div class="metric-card mc-warm"><div class="m-label" id="m-q-mid">Medium Intent</div><div class="m-val" style="color:var(--warm)">3</div><div class="m-delta warn" id="md-q-mid">Score 50–79</div></div>
     <div class="metric-card"><div class="m-label" id="m-q-low">Low Intent</div><div class="m-val" style="color:var(--cold)">2</div><div class="m-delta" id="md-q-low">Score 0–49</div></div>
     <div class="metric-card mc-teal"><div class="m-label" id="m-avg-wait">Avg Wait Time</div><div class="m-val" style="color:var(--teal)">4m</div><div class="m-delta" style="color:var(--teal)" id="md-wait">Target: &lt;2 min</div></div>
-    <div class="metric-card mc-purple"><div class="m-label" id="m-auto-rate">Auto-Dial Rate</div><div class="m-val" style="color:#9b7fff">3/min</div><div class="m-delta" style="color:#9b7fff" id="md-auto">AI-paced</div></div>
+    <div class="metric-card mc-purple"><div class="m-label" id="m-auto-rate">Auto-Dial Rate</div><div class="m-val" style="color:#9b7fff">3/min</div><div class="m-delta" style="color:#9b7fff" id="md-auto">Not implemented</div></div>
   </div>
   <div class="panel">
     <div class="panel-header">
       <span class="panel-title" id="qv-title">Full Call Queue</span>
-      <div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span id="qv-live">Auto-dialing</span></div>
+      <div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span id="qv-live">Sample queue</span></div>
       <button class="btn btn-sm btn-call" style="margin-left:auto" onclick="dialNext()" id="dial-next-btn">📞 Dial Next</button>
     </div>
     <div id="full-queue-table"></div>
@@ -561,7 +578,7 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
 <div class="view" id="view-campaigns">
   <div class="metrics-row">
     <div class="metric-card mc-call"><div class="m-label" id="m-total-camps">Total Campaigns</div><div class="m-val">3</div><div class="m-delta">2 active</div></div>
-    <div class="metric-card"><div class="m-label" id="m-total-leads">Total Leads</div><div class="m-val">247</div><div class="m-delta">↑ Synced from CRM</div></div>
+    <div class="metric-card"><div class="m-label" id="m-total-leads">Total Leads</div><div class="m-val">247</div><div class="m-delta">Sample data, no CRM connected</div></div>
     <div class="metric-card mc-warm"><div class="m-label" id="m-called">Called</div><div class="m-val" style="color:var(--warm)">142</div><div class="m-delta warn">57.5% coverage</div></div>
     <div class="metric-card mc-hot"><div class="m-label" id="m-handoff-camp">Handoffs</div><div class="m-val" style="color:var(--hot)">31</div><div class="m-delta">21.8% handoff rate</div></div>
     <div class="metric-card mc-teal"><div class="m-label" id="m-camp-rev">Revenue Pipeline</div><div class="m-val" style="color:var(--teal)">AED 4.2M</div><div class="m-delta" style="color:var(--teal)">From called leads</div></div>
@@ -639,7 +656,7 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
 <!-- ═══ CALL LOG ═══ -->
 <div class="view" id="view-calllog">
   <div class="panel">
-    <div class="panel-header"><span class="panel-title" id="cl-title">Full Call Log</span><span class="panel-count" id="cl-count">47 calls today</span></div>
+    <div class="panel-header"><span class="panel-title" id="cl-title">Full Call Log</span><span class="panel-count" id="cl-count">8 sample calls</span></div>
     <table class="call-log-table">
       <thead><tr><th id="clh-time">Time</th><th id="clh-lead">Lead</th><th id="clh-score">Score</th><th id="clh-intent">Intent</th><th id="clh-lang">Lang</th><th id="clh-duration">Duration</th><th id="clh-outcome">Outcome</th><th id="clh-next">Next Step</th></tr></thead>
       <tbody id="call-log-table"></tbody>
@@ -707,22 +724,91 @@ body.light .script-lib-card:hover{box-shadow:0 4px 16px #0000001a}
 </div>
 
 <script>
+// Shared helpers. Loaded before each page's script.
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Accessibility: make every clickable non-button element keyboard-operable, label icon-only
+// controls from their title, and mark live regions. Runs on load and on every DOM change.
+(function () {
+  const NATIVE = /^(BUTTON|A|INPUT|SELECT|TEXTAREA|SUMMARY)$/;
+  function enhance(root) {
+    root.querySelectorAll('[onclick]').forEach(el => {
+      if (NATIVE.test(el.tagName) || el.dataset.a11y) return;
+      el.dataset.a11y = '1';
+      el.setAttribute('role', 'button');
+      el.tabIndex = 0;
+      el.addEventListener('keydown', e => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); el.click(); }
+      });
+    });
+    root.querySelectorAll('button:not([aria-label]),[role=button]:not([aria-label])').forEach(el => {
+      if (!el.textContent.trim() && el.title) el.setAttribute('aria-label', el.title);
+    });
+    root.querySelectorAll('.field-label').forEach(l => {
+      const input = l.parentElement && l.parentElement.querySelector('input,select,textarea');
+      if (input && !input.getAttribute('aria-label')) input.setAttribute('aria-label', l.textContent.trim());
+    });
+    root.querySelectorAll('input:not([aria-label]),textarea:not([aria-label])').forEach(i => {
+      if (i.placeholder) i.setAttribute('aria-label', i.placeholder);
+    });
+    ['copilot-msgs', 'transcript-area', 'notif-list'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.hasAttribute('aria-live')) { el.setAttribute('aria-live', 'polite'); el.setAttribute('role', 'log'); }
+    });
+  }
+  let queued = false;
+  const run = () => { queued = false; enhance(document); };
+  document.addEventListener('DOMContentLoaded', () => {
+    run();
+    new MutationObserver(() => { if (!queued) { queued = true; requestAnimationFrame(run); } })
+      .observe(document.body, { childList: true, subtree: true });
+  });
+})();
+
+// ── API + session bootstrap ──────────────────────────────────────────
+async function api(method, path, body) {
+  const r = await fetch(path, { method, headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && !path.startsWith('/api/auth/')) { location.href = '/login.html'; throw new Error('Signed out'); }
+  if (!r.ok) throw Object.assign(new Error(j.error || 'Request failed (' + r.status + ')'), { status: r.status });
+  return j;
+}
+async function signOut() { try { await api('POST', '/api/auth/logout', {}); } finally { location.href = '/login.html'; } }
+// Require a session, optionally load leads into window.__leads, then run the page script.
+function bootApp(src, withLeads = true) {
+  api('GET', '/api/auth/me').then(me => { if (me.role === 'investor') { location.href = '/demo/index.html'; throw new Error('Signed out'); } return me; })
+    .then(me => Promise.all([me, withLeads ? api('GET', '/api/leads') : []]))
+    .then(([me, leads]) => {
+      window.__me = me; window.__leads = leads;
+      // Load scripts one after another so later ones can use the earlier ones' globals.
+      [].concat(src).reduce((p, f) => p.then(() => new Promise((ok, no) => {
+        const s = document.createElement('script'); s.src = f; s.onload = ok; s.onerror = () => no(new Error('failed to load ' + f)); document.body.appendChild(s);
+      })), Promise.resolve()).catch(e => { document.body.textContent = e.message; });
+    })
+    .catch(e => {
+      if (e.status === 401) { location.href = '/login.html'; return; } // not signed in (or the account was removed)
+      if (e.message !== 'Signed out') document.body.textContent = 'Could not load: ' + e.message;
+    });
+}
+
+</script>
+<script>
 // ══════════════════════════════════════════════════
 // TRANSLATIONS
 // ══════════════════════════════════════════════════
 const T={
   en:{
-    'logo-status':'CALLING ENGINE ACTIVE','ns-live':'Live Operations','ni-live':'Live Call Center',
+    'logo-status':'SIMULATION · NO CALLS PLACED','ns-live':'Live Operations','ni-live':'Live Call Center',
     'ni-queue':'Call Queue','ni-campaigns':'Campaigns','ns-scripts':'Scripts & AI','ni-scripts':'Script Library',
     'ni-objections':'Objection Handling','ns-analytics':'Analytics','ni-analytics':'Call Analytics',
     'ni-calllog':'Call Log','ns-settings':'System','ni-settings':'Voice Settings','ni-notifications':'Notifications',
     'page-title-live':'Live Call Center','page-title-queue':'Call Queue','page-title-campaigns':'Campaigns',
     'page-title-scripts':'Script Library','page-title-objections':'Objection Handling',
     'page-title-analytics':'Call Analytics','page-title-calllog':'Call Log','page-title-settings':'Voice Settings','page-title-notifications':'Notifications',
-    'tb-live':'Live','tb-ai':'Voice AI Active','tb-end':'End All Calls','tb-new':'New Call',
-    'm-active-calls':'Active Calls','md-active':'🟢 Live now','m-queue-size':'Queue Size','md-queue':'Waiting',
-    'm-today-calls':'Calls Today','md-today':'↑ 23 answered','m-connect-rate':'Connect Rate','md-connect':'↑ vs 48% avg',
-    'm-handoffs':'Handoffs Today','md-handoffs':'Hot leads → agents',
+    'tb-live':'Demo','tb-ai':'Scripted simulation','tb-end':'End simulated call','tb-new':'New simulated call',
+    'm-active-calls':'Active Calls','md-active':'Simulated','m-queue-size':'Queue Size','md-queue':'Waiting',
+    'm-today-calls':'Calls Today','md-today':'Sample figure','m-connect-rate':'Connect Rate','md-connect':'Sample figure',
+    'm-handoffs':'Handoffs Today','md-handoffs':'Sample figure',
     'cq-title':'Call Queue','cq-sub':'8 leads · Ordered by AI score',
     'sp-title':'AI Script Router','ai-score-label':'AI Score',
     'ca-quick':'⚡ Quick Actions','ca-obj':'🛡️ Objection Handlers',
@@ -730,7 +816,7 @@ const T={
     'wf-who':'🤖 AI Agent',
     'm-q-high':'High Intent Waiting','md-q-high':'Score 80+','m-q-mid':'Medium Intent','md-q-mid':'Score 50–79',
     'm-q-low':'Low Intent','md-q-low':'Score 0–49','m-avg-wait':'Avg Wait Time','md-wait':'Target: <2 min',
-    'm-auto-rate':'Auto-Dial Rate','md-auto':'AI-paced','qv-title':'Full Call Queue','qv-live':'Auto-dialing',
+    'm-auto-rate':'Auto-Dial Rate','md-auto':'Not implemented','qv-title':'Full Call Queue','qv-live':'Sample queue',
     'dial-next-btn':'📞 Dial Next',
     'm-total-camps':'Total Campaigns','m-total-leads':'Total Leads','m-called':'Called',
     'm-handoff-camp':'Handoffs','m-camp-rev':'Revenue Pipeline',
@@ -752,17 +838,17 @@ const T={
     'score-tier-hot':'HIGH INTENT','score-tier-mid':'MEDIUM INTENT','score-tier-low':'LOW INTENT',
   },
   ar:{
-    'logo-status':'محرك الاتصال نشط','ns-live':'العمليات الحية','ni-live':'مركز الاتصال المباشر',
+    'logo-status':'محاكاة · لا يتم إجراء مكالمات','ns-live':'العمليات الحية','ni-live':'مركز الاتصال المباشر',
     'ni-queue':'قائمة الانتظار','ni-campaigns':'الحملات','ns-scripts':'النصوص والذكاء','ni-scripts':'مكتبة النصوص',
     'ni-objections':'معالجة الاعتراضات','ns-analytics':'التحليلات','ni-analytics':'تحليلات المكالمات',
     'ni-calllog':'سجل المكالمات','ns-settings':'النظام','ni-settings':'إعدادات الصوت','ni-notifications':'الإشعارات',
     'page-title-live':'مركز الاتصال المباشر','page-title-queue':'قائمة الانتظار','page-title-campaigns':'الحملات',
     'page-title-scripts':'مكتبة النصوص','page-title-objections':'معالجة الاعتراضات',
     'page-title-analytics':'تحليلات المكالمات','page-title-calllog':'سجل المكالمات','page-title-settings':'إعدادات الصوت','page-title-notifications':'الإشعارات',
-    'tb-live':'مباشر','tb-ai':'الذكاء الصوتي نشط','tb-end':'إنهاء جميع المكالمات','tb-new':'مكالمة جديدة',
-    'm-active-calls':'المكالمات النشطة','md-active':'🟢 مباشر الآن','m-queue-size':'حجم القائمة','md-queue':'في الانتظار',
-    'm-today-calls':'مكالمات اليوم','md-today':'↑ 23 تمت الإجابة','m-connect-rate':'معدل الاتصال','md-connect':'↑ مقارنة بـ 48%',
-    'm-handoffs':'التحويلات اليوم','md-handoffs':'عملاء ساخنون ← وكلاء',
+    'tb-live':'عرض','tb-ai':'محاكاة مكتوبة مسبقًا','tb-end':'إنهاء المكالمة المحاكاة','tb-new':'مكالمة محاكاة جديدة',
+    'm-active-calls':'المكالمات النشطة','md-active':'محاكى','m-queue-size':'حجم القائمة','md-queue':'في الانتظار',
+    'm-today-calls':'مكالمات اليوم','md-today':'رقم تجريبي','m-connect-rate':'معدل الاتصال','md-connect':'رقم تجريبي',
+    'm-handoffs':'التحويلات اليوم','md-handoffs':'رقم تجريبي',
     'cq-title':'قائمة المكالمات','cq-sub':'8 عملاء · مرتبة حسب نقاط الذكاء',
     'sp-title':'موجه نص الذكاء الاصطناعي','ai-score-label':'نقاط الذكاء',
     'ca-quick':'⚡ إجراءات سريعة','ca-obj':'🛡️ ردود الاعتراضات',
@@ -770,7 +856,7 @@ const T={
     'wf-who':'🤖 الوكيل الذكي',
     'm-q-high':'انتظار عالي النية','md-q-high':'نقاط 80+','m-q-mid':'نية متوسطة','md-q-mid':'نقاط 50–79',
     'm-q-low':'نية منخفضة','md-q-low':'نقاط 0–49','m-avg-wait':'متوسط وقت الانتظار','md-wait':'الهدف: أقل من دقيقتين',
-    'm-auto-rate':'معدل الاتصال التلقائي','md-auto':'بتحكم ذكي','qv-title':'قائمة المكالمات الكاملة','qv-live':'اتصال تلقائي',
+    'm-auto-rate':'معدل الاتصال التلقائي','md-auto':'غير منفذ','qv-title':'قائمة المكالمات الكاملة','qv-live':'قائمة تجريبية',
     'dial-next-btn':'📞 اتصل بالتالي',
     'm-total-camps':'إجمالي الحملات','m-total-leads':'إجمالي العملاء','m-called':'تم الاتصال',
     'm-handoff-camp':'التحويلات','m-camp-rev':'خط الإيرادات',
@@ -812,17 +898,20 @@ function toggleTheme(){document.body.classList.toggle('light');document.getEleme
 // ══════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════
+// Lead-to-property relationship: each sample lead references a demo asset id; the link opens that asset in the portfolio prototype.
+const PORTFOLIO_BASE='portfolio-prototype.html';
 const queueData=[
-  {id:1,name:'Ahmed Al Khalidi',initials:'AK',phone:'+971 50 234 5678',score:87,intent:'Buyer',area:'Dubai Hills',lang:'EN',status:'active',c:'#0d2a1a'},
-  {id:2,name:'Nour Al Mansouri',initials:'NM',phone:'+971 52 456 7890',score:91,intent:'Buyer',area:'Emirates Hills',lang:'EN',status:'waiting',c:'#1a0d2a'},
-  {id:3,name:'Fatima Al Zaabi',initials:'FA',phone:'+971 55 876 5432',score:81,intent:'Buyer',area:'Downtown',lang:'AR',status:'waiting',c:'#0d1a2a'},
-  {id:4,name:'Rania Hassan',initials:'RH',phone:'+971 50 567 8901',score:69,intent:'Buyer',area:'Palm Jumeirah',lang:'AR',status:'waiting',c:'#2a1a0d'},
-  {id:5,name:'Tariq Mahmoud',initials:'TM',phone:'+971 50 890 1234',score:62,intent:'Seller',area:'Business Bay',lang:'AR',status:'waiting',c:'#0d2a2a'},
-  {id:6,name:'Mohammad Siddiqui',initials:'MS',phone:'+971 52 345 6789',score:55,intent:'Investor',area:'JVC',lang:'EN',status:'waiting',c:'#1a1a2a'},
-  {id:7,name:'Omar Al Farouq',initials:'OF',phone:'+971 56 789 0123',score:44,intent:'Buyer',area:'Sharjah',lang:'AR',status:'waiting',c:'#2a2a0d'},
-  {id:8,name:'Sara Al Blooshi',initials:'SB',phone:'+971 52 012 3456',score:38,intent:'Tenant',area:'JBR',lang:'AR',status:'missed',c:'#2a0d0d'},
-  {id:9,name:'Khalid Al Muhairi',initials:'KM',phone:'+971 55 321 0987',score:29,intent:'Buyer',area:'Ajman',lang:'AR',status:'waiting',c:'#0d2a2a'},
+  {id:1,name:'Ahmed (sample)',initials:'AS',phone:'+000 555 0101',score:87,intent:'Tenant',area:'Marlow Street Mixed-Use · 2-bedroom',assetId:'A7',lang:'EN',status:'active',c:'#0d2a1a'},
+  {id:2,name:'Nour (sample)',initials:'NS',phone:'+000 555 0102',score:91,intent:'Tenant',area:'Quayside Serviced Apartments · 1-bedroom',assetId:'A8',lang:'EN',status:'waiting',c:'#1a0d2a'},
+  {id:3,name:'Fatima (sample)',initials:'FS',phone:'+000 555 0103',score:81,intent:'Tenant',area:'Cedar Row Townhomes · 3-bedroom',assetId:'A5',lang:'AR',status:'waiting',c:'#0d1a2a'},
+  {id:4,name:'Rania (sample)',initials:'RS',phone:'+000 555 0104',score:69,intent:'Tenant',area:'Harbor Point Residences · studio',assetId:'A1',lang:'AR',status:'waiting',c:'#2a1a0d'},
+  {id:5,name:'Tariq (sample)',initials:'TS',phone:'+000 555 0105',score:62,intent:'Tenant',area:'Northgate Office Park · Floor 2 suite',assetId:'A2',lang:'AR',status:'waiting',c:'#0d2a2a'},
+  {id:6,name:'Mohammad (sample)',initials:'MS',phone:'+000 555 0106',score:55,intent:'Investor',area:'Portfolio enquiry (no specific asset)',assetId:null,lang:'EN',status:'waiting',c:'#1a1a2a'},
+  {id:7,name:'Omar (sample)',initials:'OS',phone:'+000 555 0107',score:44,intent:'Tenant',area:'Atlas Business Centre · small suite',assetId:'A6',lang:'AR',status:'waiting',c:'#2a2a0d'},
+  {id:8,name:'Sara (sample)',initials:'SS',phone:'+000 555 0108',score:38,intent:'Tenant',area:'Marlow Street Mixed-Use · retail unit',assetId:'A7',lang:'AR',status:'missed',c:'#2a0d0d'},
+  {id:9,name:'Khalid (sample)',initials:'KS',phone:'+000 555 0109',score:29,intent:'Tenant',area:'Harbor Point Residences · 1-bedroom',assetId:'A1',lang:'AR',status:'waiting',c:'#0d2a2a'},
 ];
+
 
 const scriptsEN={
   greeting:`Hello, am I speaking with [Client Name]?\n\nHi [Client Name], this is [Agent Name], the automated assistant from [Platform Name]. We noticed your interest in real estate in [Area/City]. Is this a good time for a quick 1-minute call?\n\n<em>Would you prefer to continue in English or Arabic?</em>`,
@@ -881,32 +970,34 @@ const objectionsAR=[
 ];
 
 const callLogData=[
-  {time:'14:32',name:'Ahmed Al Khalidi',score:87,intent:'Buyer',lang:'EN',duration:'3m 12s',outcome:'Handoff',next:'Viewing Booked'},
-  {time:'14:18',name:'Nour Al Mansouri',score:91,intent:'Buyer',lang:'EN',duration:'2m 48s',outcome:'CTA Accepted',next:'Specialist Call'},
-  {time:'14:05',name:'Fatima Al Zaabi',score:81,intent:'Buyer',lang:'AR',duration:'4m 01s',outcome:'Shortlist Sent',next:'Follow-up 24h'},
-  {time:'13:55',name:'Rania Hassan',score:69,intent:'Buyer',lang:'AR',duration:'1m 44s',outcome:'WA Fallback',next:'Send Shortlist'},
-  {time:'13:42',name:'Tariq Mahmoud',score:62,intent:'Seller',lang:'AR',duration:'2m 22s',outcome:'Callback Req.',next:'Call Tomorrow 10am'},
-  {time:'13:30',name:'Mohammad Siddiqui',score:55,intent:'Investor',lang:'EN',duration:'3m 55s',outcome:'Shortlist Sent',next:'Advisor Call'},
-  {time:'13:15',name:'Omar Al Farouq',score:44,intent:'Buyer',lang:'AR',duration:'0m 58s',outcome:'Not Interested',next:'DNC Marked'},
-  {time:'13:02',name:'Sara Al Blooshi',score:38,intent:'Tenant',lang:'AR',duration:'No Answer',outcome:'WA Sent',next:'Retry +24h'},
+  {time:'14:32',name:'Ahmed (sample)',score:87,intent:'Tenant',lang:'EN',duration:'3m 12s',outcome:'Handoff requested',next:'Viewing request (sample)'},
+  {time:'14:18',name:'Nour (sample)',score:91,intent:'Tenant',lang:'EN',duration:'2m 48s',outcome:'Viewing requested',next:'Leasing agent call'},
+  {time:'14:05',name:'Fatima (sample)',score:81,intent:'Tenant',lang:'AR',duration:'4m 01s',outcome:'Details requested',next:'Follow-up 24h'},
+  {time:'13:55',name:'Rania (sample)',score:69,intent:'Tenant',lang:'AR',duration:'1m 44s',outcome:'Prefers messaging',next:'Send details'},
+  {time:'13:42',name:'Tariq (sample)',score:62,intent:'Tenant',lang:'AR',duration:'2m 22s',outcome:'Callback requested',next:'Call tomorrow 10:00'},
+  {time:'13:30',name:'Mohammad (sample)',score:55,intent:'Investor',lang:'EN',duration:'3m 55s',outcome:'Human follow-up',next:'Investor relations call'},
+  {time:'13:15',name:'Omar (sample)',score:44,intent:'Tenant',lang:'AR',duration:'0m 58s',outcome:'Not interested',next:'Opted out (sample)'},
+  {time:'13:02',name:'Sara (sample)',score:38,intent:'Tenant',lang:'AR',duration:'No Answer',outcome:'No answer',next:'Retry later'},
 ];
+
 
 const notifData=[
-  {text:'🔥 Ahmed Al Khalidi (Score 87) — Handoff triggered, Sarah Ahmed notified',time:'2m ago',color:'var(--hot)',unread:true},
-  {text:'📞 Nour Al Mansouri answered — Specialist call booked for today 4pm',time:'15m ago',color:'var(--call)',unread:true},
-  {text:'🚨 Sara Al Blooshi — No answer, WhatsApp fallback sent automatically',time:'1h ago',color:'var(--warm)',unread:true},
-  {text:'⚡ AI re-scored queue: 3 leads upgraded to High Intent after website activity',time:'1h ago',color:'#9b7fff',unread:true},
-  {text:'💬 Fatima Al Zaabi replied on WhatsApp — "Yes, please send the shortlist"',time:'2h ago',color:'var(--wa)',unread:true},
-  {text:'✅ Campaign "Bayut Hot Leads Q3" reached 80% coverage — 47 calls placed',time:'3h ago',color:'var(--call)',unread:true},
-  {text:'📊 Daily call analytics ready — 61% connect rate, 9 handoffs today',time:'4h ago',color:'var(--text2)',unread:false},
-  {text:'⚠️ Omar Al Farouq marked DNC — removed from all future call queues',time:'5h ago',color:'var(--warm)',unread:false},
+  {text:'🔥 Ahmed (sample), score 87: handoff rule met (example event, nothing was sent)',time:'sample',color:'var(--hot)',unread:true},
+  {text:'📞 Nour (sample): leasing agent call requested (example event)',time:'sample',color:'var(--call)',unread:true},
+  {text:'🚨 Sara (sample): no answer. A retry would be a human decision (example event)',time:'sample',color:'var(--warm)',unread:true},
+  {text:'⚡ Example: queue scores would be recalculated when new lead activity arrives (not implemented)',time:'sample',color:'#9b7fff',unread:true},
+  {text:'💬 Fatima (sample) asked for details by message (example event)',time:'sample',color:'var(--wa)',unread:false},
+  {text:'✅ Sample campaign "Marlow Street lease-up" shows 80% of its sample list reviewed',time:'sample',color:'var(--call)',unread:false},
+  {text:'⚠️ Omar (sample) opted out: a real system must honour this on every channel (requirement, not implemented)',time:'sample',color:'var(--warm)',unread:false},
 ];
 
+
 const campaigns=[
-  {name:'Bayut Hot Leads — Q3 Dubai',status:'active',leads:84,called:68,answered:42,handoffs:18,conv:26,bar:81,barColor:'var(--call)'},
-  {name:'Property Finder — Warm Buyers',status:'active',leads:67,called:48,answered:29,handoffs:9,conv:19,bar:72,barColor:'var(--warm)'},
-  {name:'Facebook Leads — Sharjah',status:'paused',leads:96,called:26,answered:16,handoffs:4,conv:25,bar:27,barColor:'var(--cold)'},
+  {name:'Sample campaign: Marlow Street lease-up',status:'active',leads:84,called:68,answered:42,handoffs:18,conv:26,bar:81,barColor:'var(--call)'},
+  {name:'Sample campaign: Cedar Row refurbished units',status:'active',leads:67,called:48,answered:29,handoffs:9,conv:19,bar:72,barColor:'var(--warm)'},
+  {name:'Sample campaign: Northgate office enquiries',status:'paused',leads:96,called:26,answered:16,handoffs:4,conv:25,bar:27,barColor:'var(--cold)'},
 ];
+
 
 const scriptsLibrary=[
   {icon:'🔥',name:'High Intent — Opening',type:'Score 80–100',tags:['hot','en','ar'],preview:'Hello, am I speaking with [Client Name]? ... Based on your recent interest, we may have highly relevant options...'},
@@ -1102,12 +1193,13 @@ function renderSettings(){
         <button class="btn btn-sm" onclick="selectType(this)">Auto-detect</button>
       </div>
     </div>
-    <div class="stat-row"><div class="stat-label">WhatsApp Fallback</div><div style="flex:1;font-size:12px;color:var(--call)">✓ Enabled — Auto-send on no answer</div></div>`;
+    <div class="stat-row"><div class="stat-label">Message fallback</div><div style="flex:1;font-size:12px;color:var(--text3)">Not implemented. No messages are sent by this prototype.</div></div>
+    <div class="stat-row" style="margin-top:14px;display:block"><div class="stat-label" style="margin-bottom:6px">Before any real use (not implemented here)</div><ul style="margin:0;padding-inline-start:18px;font-size:12px;color:var(--text2);line-height:1.7"><li>Recorded consent and opt-out handling across channels</li><li>Call-recording disclosure and retention rules for each region</li><li>Telecom and marketing-contact regulations for each market</li><li>Human approval points before any outreach</li><li>Telephony, speech and CRM integrations (none are connected)</li></ul></div>`;
   document.getElementById('routing-settings').innerHTML=`
     <div class="stat-row" style="margin-bottom:12px"><div class="stat-label">High Intent (80+)</div><div style="flex:1;font-size:12px;color:var(--hot)">Push to viewing / Handoff immediately</div></div>
     <div class="stat-row" style="margin-bottom:12px"><div class="stat-label">Medium (50–79)</div><div style="flex:1;font-size:12px;color:var(--warm)">Qualify → Send shortlist → Book callback</div></div>
     <div class="stat-row" style="margin-bottom:12px"><div class="stat-label">Low (0–49)</div><div style="flex:1;font-size:12px;color:var(--cold)">Soft discovery → Capture WA/email → Nurture</div></div>
-    <div class="stat-row"><div class="stat-label">Auto-dial Speed</div><input type="range" min="1" max="5" step="1" value="3" style="flex:1;accent-color:var(--call)"><div class="stat-val" style="color:var(--call)">3/min</div></div>`;
+    <div class="stat-row"><div class="stat-label">Dial pacing (illustrative)</div><input type="range" min="1" max="5" step="1" value="3" style="flex:1;accent-color:var(--call)"><div class="stat-val" style="color:var(--call)">3/min</div></div>`;
   const vars=['client_name','agent_name','platform_name','ai_score','lead_intent','preferred_language','area_city','property_type','budget_range','timeline','contact_channel','callback_time','lead_source','handoff_required'];
   document.getElementById('system-vars').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap">${vars.map(v=>`<span style="background:var(--bg4);border:1px solid var(--border2);border-radius:5px;padding:4px 10px;font-family:var(--font-m);font-size:11.5px;color:var(--text2)">[${v}]</span>`).join('')}</div>`;
 }
@@ -1142,17 +1234,18 @@ function startCallTimer(){
 }
 
 const transcriptQueue=[
-  {role:'agent',delay:0,text:'Hello, am I speaking with Ahmed Al Khalidi?'},
+  {role:'agent',delay:0,text:'Hello, am I speaking with Ahmed?'},
   {role:'client',delay:2200,text:'Yes, speaking. Who is this?'},
-  {role:'agent',delay:4400,text:'Hi Ahmed, this is Sara, the automated assistant from Observer Platform. We noticed your interest in real estate in Dubai Hills. Is this a good time for a quick 1-minute call?'},
+  {role:'agent',delay:4400,text:'Hi Ahmed, this is the automated assistant for the leasing team. You enquired about a two-bedroom at Marlow Street Mixed-Use. Is this a good time for a one-minute call?'},
   {role:'client',delay:8000,text:'Yes, sure. Go ahead.'},
-  {role:'agent',delay:9500,text:'Thank you. Based on your recent activity, we may have some highly relevant options for you.\n\nMay I quickly ask — are you looking to buy, rent, or invest?'},
-  {role:'client',delay:13500,text:'Buy. Looking for a villa in Dubai Hills. 4 to 4.5 million budget, cash purchase.'},
-  {role:'agent',delay:15500,text:'Excellent! Cash buyer, Dubai Hills — we have exactly that. Which area within Dubai Hills do you prefer: Park Heights, Golf Place, or Sidra?'},
-  {role:'client',delay:19000,text:'Golf Place if possible. Ready to move in within 6 weeks.'},
-  {role:'system',delay:21000,text:'⚡ HANDOFF TRIGGER: Cash buyer, specific area, 6-week timeline → Route to human specialist'},
-  {role:'agent',delay:22500,text:'Perfect. Based on what you shared, I have 3 Golf Place villas matching your criteria. I\'d like to connect you with our specialist Sarah Ahmed who can arrange a viewing today or tomorrow. Does that work for you?'},
+  {role:'agent',delay:9500,text:'Thank you. May I ask: is this home for you, or for a family?'},
+  {role:'client',delay:13500,text:'For my family. Two bedrooms, and I would need to move in within six weeks.'},
+  {role:'agent',delay:15500,text:'Thanks. Do you need parking, and do you have a monthly budget in mind?'},
+  {role:'client',delay:19000,text:'One parking space. Around 5,000 a month.'},
+  {role:'system',delay:21000,text:'⚡ HANDOFF RULE (sample): specific unit, 6-week move-in → route to a human leasing agent'},
+  {role:'agent',delay:22500,text:'Perfect. I would like to connect you with a leasing specialist who can confirm availability and arrange a viewing. Does that work for you?'},
 ];
+
 
 let tIdx=0;
 function runTranscript(){
@@ -1185,7 +1278,7 @@ function addToTranscript(role,text){
     div.textContent=text;
   } else {
     div.className=`transcript-bubble ${role}`;
-    div.innerHTML=`<div class="tb-role">${role==='agent'?'🤖 AI Agent':'👤 Client'}</div>${text.replace(/\n/g,'<br>')}<div class="tb-time">${ts}</div>`;
+    div.innerHTML=`<div class="tb-role">${role==='agent'?'🤖 AI Agent':'👤 Client'}</div>${String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])).replace(/\n/g,'<br>')}<div class="tb-time">${ts}</div>`;
   }
   area.appendChild(div);
   area.scrollTop=area.scrollHeight;
@@ -1247,8 +1340,8 @@ function renderQuickActions(){
 function sendShortlist(){addToTranscript('agent','Certainly. Would you prefer to receive properties by WhatsApp or email?');}
 function bookViewing(){addToTranscript('agent','Perfect. May I confirm your preferred day for the viewing: today, tomorrow, or this weekend?');}
 function scheduleCallback(){addToTranscript('agent','Of course. May I confirm the best time for a callback — morning, afternoon, or evening?');}
-function switchToWA(){addToTranscript('system','📲 Switching to WhatsApp channel — message auto-queued');}
-function dropVoicemail(){addToTranscript('system','📬 Voicemail dropped — WhatsApp fallback triggered');}
+function switchToWA(){addToTranscript('system','📲 (simulated) A real build would offer a message channel here. No message is sent.');}
+function dropVoicemail(){addToTranscript('system','📬 (simulated) No voicemail is left and no message is sent.');}
 function handleObj(type){
   const responses={
     'Busy':'Of course, I understand. May I arrange a callback at a time that suits you better?',
@@ -1261,11 +1354,11 @@ function handleObj(type){
 }
 function triggerHandoff(){
   document.getElementById('handoff-alert').style.display='flex';
-  addToTranscript('system','🚨 HANDOFF TRIGGERED — Routing to human specialist');
+  addToTranscript('system','🚨 HANDOFF (simulated) — in a real build this would alert a human leasing agent');
 }
 function confirmHandoff(){
   document.getElementById('handoff-alert').style.display='none';
-  addToTranscript('system','✅ Handoff confirmed — Sarah Ahmed notified · Call data transferred');
+  addToTranscript('system','✅ Handoff confirmed (simulated) — nobody was notified and no data was transferred');
 }
 function toggleMute(){
   isMuted=!isMuted;
@@ -1276,7 +1369,7 @@ function endCurrentCall(){
   clearInterval(callInterval);
   stopWave();
   setWaveStatus('silent');
-  addToTranscript('system','📵 Call ended — Duration: '+document.getElementById('call-timer').textContent);
+  addToTranscript('system','📵 Simulated call ended — timer shows '+document.getElementById('call-timer').textContent);
 }
 
 // ══════════════════════════════════════════════════
@@ -1307,6 +1400,7 @@ function selectQueueItem(id){
   const q=queueData.find(x=>x.id===id);if(!q)return;
   document.getElementById('call-name').textContent=q.name;
   document.getElementById('call-meta').textContent=`${q.phone} · ${q.area}`;
+  const al=document.getElementById('call-asset-link');if(al){if(q.assetId){al.href=PORTFOLIO_BASE+'#/assets/'+q.assetId;al.hidden=false}else al.hidden=true}
   document.getElementById('call-avatar').textContent=q.initials;
   document.getElementById('score-fill').style.width=q.score+'%';
   document.getElementById('score-fill').style.background=q.score>=80?'var(--hot)':q.score>=50?'var(--warm)':'var(--cold)';
@@ -1343,7 +1437,7 @@ function startNewCall(){
   closeModal('new-call-modal');
   document.getElementById('call-name').textContent=name;
   document.getElementById('transcript-area').innerHTML='';
-  addToTranscript('system',`📞 Call initiated with ${name}`);
+  addToTranscript('system',`📞 Simulated call with ${name}. No call is placed.`);
   addToTranscript('agent','Hello, am I speaking with '+name+'?');
   setWaveStatus('speaking');
 }
@@ -1354,10 +1448,11 @@ function startNewCall(){
 renderQueueList();
 buildWaveform();
 startCallTimer();
-setScript(87,'buyer');
+selectQueueItem(1); // header, score and script come from the sample queue, not hard-coded markup
 renderQuickActions();
 // Start transcript simulation
 setTimeout(runTranscript,1200);
+
 </script>
 </body>
 </html>

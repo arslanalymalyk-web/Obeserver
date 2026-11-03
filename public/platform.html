@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observer // Autonomous Revenue Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/platform.css">
+<link rel="stylesheet" href="css/a11y.css">
+</head>
+<body class="has-banner">
+<div class="proto-banner" role="note"><strong>Concept prototype — sample data</strong><span>Brokerage lead-management workspace (separate from the portfolio product). Pipeline, funnel, channel, SLA and messaging views show illustrative figures, not live data, and no messages are sent. The Leads, Team and integration screens use this app’s demo backend.</span><a href="demo/index.html">← Portfolio &amp; Investor Operations prototype</a></div>
+<div class="app">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark" data-i18n="brand">Observer</div>
+    <div class="logo-sub" data-i18n="brand_sub">Autonomous Revenue Engine</div>
+    <div style="display:flex;gap:5px;margin-top:6px;align-items:center">
+      <div class="logo-tag">⚡ <span data-i18n="ai_powered">DEMO</span></div>
+      <div class="logo-tag" style="background:var(--green-bg);border-color:var(--green)33;color:var(--green)">v3</div>
+    </div>
+  </div>
+  <div class="org-switcher">
+    <div class="org-dot"></div>
+    <div style="flex:1">
+      <div class="org-name" id="org-name">Your agency</div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)" data-i18n="org_sub">Sample agency</div>
+    </div>
+    <div class="org-arrow">⌄</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section" data-i18n="nav_core">Core</div>
+    <div class="nav-item active" onclick="showView('dashboard',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span data-i18n="nav_dashboard">Dashboard</span><span class="nav-badge red">5</span>
+    </div>
+    <div class="nav-item" onclick="showView('pipeline',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h9M2 12h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_pipeline">Pipeline</span>
+    </div>
+    <div class="nav-item" onclick="showView('leads',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 13c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_leads">All Leads</span>
+    </div>
+    <div class="nav-item" id="nav-team" style="display:none" onclick="showView('team',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 13c0-2 2-3.5 4.5-3.5S10.5 11 10.5 13M11 3.2a2.5 2.5 0 010 3.6M12.5 9.7c1.2.5 2 1.5 2 3.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span>Team</span>
+    </div>
+    <div class="nav-section" data-i18n="nav_ai">AI Engine</div>
+    <div class="nav-item" onclick="showView('scoring',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_scoring">Lead Scoring</span><span class="nav-badge purple">AI</span>
+    </div>
+    <div class="nav-item" onclick="showView('intent',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8h2l2-5 2 10 2-5h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span data-i18n="nav_intent">Intent Detection</span>
+    </div>
+    <div class="nav-item" onclick="showView('nba',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 4H14l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4.5L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span data-i18n="nav_nba">Next Best Action</span>
+    </div>
+    <div class="nav-item" onclick="showView('call_assist',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 3.5c0 5 4.5 9.5 9.5 9.5l1.5-2.2-2.8-1.3-1.2 1.2c-1.6-.8-2.9-2.1-3.7-3.7l1.2-1.2L6 2.9 3.8 2C3.4 2 3 2.5 3 3.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span>Live Call Assistant</span><span class="nav-badge red">DEMO</span>
+    </div>
+    <div class="nav-section" data-i18n="nav_channels">Channels</div>
+    <div class="nav-item" onclick="showView('whatsapp',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13z" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 8.5c1.5 2 4.5 2 5-1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_wa">WhatsApp</span><span class="nav-badge green">14</span>
+    </div>
+    <div class="nav-item" onclick="showView('sms',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 3h12v8H9l-3 2V11H2V3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span data-i18n="nav_sms">SMS / Sequences</span>
+    </div>
+    <div class="nav-item" onclick="showView('social_auto',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2C4.69 2 2 4.46 2 7.5c0 1.7.82 3.22 2.12 4.26L3.5 14l2.38-1.18C6.54 12.93 7.26 13 8 13c3.31 0 6-2.46 6-5.5S11.31 2 8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="7.5" r=".7" fill="currentColor"/><circle cx="8" cy="7.5" r=".7" fill="currentColor"/><circle cx="10.5" cy="7.5" r=".7" fill="currentColor"/></svg>
+      <span>FB &amp; Instagram Auto</span><span class="nav-badge purple">NEW</span>
+    </div>
+    <div class="nav-section" data-i18n="nav_analytics">Analytics</div>
+    <div class="nav-item" onclick="showView('funnel',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 3h12l-4 5v5l-4-2V8L2 3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span data-i18n="nav_funnel">Conversion Funnel</span>
+    </div>
+    <div class="nav-item" onclick="showView('roi',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13V8M6 13V5M10 13V7M14 13V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_roi">Channel ROI</span>
+    </div>
+    <div class="nav-item" onclick="showView('agents',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 13c0-1.66 1.79-3 4-3M8 13c0-1.66 1.79-3 4-3s4 1.34 4 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_agents">Agent Performance</span>
+    </div>
+    <div class="nav-section">GCC Market</div>
+    <div class="nav-item" onclick="showView('gcc_developers',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="8" width="3" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="6.5" y="5" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="11" y="2" width="3" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span>GCC Developers</span><span class="nav-badge purple">NEW</span>
+    </div>
+    <div class="nav-item" onclick="showView('payment_calc',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span>Payment Plans</span><span class="nav-badge green">CALC</span>
+    </div>
+    <div class="nav-section" data-i18n="nav_enterprise">Enterprise</div>
+    <div class="nav-item" onclick="showView('sla',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_sla">SLA Tracking</span><span class="nav-badge red">2</span>
+    </div>
+    <div class="nav-item" onclick="showView('compliance',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2 4v4c0 3.18 2.58 5.74 6 6.5 3.42-.76 6-3.32 6-6.5V4L8 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span data-i18n="nav_compliance">Compliance</span>
+    </div>
+    <div class="nav-item" onclick="showView('notifications',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 00-4 4v3l-1.5 2h11L12 9V6a4 4 0 00-4-4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6.5 13.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span data-i18n="nav_notif">Notifications</span><span class="nav-badge red">9</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="agent-pill">
+      <div class="agent-avatar has-photo" style="overflow:hidden">
+        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Sarah Ahmed" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='linear-gradient(135deg,var(--accent),var(--accent2))';this.parentElement.innerHTML='SA'">
+      </div>
+      <div>
+        <div class="agent-name" id="user-name">You</div>
+        <div class="agent-role" id="user-role"></div>
+      </div>
+      <div class="online-dot"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title" data-i18n="nav_dashboard">Dashboard</div>
+    <div class="live-badge"><span class="live-dot"></span><span data-i18n="live">Demo</span></div>
+    <div class="ai-badge">⚡ <span data-i18n="ai_active">Sample data</span></div>
+    <div class="topbar-right">
+      <!-- CONTROLS GROUP -->
+      <div class="topbar-controls" style="display:flex;align-items:center;gap:5px">
+        <!-- Theme Toggle -->
+        <div class="topbar-controls">
+          <button class="ctrl-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
+            🌗
+            <span class="ctrl-tooltip" data-i18n="tt_theme">Light / Dark mode</span>
+          </button>
+          <button class="ctrl-btn" id="densityBtn" onclick="toggleDensity()" title="Density">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="2" rx="1" fill="currentColor"/><rect x="1" y="5.5" width="11" height="2" rx="1" fill="currentColor"/><rect x="1" y="10" width="11" height="2" rx="1" fill="currentColor"/></svg>
+            <span class="ctrl-tooltip" data-i18n="tt_density">Compact / Comfortable</span>
+          </button>
+          <button class="ctrl-btn" id="focusBtn" onclick="toggleFocus()" title="Focus Mode">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 4V1h3M9 1h3v3M12 9v3H9M4 12H1V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <span class="ctrl-tooltip" data-i18n="tt_focus">Focus Mode</span>
+          </button>
+          <button class="ctrl-btn" id="wakeBtn" onclick="toggleWakeWord()" title="Hey Observer wake word">
+            🎙️
+            <span class="ctrl-tooltip">Hands-free: "Hey Observer"</span>
+          </button>
+          <div class="ctrl-divider"></div>
+          <button class="ctrl-btn" id="langBtn" onclick="toggleLang()" style="font-size:11px;font-weight:700;width:34px" title="Language">
+            <span id="langLabel">AR</span>
+            <span class="ctrl-tooltip">عربي / English</span>
+          </button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <input placeholder="Search leads, agents..." id="searchInput" data-i18n-ph="search_ph">
+      </div>
+      <button class="btn btn-wa" onclick="showView('whatsapp',null)">💬 <span data-i18n="nav_wa">WhatsApp</span></button>
+      <button class="btn btn-primary" onclick="openAddLead()">+ <span data-i18n="add_lead">Add Lead</span></button>
+      <button class="btn" onclick="document.getElementById('csv-file').click()">⬆ Import CSV</button>
+      <input type="file" id="csv-file" accept=".csv,text/csv" hidden aria-label="Import leads from CSV" onchange="importLeadsCSV(this)">
+      <button class="btn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div class="view active" id="view-dashboard">
+  <!-- HERO WELCOME BANNER -->
+  <div class="hero-banner">
+    <img class="hero-bg" src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop" alt="Dubai skyline at dusk" onerror="this.style.display='none';this.closest('.hero-banner').style.background='linear-gradient(120deg,#0f1830,#1a1430,#2a1020)'">
+    <div class="hero-content">
+      <div class="hero-greeting" id="hero-greeting">Good evening, Sarah 👋</div>
+      <div class="hero-sub" id="hero-sub"></div>
+      <div class="hero-chips">
+        <span class="hero-chip"><span class="hc-dot"></span> <span id="chip-total"></span></span>
+        <span class="hero-chip warm"><span class="hc-dot"></span> <span id="chip-hot"></span></span>
+        <span class="hero-chip purple"><span class="hc-dot"></span> <span id="chip-pipe"></span></span>
+      </div>
+    </div>
+    <div class="hero-loc" id="hero-loc"></div>
+  </div>
+  <div class="metrics-row">
+    <div class="metric-card mc-hot">
+      <div class="metric-label" data-i18n="m_total">Total Leads</div>
+      <div class="metric-value" id="m-total">247</div>
+      <div class="metric-delta" id="m-total-d"></div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:73%;background:var(--accent)"></div></div>
+    </div>
+    <div class="metric-card mc-hot">
+      <div class="metric-label" data-i18n="m_hot">Hot Leads 🔥</div>
+      <div class="metric-value" style="color:var(--hot)" id="m-hot">34</div>
+      <div class="metric-delta" id="m-hot-d"></div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:34%;background:var(--hot)"></div></div>
+    </div>
+    <div class="metric-card mc-green">
+      <div class="metric-label" data-i18n="m_calls">Calls Booked</div>
+      <div class="metric-value" style="color:var(--green)" id="m-meet">0</div>
+      <div class="metric-delta" id="m-meet-d"></div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:62%;background:var(--green)"></div></div>
+    </div>
+    <div class="metric-card mc-warm">
+      <div class="metric-label" data-i18n="m_response">Avg Response</div>
+      <div class="metric-value" style="color:var(--warm)">—</div>
+      <div class="metric-delta warn">Tracked once messaging is connected</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:88%;background:var(--warm)"></div></div>
+    </div>
+  </div>
+  <div class="metrics-row">
+    <div class="metric-card mc-purple">
+      <div class="metric-label" data-i18n="m_ai_score">AI Score Avg</div>
+      <div class="metric-value" style="color:var(--purple)">78</div>
+      <div class="metric-delta" style="color:var(--purple)">↑ XGBoost v2.4</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:78%;background:var(--purple)"></div></div>
+    </div>
+    <div class="metric-card mc-green">
+      <div class="metric-label" data-i18n="m_wa">WhatsApp Opens</div>
+      <div class="metric-value" style="color:var(--wa-dark)">89%</div>
+      <div class="metric-delta">↑ vs 28% email</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:89%;background:var(--wa-dark)"></div></div>
+    </div>
+    <div class="metric-card mc-teal">
+      <div class="metric-label" data-i18n="m_revenue">Revenue Pipeline</div>
+      <div class="metric-value" style="color:var(--teal)">AED 4.2M</div>
+      <div class="metric-delta" style="color:var(--teal)">↑ +12% MoM</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:68%;background:var(--teal)"></div></div>
+    </div>
+    <div class="metric-card mc-warm">
+      <div class="metric-label" data-i18n="m_cpl">Cost Per Lead</div>
+      <div class="metric-value" style="color:var(--warm)">AED 42</div>
+      <div class="metric-delta">↓ -18% vs last month</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:42%;background:var(--warm)"></div></div>
+    </div>
+  </div>
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <span style="font-size:13px">🔥</span>
+        <span class="panel-title" data-i18n="hot_leads_panel">Hot Leads — Act Now</span>
+        <span class="panel-count" id="hot-count">34 total</span>
+      </div>
+      <table class="lead-table">
+        <thead><tr><th data-i18n="col_lead">Lead</th><th data-i18n="col_score">AI Score</th><th data-i18n="col_intent">Intent</th><th data-i18n="col_time">Time</th><th></th></tr></thead>
+        <tbody id="hot-leads-table"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" data-i18n="live_activity">Live Activity Stream</span>
+        <div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span data-i18n="realtime">Real-time</span></div>
+      </div>
+      <div style="max-height:290px;overflow-y:auto">
+        <div class="activity-feed" id="activity-feed" style="padding:0 15px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" data-i18n="nba_panel">Next Best Actions</span>
+        <div class="ai-badge" style="font-size:9px">⚡ AI</div>
+        <span class="panel-action" onclick="showView('nba',null)" data-i18n="view_all">View all →</span>
+      </div>
+      <div class="panel-body" style="padding:11px 13px"><div id="dash-nba"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" data-i18n="temp_dist">Lead Temperature Distribution</span>
+      </div>
+      <div class="panel-body">
+        <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">
+          <div style="text-align:center"><div style="font-size:22px;font-weight:600;color:var(--hot);font-family:var(--font-display)">34</div><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono)" data-i18n="hot">HOT</div></div>
+          <div style="text-align:center"><div style="font-size:22px;font-weight:600;color:var(--warm);font-family:var(--font-display)">89</div><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono)" data-i18n="warm">WARM</div></div>
+          <div style="text-align:center"><div style="font-size:22px;font-weight:600;color:var(--cold);font-family:var(--font-display)">124</div><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono)" data-i18n="cold">COLD</div></div>
+          <div style="flex:1"><div style="height:7px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:5px"><div style="width:13.7%;background:var(--hot)"></div><div style="width:36%;background:var(--warm)"></div><div style="width:50.3%;background:var(--cold)"></div></div><div style="font-size:11px;color:var(--text3)" data-i18n="total_leads_ai">247 total · AI-scored</div></div>
+        </div>
+        <div class="mini-chart" id="daily-chart" style="height:52px"></div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:5px" data-i18n="daily_chart_label">Daily new leads — last 14 days</div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-grid-3">
+    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="agents_today">Agents Today</span></div><div id="agent-today"></div></div>
+    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="pipeline_velocity">Pipeline Velocity</span></div><div class="panel-body"><div id="pipe-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div></div></div>
+    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="channel_mix">Channel Mix Today</span></div><div class="panel-body" id="channel-mix"></div></div>
+  </div>
+
+  <!-- AUTOMATION SUMMARY + SOCIAL SNAPSHOT -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🤖 Today's Automation Summary</span>
+        <div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Running</div>
+      </div>
+      <div class="panel-body" id="dash-auto-summary"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📱 Social Leads Snapshot</span>
+        <span class="panel-action" onclick="showView('social_auto',null)">View all →</span>
+      </div>
+      <div class="panel-body" id="dash-social-snapshot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PIPELINE ═══════════ -->
+<div class="view" id="view-pipeline">
+  <div class="metrics-row">
+    <div class="metric-card"><div class="metric-label" data-i18n="new">New</div><div class="metric-value">48</div><div class="metric-delta">↑ today</div><div class="metric-bar"><div class="metric-bar-fill" style="width:48%;background:var(--cold)"></div></div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="qualified">Qualified</div><div class="metric-value">31</div><div class="metric-delta">64.5% rate</div><div class="metric-bar"><div class="metric-bar-fill" style="width:64%;background:var(--warm)"></div></div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="meeting_set">Meeting Set</div><div class="metric-value">19</div><div class="metric-delta">61.2% rate</div><div class="metric-bar"><div class="metric-bar-fill" style="width:61%;background:var(--purple)"></div></div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="closed">Closed Won</div><div class="metric-value" style="color:var(--green)">7</div><div class="metric-delta">36.8% close rate</div><div class="metric-bar"><div class="metric-bar-fill" style="width:37%;background:var(--green)"></div></div></div>
+  </div>
+
+  <!-- Revenue forecast banner -->
+  <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:var(--rl);padding:14px 18px;margin-bottom:13px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.5px">Weighted Pipeline</div><div style="font-size:24px;font-family:var(--font-display);color:var(--accent)">AED 6.84M</div></div>
+    <div style="width:1px;height:36px;background:var(--border2)"></div>
+    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Best Case</div><div style="font-size:16px;font-weight:600;color:var(--green)">AED 12.2M</div></div>
+    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Commit</div><div style="font-size:16px;font-weight:600;color:var(--text)">AED 4.1M</div></div>
+    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Avg Deal Size</div><div style="font-size:16px;font-weight:600;color:var(--text)">AED 2.44M</div></div>
+    <div style="margin-left:auto">
+      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:5px">Close probability by stage</div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <span style="font-size:10px;font-family:var(--font-mono);color:var(--cold)">New 10%</span>
+        <span style="font-size:10px;color:var(--text4)">→</span>
+        <span style="font-size:10px;font-family:var(--font-mono);color:var(--warm)">Qual 30%</span>
+        <span style="font-size:10px;color:var(--text4)">→</span>
+        <span style="font-size:10px;font-family:var(--font-mono);color:var(--purple)">Meet 60%</span>
+        <span style="font-size:10px;color:var(--text4)">→</span>
+        <span style="font-size:10px;font-family:var(--font-mono);color:var(--accent)">Offer 85%</span>
+        <span style="font-size:10px;color:var(--text4)">→</span>
+        <span style="font-size:10px;font-family:var(--font-mono);color:var(--green)">Closed 100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title" data-i18n="deal_pipeline">Deal Pipeline — Kanban</span><span class="panel-count">5 stages</span></div>
+    <div class="panel-body" style="overflow-x:auto"><div class="kanban" id="kanban-board"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ ALL LEADS ═══════════ -->
+<div class="view" id="view-leads">
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:13px;flex-wrap:wrap">
+    <button class="btn btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="filterLeads('all',this)" data-i18n="filter_all">All</button>
+    <button class="btn btn-sm" onclick="filterLeads('hot',this)">🔥 <span data-i18n="filter_hot">Hot</span></button>
+    <button class="btn btn-sm" onclick="filterLeads('warm',this)" data-i18n="filter_warm">Warm</button>
+    <button class="btn btn-sm" onclick="filterLeads('cold',this)" data-i18n="filter_cold">Cold</button>
+    <button class="btn btn-sm" onclick="filterLeads('buyer',this)" data-i18n="filter_buyers">Buyers</button>
+    <button class="btn btn-sm" onclick="filterLeads('seller',this)" data-i18n="filter_sellers">Sellers</button>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title" data-i18n="nav_leads">All Leads</span><span class="panel-count" id="leads-count">247 leads</span></div>
+    <table class="lead-table">
+      <thead><tr><th data-i18n="col_lead">Lead</th><th data-i18n="col_source">Source</th><th data-i18n="col_score">AI Score</th><th data-i18n="col_intent">Intent</th><th data-i18n="col_temp">Temp</th><th data-i18n="col_budget">Budget</th><th data-i18n="col_agent">Agent</th><th data-i18n="col_last">Last Contact</th><th></th></tr></thead>
+      <tbody id="all-leads-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ TEAM (admins) ═══════════ -->
+<div class="view" id="view-team">
+  <div class="panel" style="max-width:860px">
+    <div class="panel-header"><span class="panel-title">Invite a teammate</span></div>
+    <div style="padding:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+      <div class="field-group" style="flex:2;min-width:200px;margin:0"><div class="field-label">Email</div><input class="field-input" id="inv-email" type="email" placeholder="agent@agency.com"></div>
+      <div class="field-group" style="flex:1;min-width:120px;margin:0"><div class="field-label">Role</div><select class="field-input" id="inv-role" onchange="onInviteRole()"><option value="agent">Agent</option><option value="admin">Admin</option><option value="investor">Investor (portfolio view only)</option></select></div>
+      <div class="field-group" id="inv-investor-wrap" style="flex:1;min-width:180px;margin:0;display:none"><div class="field-label">Investor</div><select class="field-input" id="inv-investor"></select></div>
+      <button class="btn btn-primary" onclick="sendInvite()">Create invite link</button>
+    </div>
+    <div id="inv-result" style="padding:0 14px 14px;font-size:12px;display:none">
+      <div style="color:var(--text3);margin-bottom:4px">Share this link with them. It works once, for 7 days, and is not shown again.</div>
+      <div style="display:flex;gap:6px"><input class="field-input" id="inv-link" readonly style="flex:1;font-family:var(--font-mono);font-size:11px"><button class="btn" onclick="copyInvite()">Copy</button></div>
+    </div>
+  </div>
+  <div class="panel" style="max-width:860px;margin-top:14px">
+    <div class="panel-header"><span class="panel-title">Team</span><span class="panel-count" id="team-count"></span></div>
+    <table class="lead-table"><thead><tr><th>Email</th><th>Role</th><th></th></tr></thead><tbody id="team-table"></tbody></table>
+  </div>
+  <div class="panel" style="max-width:860px;margin-top:14px">
+    <div class="panel-header"><span class="panel-title">Lead intake webhooks</span><span class="panel-count" id="intg-count"></span></div>
+    <div style="padding:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+      <div class="field-group" style="flex:2;min-width:200px;margin:0"><div class="field-label">Source name (e.g. Bayut, Property Finder, Facebook Ads)</div><input class="field-input" id="intg-label" maxlength="60" placeholder="Bayut"></div>
+      <button class="btn btn-primary" onclick="createIntegration()">Create webhook</button>
+    </div>
+    <div id="intg-result" style="padding:0 14px 14px;font-size:12px;display:none">
+      <div style="color:var(--text3);margin-bottom:4px">Send leads here with <code>POST</code> (JSON, one lead or a list of up to 200). Shown once, so copy it now. Anyone with this URL can add leads, so keep it private.</div>
+      <div style="display:flex;gap:6px"><input class="field-input" id="intg-url" readonly style="flex:1;font-family:var(--font-mono);font-size:11px"><button class="btn" onclick="copyField('intg-url')">Copy</button></div>
+      <pre id="intg-curl" style="margin:8px 0 0;padding:8px;background:var(--bg3);border-radius:var(--r);font-size:11px;overflow-x:auto;white-space:pre-wrap"></pre>
+    </div>
+    <div style="padding:0 14px 14px;border-top:1px solid var(--border2);margin-top:4px">
+      <div style="font-size:12px;font-weight:600;margin:12px 0 4px">Connect HubSpot (import contacts)</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">In HubSpot: Settings &rarr; Integrations &rarr; Private Apps &rarr; create an app with the <code>crm.objects.contacts.read</code> scope, then paste its access token. Read-only: nothing is written to HubSpot. The token is stored encrypted and never shown again.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+        <div class="field-group" style="flex:2;min-width:220px;margin:0"><div class="field-label">Private app access token</div><input class="field-input" id="hs-token" type="password" autocomplete="off" placeholder="pat-na1-…"></div>
+        <button class="btn btn-primary" id="hs-connect" onclick="connectHubspot()">Connect HubSpot</button>
+      </div>
+    </div>
+    <table class="lead-table"><thead><tr><th>Source</th><th>Last activity</th><th>Records</th><th></th></tr></thead><tbody id="intg-table"></tbody></table>
+    <div style="padding:10px 14px;font-size:11px;color:var(--text3)">Matching people (same phone or email) are merged into the existing lead instead of duplicated: empty fields are filled, nothing is overwritten.</div>
+  </div>
+</div>
+
+<!-- ═══════════ AI SCORING ═══════════ -->
+<div class="view" id="view-scoring">
+  <div class="metrics-row">
+    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="model">Model</div><div class="metric-value" style="font-size:18px;color:var(--purple)">Rule-based</div><div class="metric-delta" style="color:var(--purple)">Sample weights</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="scored_today">Scored Today</div><div class="metric-value">184</div><div class="metric-delta">↑ +22 new</div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="high_intent">High Intent</div><div class="metric-value" style="color:var(--green)">47</div><div class="metric-delta">↑ 25.5% of scored</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="avg_score">Avg Score</div><div class="metric-value" style="color:var(--accent)">78</div><div class="metric-delta warn">↑ vs 61 last month</div></div>
+  </div>
+  <div class="scoring-grid">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" data-i18n="feature_weights">Model Feature Weights</span><div class="model-badge">⚡ XGBoost v2.4</div></div>
+      <div class="panel-body" id="weight-settings"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" data-i18n="live_queue">Live Scoring Queue</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span data-i18n="processing">Processing</span></div></div>
+      <div class="panel-body" style="padding:11px"><div class="score-queue" id="score-queue"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ INTENT DETECTION ═══════════ -->
+<div class="view" id="view-intent">
+  <div class="metrics-row">
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="buyers_detected">Buyers Detected</div><div class="metric-value" style="color:var(--green)">163</div><div class="metric-delta">↑ NLP classified</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="sellers">Sellers</div><div class="metric-value" style="color:var(--cold)">84</div><div class="metric-delta">34% of leads</div></div>
+    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="high_urgency">High Urgency</div><div class="metric-value" style="color:var(--hot)">51</div><div class="metric-delta">↑ Act immediately</div></div>
+    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="nlp_model">NLP Model</div><div class="metric-value" style="font-size:18px;color:var(--purple)">GPT-NLP</div><div class="metric-delta" style="color:var(--purple)">WA + SMS</div></div>
+  </div>
+  <div class="intent-grid" id="intent-grid"></div>
+</div>
+
+<!-- ═══════════ NEXT BEST ACTION ═══════════ -->
+<div class="view" id="view-nba">
+  <div class="metrics-row">
+    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="urgent_actions">Urgent Actions</div><div class="metric-value" style="color:var(--hot)">12</div><div class="metric-delta">Act in 30 min</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="scheduled">Scheduled</div><div class="metric-value">28</div><div class="metric-delta">Queued by AI</div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="completed_today">Completed Today</div><div class="metric-value" style="color:var(--green)">41</div><div class="metric-delta">↑ 87% execution</div></div>
+    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="ai_confidence">AI Confidence</div><div class="metric-value" style="color:var(--purple)">94%</div><div class="metric-delta" style="color:var(--purple)">Engine accuracy</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title" data-i18n="ai_actions">AI-Recommended Actions</span><div class="ai-badge" style="font-size:9px">⚡ <span data-i18n="ranked_revenue">Ranked by revenue impact</span></div></div>
+    <div class="panel-body" style="padding:11px"><div class="nba-list" id="nba-list"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ LIVE CALL ASSISTANT ═══════════ -->
+<div class="view" id="view-call_assist">
+  <div class="metrics-row">
+    <div class="metric-card mc-hot"><div class="metric-label">Call Status</div><div class="metric-value" style="font-size:18px;color:var(--hot)" id="call-status-val">🔴 Live</div><div class="metric-delta" id="call-duration">02:14 elapsed</div></div>
+    <div class="metric-card mc-purple"><div class="metric-label">AI Sentiment</div><div class="metric-value" style="font-size:18px;color:var(--purple)" id="call-sentiment">Positive ↗</div><div class="metric-delta" style="color:var(--purple)">Buyer engaged</div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Close Probability</div><div class="metric-value" style="color:var(--green)" id="call-close-prob">73%</div><div class="metric-delta">↑ +12% this call</div></div>
+    <div class="metric-card"><div class="metric-label">Talk Ratio</div><div class="metric-value" style="color:var(--accent)">38<span style="font-size:14px">:62</span></div><div class="metric-delta">You : Lead · ideal</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:13px;align-items:start">
+    <!-- LEFT: live transcript + AI cues -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📞 Live Call — Ahmed Al Khalidi</span>
+          <div style="display:flex;gap:7px;align-items:center">
+            <span class="live-badge" style="font-size:9px"><span class="live-dot"></span>Recording</span>
+            <button class="btn btn-sm btn-hot" onclick="endCallDemo()">End Call</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg3)">
+          <div class="agent-avatar has-photo" style="width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0">
+            <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Ahmed Al Khalidi" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.classList.remove('has-photo');this.parentElement.innerHTML='AK'">
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Ahmed Al Khalidi</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">+971 50 234 5678 · Score 87 🔥 · Cash buyer</div>
+          </div>
+          <div class="call-prop-strip">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&q=80&auto=format&fit=crop" alt="Dubai Hills villa" onerror="this.style.display='none'">
+            <span>5BR · Dubai Hills<br>AED 4.2M</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div id="call-transcript" style="max-height:280px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+      </div>
+
+      <!-- AI WHISPER CUES -->
+      <div class="panel" style="border-color:var(--purple)33">
+        <div class="panel-header" style="background:linear-gradient(135deg,var(--purple-bg),transparent)">
+          <span class="panel-title">⚡ AI Whisper — say this next</span>
+          <span class="ai-badge" style="font-size:9px">Real-time</span>
+        </div>
+        <div class="panel-body" id="call-whisper"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: objection handler + lead context + auto-capture -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🛡️ Objection Handler</span></div>
+        <div class="panel-body" id="call-objections" style="padding:11px"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">📝 AI Auto-Capture</span><span style="font-size:9px;color:var(--green);font-family:var(--font-mono)">● Saving to CRM</span></div>
+        <div class="panel-body" id="call-capture" style="padding:11px"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🎯 Live Talking Points</span></div>
+        <div class="panel-body" id="call-talkpoints" style="padding:11px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ WHATSAPP ═══════════ -->
+<div class="view" id="view-whatsapp">
+
+  <div class="wa-layout">
+    <div class="wa-contacts">
+      <div class="wa-contacts-head">💬 <span data-i18n="wa_head">WhatsApp — 14 unread</span></div>
+      <div class="wa-contacts-list" id="wa-contacts"></div>
+    </div>
+    <div class="wa-chat">
+      <div class="wa-chat-head">
+        <div class="wa-c-avatar has-photo" style="width:32px;height:32px;border-radius:50%;background:#1a3a2a;color:var(--wa-dark);overflow:hidden">
+          <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Ahmed Al Khalidi" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.innerHTML='AK'">
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Ahmed Al Khalidi</div>
+          <div style="font-size:10.5px;color:var(--wa-dark);font-family:var(--font-mono)">🟢 Online · <span data-i18n="buyer">Buyer</span> · Score 87</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:7px">
+          <span class="temp hot"><span class="temp-dot"></span><span data-i18n="hot">Hot</span></span>
+          <button class="btn btn-sm btn-primary">📞 <span data-i18n="call_now">Call Now</span></button>
+        </div>
+      </div>
+      <div class="wa-chat-msgs" id="wa-msgs"></div>
+      <div class="wa-ai-suggestion">
+        <div style="font-size:9px;color:var(--purple);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0">⚡ AI</div>
+        <div id="wa-suggestion" style="flex:1;font-size:12px;color:var(--text2)">"Hi Ahmed, I found 3 villas in Dubai Hills matching your AED 4M budget. Shall I send the shortlist?"</div>
+        <button class="btn btn-sm btn-primary" onclick="sendWaSuggestion()" data-i18n="use_suggestion">Use ↑</button>
+      </div>
+      <div class="wa-input-area">
+        <input class="wa-input" id="wa-input" placeholder="Type a message..." data-i18n-ph="type_message">
+        <button class="wa-send" onclick="sendWaMessage()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M13 7L1 1l2 6-2 6 12-6z" fill="#fff"/></svg></button>
+      </div>
+    </div>
+    <div class="wa-sidebar">
+      <div class="wa-sidebar-head" data-i18n="lead_intel">Lead Intelligence</div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="ai_score_label">AI Score</div><div class="wa-info-val" style="color:var(--hot);font-family:var(--font-mono)">87 / 100 🔥</div></div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="col_intent">Intent</div><div style="display:flex;gap:4px;margin-top:4px"><span class="nlp-chip buyer" data-i18n="buyer">Buyer</span><span class="nlp-chip serious" data-i18n="serious">Serious</span></div></div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="col_budget">Budget</div><div class="wa-info-val">AED 3.5M – 4.5M</div></div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="pref_area">Preferred Area</div><div class="wa-info-val">Dubai Hills, MBR City</div></div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="timeframe">Timeframe</div><div class="wa-info-val" style="color:var(--hot)">1–2 months 🔥</div></div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="col_source">Source</div><div class="wa-info-val">Bayut · Property Finder</div></div>
+      <div class="wa-info-row"><div class="wa-info-label" data-i18n="financing">Financing</div><div class="wa-info-val" data-i18n="cash_buyer">Cash buyer</div></div>
+      <div style="padding:11px 13px;display:flex;flex-direction:column;gap:6px">
+        <button class="btn btn-primary" style="width:100%;justify-content:center">📅 <span data-i18n="book_viewing">Book Viewing</span></button>
+        <button class="btn" style="width:100%;justify-content:center">📋 <span data-i18n="assign_crm">Assign to CRM</span></button>
+        <button class="btn" style="width:100%;justify-content:center">🏡 <span data-i18n="send_shortlist">Send Shortlist</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SMS / AI FOLLOW-UP ═══════════ -->
+<div class="view" id="view-sms">
+  <div class="metrics-row">
+    <div class="metric-card mc-purple"><div class="metric-label">Active Sequences</div><div class="metric-value" style="color:var(--purple)">7</div><div class="metric-delta">⚡ Fully automated</div><div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--purple)"></div></div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Messages Sent Today</div><div class="metric-value" style="color:var(--green)">1,847</div><div class="metric-delta">↑ SMS + WA + Email</div><div class="metric-bar"><div class="metric-bar-fill" style="width:82%;background:var(--green)"></div></div></div>
+    <div class="metric-card mc-hot"><div class="metric-label">Leads Re-Engaged</div><div class="metric-value" style="color:var(--hot)">214</div><div class="metric-delta">↑ From cold sequences</div><div class="metric-bar"><div class="metric-bar-fill" style="width:58%;background:var(--hot)"></div></div></div>
+    <div class="metric-card mc-warm"><div class="metric-label">Avg Open Rate</div><div class="metric-value" style="color:var(--warm)">74%</div><div class="metric-delta">WA: 89% · SMS: 72% · Email: 32%</div><div class="metric-bar"><div class="metric-bar-fill" style="width:74%;background:var(--warm)"></div></div></div>
+  </div>
+
+  <!-- ⚡ MULTI-CHANNEL ORCHESTRATION ENGINE -->
+  <div class="panel" style="margin-bottom:13px">
+    <div class="panel-header">
+      <span class="panel-title">⚡ Multi-Channel Orchestration Engine</span>
+      <span class="ai-badge" style="font-size:9px">🤖 Auto-Cascade</span>
+    </div>
+    <div class="panel-body">
+      <div id="orch-desc" style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6"></div>
+      <div id="orch-waterfall" style="display:flex;gap:0;overflow-x:auto;padding-bottom:6px;margin-bottom:16px"></div>
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px">🔴 Live Lead Journeys — where each lead is in the cascade right now</div>
+      <div id="orch-journeys" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+
+  <!-- Channel tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:13px">
+    <button class="btn btn-primary btn-sm seq-tab" onclick="filterSeqs('all',this)">All Sequences (7)</button>
+    <button class="btn btn-sm seq-tab" onclick="filterSeqs('whatsapp',this)">💬 WhatsApp (3)</button>
+    <button class="btn btn-sm seq-tab" onclick="filterSeqs('sms',this)">📱 SMS (2)</button>
+    <button class="btn btn-sm seq-tab" onclick="filterSeqs('email',this)">📧 Email (1)</button>
+    <button class="btn btn-sm seq-tab" onclick="filterSeqs('ai_call',this)">🤖 AI Call (1)</button>
+    <div style="margin-left:auto"><button class="btn btn-sm btn-primary" onclick="alert('Sequence builder — coming soon')">+ New Sequence</button></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:13px;align-items:start">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Automation Sequences</span><span class="panel-count" id="seq-count">7 active</span></div>
+      <div class="panel-body" id="sms-sequences"></div>
+    </div>
+
+    <!-- Right sidebar: live queue -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Sample send queue (nothing is sent)</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Live</div></div>
+        <div class="panel-body" id="seq-live-queue"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">📊 7-Day Performance</span></div>
+        <div class="panel-body" id="seq-perf-chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLLOW-UP TEMPLATE LIBRARY -->
+  <div class="panel" style="margin-top:13px">
+    <div class="panel-header">
+      <span class="panel-title">🔁 Follow-Up Automation Library</span>
+      <span class="ai-badge" style="font-size:9px">⚡ Lifecycle Nurture</span>
+    </div>
+    <div class="panel-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Never let a lead go cold. One-click enroll any contact segment into a ready-made nurture cadence — auto-personalized with name, budget, and preferred area. Fires on WhatsApp first, SMS fallback.</div>
+      <div id="followup-templates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:11px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CONVERSION FUNNEL ═══════════ -->
+<div class="view" id="view-funnel">
+  <div class="metrics-row">
+    <div class="metric-card"><div class="metric-label" data-i18n="top_funnel">Top of Funnel</div><div class="metric-value">247</div><div class="metric-delta" data-i18n="total_leads_label">Total leads</div></div>
+    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="qual_rate">Qualified Rate</div><div class="metric-value" style="color:var(--warm)">64%</div><div class="metric-delta warn">Industry avg: 45%</div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="meeting_rate">Meeting Rate</div><div class="metric-value" style="color:var(--green)">38%</div><div class="metric-delta">↑ +6pp MoM</div></div>
+    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="close_rate">Close Rate</div><div class="metric-value" style="color:var(--hot)">12%</div><div class="metric-delta">↑ Top quartile</div></div>
+  </div>
+  <div class="panel-grid">
+    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="conv_funnel">Conversion Funnel</span></div><div class="panel-body"><div class="funnel" id="conv-funnel"></div></div></div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" data-i18n="dropoff">Drop-off Analysis</span></div>
+      <div class="panel-body">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Lead → Qualified</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--hot)">-36%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do1">Main reason: Slow response time (&gt;15 min)</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:64%;height:3px;background:var(--warm);border-radius:2px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Qualified → Meeting</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--warm)">-41%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do2">Main reason: No WhatsApp follow-up</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:59%;height:3px;background:var(--green);border-radius:2px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Meeting → Offer</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--green)">-28%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do3">Main reason: Property mismatch</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:72%;height:3px;background:var(--accent);border-radius:2px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Offer → Closed</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--teal)">-31%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do4">Main reason: Financing delays</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:69%;height:3px;background:var(--teal);border-radius:2px"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CHANNEL ROI ═══════════ -->
+<div class="view" id="view-roi">
+  <div class="metrics-row">
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="best_roi">Best ROI Channel</div><div class="metric-value" style="font-size:18px;color:var(--wa-dark)">WhatsApp</div><div class="metric-delta">Sample figures</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="ad_spend">Total Ad Spend</div><div class="metric-value">AED 10.4K</div><div class="metric-delta">This month</div></div>
+    <div class="metric-card mc-teal"><div class="metric-label" data-i18n="rev_attributed">Revenue Attributed</div><div class="metric-value" style="color:var(--teal)">AED 4.2M</div><div class="metric-delta">↑ Tracked deals</div></div>
+    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="m_cpl">Blended CPL</div><div class="metric-value" style="color:var(--warm)">AED 42</div><div class="metric-delta warn">↓ -18% MoM</div></div>
+  </div>
+  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="channel_perf">Channel Performance & ROI</span></div><div class="panel-body" id="channel-roi"></div></div>
+</div>
+
+<!-- ═══════════ AGENTS ═══════════ -->
+<div class="view" id="view-agents">
+  <div class="metrics-row">
+    <div class="metric-card"><div class="metric-label" data-i18n="active_agents">Active Agents</div><div class="metric-value">8</div><div class="metric-delta">3 online now</div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="top_converter">Top Converter</div><div class="metric-value" style="font-size:18px">Sarah A.</div><div class="metric-delta">32% conv. rate</div></div>
+    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="avg_response">Avg Response</div><div class="metric-value" style="color:var(--warm)">6m 12s</div><div class="metric-delta warn">Target: &lt;5 min</div></div>
+    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="sla_breaches">SLA Breaches</div><div class="metric-value" style="color:var(--hot)">2</div><div class="metric-delta neg">Action required</div></div>
+  </div>
+  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="agent_leaderboard">Agent Leaderboard</span></div>
+    <table class="full-table">
+      <thead><tr><th>#</th><th data-i18n="col_agent">Agent</th><th data-i18n="status">Status</th><th data-i18n="hot">Hot</th><th data-i18n="booked">Booked</th><th data-i18n="conv_rate">Conv.</th><th data-i18n="response_time_col">Response</th><th data-i18n="col_score">AI Score</th><th>SLA</th></tr></thead>
+      <tbody id="agent-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ SLA TRACKING ═══════════ -->
+<div class="view" id="view-sla">
+  <div class="metrics-row">
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="sla_compliance">SLA Compliance</div><div class="metric-value" style="color:var(--green)">91%</div><div class="metric-delta">Target: 95%</div><div class="metric-bar"><div class="metric-bar-fill" style="width:91%;background:var(--green)"></div></div></div>
+    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="active_breaches">Active Breaches</div><div class="metric-value" style="color:var(--hot)">2</div><div class="metric-delta neg">Escalation needed</div></div>
+    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="at_risk">At Risk</div><div class="metric-value" style="color:var(--warm)">5</div><div class="metric-delta warn">Next 15 minutes</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="resolved_today">Resolved Today</div><div class="metric-value" style="color:var(--green)">18</div><div class="metric-delta">↑ Good work</div></div>
+  </div>
+  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="sla_queue">SLA Queue — Response Time Tracker</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Live</div></div><div class="panel-body" style="padding:11px" id="sla-list"></div></div>
+</div>
+
+<!-- ═══════════ COMPLIANCE ═══════════ -->
+<div class="view" id="view-compliance">
+  <div class="metrics-row">
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="overall_status">Overall Status</div><div class="metric-value" style="color:var(--green);font-size:18px" data-i18n="compliant">Compliant</div><div class="metric-delta">Last audit: 2d ago</div></div>
+    <div class="metric-card"><div class="metric-label" data-i18n="data_region">Data Region</div><div class="metric-value" style="font-size:18px">UAE</div><div class="metric-delta">AWS ME (Bahrain)</div></div>
+    <div class="metric-card mc-warm"><div class="metric-label">PDPL Status</div><div class="metric-value" style="color:var(--warm);font-size:18px" data-i18n="review">Review</div><div class="metric-delta warn">1 item pending</div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="encryption">Encryption</div><div class="metric-value" style="color:var(--green);font-size:18px">AES-256</div><div class="metric-delta">At rest + in transit</div></div>
+  </div>
+  <div class="compliance-grid" id="compliance-grid"></div>
+  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="audit_log">Audit Log — Last 24 Hours</span></div>
+    <table class="full-table"><thead><tr><th data-i18n="time">Time</th><th data-i18n="event">Event</th><th data-i18n="user">User</th><th>IP</th><th data-i18n="status">Status</th></tr></thead><tbody id="audit-log"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══════════ NOTIFICATIONS ═══════════ -->
+<div class="view" id="view-notifications">
+  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="nav_notif">Notifications</span><span class="panel-count">9 unread</span></div><div id="notif-list"></div></div>
+</div>
+
+<!-- ═══════════ GCC DEVELOPERS ═══════════ -->
+<div class="view" id="view-gcc_developers">
+  <!-- HERO BANNER -->
+  <div class="gcc-hero">
+    <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=85&auto=format&fit=crop" alt="GCC Skyline" loading="lazy" onerror="this.style.display='none'">
+    <div class="gcc-hero-badge"><span class="live-dot" style="width:6px;height:6px;border-radius:50%;display:inline-block;animation:blink 1.4s infinite"></span>Live · 6 countries</div>
+    <div class="gcc-hero-content">
+      <div class="gcc-hero-title">GCC Real Estate Intelligence</div>
+      <div class="gcc-hero-sub">42 DEVELOPERS · 187 PROJECTS · $2.1T PIPELINE · UAE · KSA · QATAR · KUWAIT · BAHRAIN · OMAN</div>
+    </div>
+  </div>
+
+  <div class="metrics-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="metric-card mc-hot"><div class="metric-label">GCC Developers</div><div class="metric-value">42</div><div class="metric-delta">Across 6 countries</div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Total Projects</div><div class="metric-value">187</div><div class="metric-delta">Active & Upcoming</div></div>
+    <div class="metric-card mc-purple"><div class="metric-label">Pipeline Value</div><div class="metric-value" style="font-size:18px">$2.1T</div><div class="metric-delta">Combined GCC</div></div>
+    <div class="metric-card mc-warm"><div class="metric-label">Avg Unit Price</div><div class="metric-value" style="font-size:18px">AED 2.8M</div><div class="metric-delta">↑ 12% YoY</div></div>
+    <div class="metric-card mc-teal"><div class="metric-label">Off-Plan Ratio</div><div class="metric-value">68%</div><div class="metric-delta">of total inventory</div></div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-primary btn-sm gcc-filter" onclick="filterGCC('all',this)">All GCC (42)</button>
+    <button class="btn btn-sm gcc-filter" onclick="filterGCC('UAE',this)">🇦🇪 UAE (14)</button>
+    <button class="btn btn-sm gcc-filter" onclick="filterGCC('KSA',this)">🇸🇦 Saudi Arabia (11)</button>
+    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Qatar',this)">🇶🇦 Qatar (6)</button>
+    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Kuwait',this)">🇰🇼 Kuwait (4)</button>
+    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Bahrain',this)">🇧🇭 Bahrain (4)</button>
+    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Oman',this)">🇴🇲 Oman (3)</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Leading GCC Developers & Flagship Projects</span>
+      <span class="panel-count" id="gcc-count">42 developers</span>
+    </div>
+    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:13px" id="gcc-dev-grid"></div>
+  </div>
+</div>
+
+<!-- ═══════════ PAYMENT CALCULATOR ═══════════ -->
+<div class="view" id="view-payment_calc">
+  <div class="metrics-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="metric-card mc-green" id="calc-m-monthly"><div class="metric-label">Monthly Payment</div><div class="metric-value" id="calc-monthly-val" style="font-size:20px">—</div><div class="metric-delta">EMI estimate</div></div>
+    <div class="metric-card mc-teal" id="calc-m-downpay"><div class="metric-label">Down Payment</div><div class="metric-value" id="calc-dp-val" style="font-size:20px">—</div><div class="metric-delta" id="calc-dp-pct">% of price</div></div>
+    <div class="metric-card mc-purple" id="calc-m-roi"><div class="metric-label">Expected ROI</div><div class="metric-value" id="calc-roi-val" style="font-size:20px;color:var(--green)">—</div><div class="metric-delta">Annual yield</div></div>
+    <div class="metric-card mc-warm" id="calc-m-total"><div class="metric-label">Total Cost</div><div class="metric-value" id="calc-total-val" style="font-size:18px">—</div><div class="metric-delta">Inc. fees & interest</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start">
+
+    <!-- INPUT PANEL -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">⚡ Payment calculator (sample inputs)</span></div>
+      <div class="panel-body">
+        <!-- PROPERTY PRICE -->
+        <div class="field-group">
+          <div class="field-label">Property Price (AED)</div>
+          <input class="field-input" id="calc-price" type="number" placeholder="e.g. 2500000" value="2500000" oninput="calcAll()">
+        </div>
+        <!-- PAYMENT PLAN TYPE -->
+        <div class="field-group">
+          <div class="field-label">Payment Plan</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="plan-selector">
+            <button class="plan-btn active" data-plan="mortgage" onclick="selectPlan('mortgage',this)">🏦 Bank Mortgage</button>
+            <button class="plan-btn" data-plan="developer" onclick="selectPlan('developer',this)">🏗️ Developer Plan</button>
+            <button class="plan-btn" data-plan="cash" onclick="selectPlan('cash',this)">💵 Full Cash</button>
+            <button class="plan-btn" data-plan="posthandover" onclick="selectPlan('posthandover',this)">📋 Post-Handover</button>
+          </div>
+        </div>
+
+        <!-- DOWN PAYMENT -->
+        <div class="field-group" id="dp-group">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <div class="field-label">Down Payment</div>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent)" id="dp-pct-label">20%</span>
+          </div>
+          <input type="range" id="calc-dp" min="5" max="80" value="20" step="1" oninput="updateDP();calcAll()" style="width:100%;accent-color:var(--accent);cursor:pointer">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">
+            <span>Min 5%</span><span id="dp-aed-label">AED 500,000</span><span>Max 80%</span>
+          </div>
+        </div>
+
+        <!-- LOAN TERM (Mortgage only) -->
+        <div class="field-group" id="term-group">
+          <div class="field-label">Loan Term (Years)</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap" id="term-selector">
+            <button class="btn btn-sm term-btn active" onclick="selectTerm(5,this)">5 yr</button>
+            <button class="btn btn-sm term-btn" onclick="selectTerm(10,this)">10 yr</button>
+            <button class="btn btn-sm term-btn" onclick="selectTerm(15,this)">15 yr</button>
+            <button class="btn btn-sm term-btn" onclick="selectTerm(20,this)">20 yr</button>
+            <button class="btn btn-sm term-btn" onclick="selectTerm(25,this)">25 yr</button>
+          </div>
+        </div>
+
+        <!-- INTEREST RATE -->
+        <div class="field-group" id="rate-group">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <div class="field-label">Interest Rate (Annual %)</div>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent)" id="rate-label">4.5%</span>
+          </div>
+          <input type="range" id="calc-rate" min="2" max="12" value="4.5" step="0.1" oninput="updateRate();calcAll()" style="width:100%;accent-color:var(--accent);cursor:pointer">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">
+            <span>2%</span><span>UAE Bank Rate (EIBOR+)</span><span>12%</span>
+          </div>
+        </div>
+
+        <!-- RENTAL YIELD (for ROI) -->
+        <div class="field-group">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <div class="field-label">Expected Rental Yield (%)</div>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--green)" id="yield-label">6.5%</span>
+          </div>
+          <input type="range" id="calc-yield" min="2" max="15" value="6.5" step="0.1" oninput="updateYield();calcAll()" style="width:100%;accent-color:var(--green);cursor:pointer">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">
+            <span>2% (Low)</span><span>Dubai Avg ~6-8%</span><span>15% (High)</span>
+          </div>
+        </div>
+
+        <!-- PROPERTY TYPE -->
+        <div class="field-group">
+          <div class="field-label">Property Type</div>
+          <select class="field-input" id="calc-type" onchange="calcAll()">
+            <option value="apartment">Apartment</option>
+            <option value="villa">Villa / Townhouse</option>
+            <option value="commercial">Commercial</option>
+            <option value="offplan">Off-Plan</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px" onclick="calcAll()">⚡ Recalculate & Get AI Summary</button>
+      </div>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div>
+      <!-- PAYMENT BREAKDOWN -->
+      <div class="panel" style="margin-bottom:13px">
+        <div class="panel-header"><span class="panel-title">Payment Breakdown</span></div>
+        <div class="panel-body" id="calc-breakdown">
+          <div style="text-align:center;color:var(--text3);padding:20px">Enter property details to calculate</div>
+        </div>
+      </div>
+
+      <!-- AI ANALYSIS -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">AI Investment Analysis</span>
+          <div class="ai-badge">⚡ Claude</div>
+        </div>
+        <div class="panel-body">
+          <div id="calc-ai-response" style="font-size:12.5px;line-height:1.7;color:var(--text2)">
+            <div style="color:var(--text3);font-style:italic">Click "Recalculate & Get AI Summary" to get a real-time investment analysis from AI...</div>
+          </div>
+          <div id="calc-ai-loading" style="display:none">
+            <div class="cop-typing" style="justify-content:flex-start;padding:8px 0"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="panel" style="margin-top:13px">
+    <div class="panel-header"><span class="panel-title">Plan Comparison — All Payment Options</span></div>
+    <div class="panel-body" id="calc-comparison"></div>
+  </div>
+</div>
+
+<!-- ═══════════ FACEBOOK & INSTAGRAM AUTOMATION ═══════════ -->
+<div class="view" id="view-social_auto">
+
+  <!-- SOCIAL HERO BANNER -->
+  <div class="hero-banner" style="min-height:120px">
+    <img class="hero-bg" src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1600&q=80&auto=format&fit=crop" alt="Social media engagement" onerror="this.style.display='none';this.closest('.hero-banner').style.background='linear-gradient(120deg,#4267B2,#7c4dff,#e1306c)'">
+    <div class="hero-content">
+      <div class="hero-greeting" style="font-size:21px">📘📸 Facebook &amp; Instagram, on Autopilot</div>
+      <div class="hero-sub">Every DM, comment, and Lead Ad answered in seconds — qualified, nurtured, and called by AI. <strong style="color:#fff">Zero leads slip through.</strong></div>
+      <div class="hero-chips">
+        <span class="hero-chip"><span class="hc-dot"></span> 4,742 leads auto-handled</span>
+        <span class="hero-chip warm"><span class="hc-dot"></span> 100% response rate</span>
+        <span class="hero-chip purple"><span class="hc-dot"></span> 318 AI calls placed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI METRICS ROW -->
+  <div class="metrics-row">
+    <div class="metric-card mc-purple">
+      <div class="metric-label">Total Social Leads</div>
+      <div class="metric-value" style="color:var(--purple)" id="sm-total">4,742</div>
+      <div class="metric-delta">↑ All responded automatically</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:94%;background:var(--purple)"></div></div>
+    </div>
+    <div class="metric-card mc-green">
+      <div class="metric-label">Auto-Responded</div>
+      <div class="metric-value" style="color:var(--green)">4,742</div>
+      <div class="metric-delta">↑ 100% response rate</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--green)"></div></div>
+    </div>
+    <div class="metric-card mc-hot">
+      <div class="metric-label">AI Calls Made</div>
+      <div class="metric-value" style="color:var(--hot)" id="sm-calls">318</div>
+      <div class="metric-delta">↑ Unclosed leads followed up</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:67%;background:var(--hot)"></div></div>
+    </div>
+    <div class="metric-card mc-warm">
+      <div class="metric-label">Pipeline Value</div>
+      <div class="metric-value" style="color:var(--warm)">AED 6.1M</div>
+      <div class="metric-delta">↑ From social automation</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:78%;background:var(--warm)"></div></div>
+    </div>
+  </div>
+
+  <!-- TWO COLUMN GRID: Workflow Map + Live Conversations -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px">
+
+    <!-- WORKFLOW AUTOMATION MAP -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Automation Workflows</span>
+        <div style="display:flex;gap:6px">
+          <span class="live-badge" style="font-size:9px"><span class="live-dot"></span>Running</span>
+          <button class="btn btn-sm btn-primary" onclick="addWorkflow()">+ New Flow</button>
+        </div>
+      </div>
+      <div class="panel-body" id="workflow-list"></div>
+    </div>
+
+    <!-- LIVE CONVERSATION FEED -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Live Conversation Feed</span>
+        <span class="panel-count" id="sm-conv-count">Loading...</span>
+      </div>
+      <div class="panel-body" id="social-conv-feed" style="max-height:360px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- AI CALLING PANEL + OPPORTUNITY PIPELINE -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px">
+
+    <!-- AI CALLING ENGINE -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🤖 AI Calling Engine</span>
+        <div class="ai-badge" style="font-size:9px">⚡ GoHighLevel AI</div>
+      </div>
+      <div class="panel-body">
+        <div class="sunset-card">
+          <img src="https://images.unsplash.com/photo-1518684079-3c830dcef090?w=900&q=80&auto=format&fit=crop" alt="Dubai sunset over the marina" onerror="this.style.display='none';this.closest('.sunset-card').style.background='linear-gradient(105deg,#7c4dff,#2a1040)'">
+          <div class="sunset-card-body">
+            <div style="font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⚡ Always-On AI Workforce</div>
+            <div style="font-size:12.5px;line-height:1.6;color:#fff">
+              When a lead comes in from Facebook or Instagram and does <strong>not close</strong>, the AI automatically calls them — qualifying, answering questions, and booking viewings — <strong>while you're watching the sunset with your family.</strong>
+            </div>
+          </div>
+        </div>
+        <div id="ai-call-queue"></div>
+      </div>
+    </div>
+
+    <!-- OPPORTUNITY PIPELINE (KANBAN LITE) -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Opportunity Pipeline</span>
+        <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Drag leads across stages →</span>
+      </div>
+      <div class="panel-body" id="social-pipeline" style="overflow-x:auto"></div>
+    </div>
+  </div>
+
+  <!-- CHANNEL STATS ROW -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Facebook Page Performance</span><span style="font-size:10px;color:var(--cold);font-family:var(--font-mono)">📘 Meta</span></div>
+      <div class="panel-body" id="fb-stats"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Instagram Performance</span><span style="font-size:10px;color:var(--hot);font-family:var(--font-mono)">📸 Meta</span></div>
+      <div class="panel-body" id="ig-stats"></div>
+    </div>
+  </div>
+
+</div>
+<!-- /FACEBOOK & INSTAGRAM AUTOMATION -->
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="add-lead-modal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" data-i18n="add_lead_title">Add New Lead</div><button class="modal-close" onclick="closeModal('add-lead-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field-group"><div class="field-label" data-i18n="full_name">Full Name</div><input class="field-input" id="al-name" placeholder="Mohammed Al Rashid"></div>
+      <div class="field-group"><div class="field-label" data-i18n="wa_phone">WhatsApp / Phone</div><input class="field-input" id="al-phone" placeholder="+971 50 000 0000"></div>
+      <div class="field-group"><div class="field-label" data-i18n="col_source">Source</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="selectType(this)">Bayut</button>
+          <button class="btn btn-sm" onclick="selectType(this)">Property Finder</button>
+          <button class="btn btn-sm" onclick="selectType(this)">Facebook</button>
+          <button class="btn btn-sm" onclick="selectType(this)">WhatsApp</button>
+          <button class="btn btn-sm" onclick="selectType(this)">Referral</button>
+        </div>
+      </div>
+      <div class="field-group"><div class="field-label">Stage</div><select class="field-input" id="al-status"><option>New</option><option>Qualified</option><option>Meeting Set</option><option>Offer Stage</option><option>Closed Won</option></select></div>
+      <div class="field-group"><div class="field-label" data-i18n="budget_aed">Budget (AED)</div><input class="field-input" id="al-budget" placeholder="e.g. 2,500,000"></div>
+      <div class="field-group"><div class="field-label" data-i18n="pref_area">Preferred Area</div><input class="field-input" id="al-area" placeholder="e.g. Dubai Hills, Downtown"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('add-lead-modal')" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-primary" id="al-save" onclick="saveLead()">⚡ Add &amp; Score</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="lead-detail-modal">
+  <div class="modal" style="width:500px">
+    <div class="modal-head"><div class="modal-title" id="modal-lead-name">Lead Details</div><button class="modal-close" onclick="closeModal('lead-detail-modal')">✕</button></div>
+    <div class="modal-body" id="modal-lead-body"></div>
+  </div>
+</div>
+
+<!-- AI COPILOT -->
+<button class="copilot-fab" id="copilot-fab" onclick="toggleCopilot()" title="AI Copilot">⚡</button>
+<div class="copilot-panel" id="copilot-panel">
+  <div class="copilot-head">
+    <div class="copilot-avatar">⚡</div>
+    <div>
+      <div class="copilot-name" data-i18n="copilot_name">Observer AI Copilot</div>
+      <div class="copilot-status" data-i18n="copilot_status">● Online · Analyzing 247 leads</div>
+    </div>
+    <label class="cop-voice-toggle" title="Speak replies aloud">
+      <input type="checkbox" id="cop-voice-out" onchange="toggleVoiceOut()"> 🔊 Voice
+    </label>
+    <button class="copilot-close" onclick="toggleCopilot()">✕</button>
+  </div>
+  <div class="copilot-msgs" id="copilot-msgs">
+    <div class="cop-msg ai">👋 <span data-i18n="copilot_intro">I'm your AI Copilot. Right now: <strong>Ahmed Al Khalidi (Score: 87)</strong> has been viewing listings for 40 mins. No contact yet.</span> <span class="cop-action" onclick="showView('whatsapp',null)">→ Contact</span>
+      <div style="margin-top:7px;font-size:10.5px;color:var(--text3);font-family:var(--font-mono)">🎤 Tap the mic or say <strong style="color:var(--purple)">"Hey Observer"</strong> to command hands-free.</div>
+    </div>
+  </div>
+  <div class="cop-listening-bar" id="cop-listening-bar">
+    <div class="lw"><span></span><span></span><span></span><span></span><span></span></div>
+    <span id="cop-listening-text">Listening…</span>
+  </div>
+  <div class="copilot-input-row">
+    <button class="cop-mic" id="cop-mic" onclick="toggleVoiceInput()" title="Voice command">🎤</button>
+    <input id="cop-input" placeholder="Ask, or tap 🎤 to speak..." onkeypress="if(event.key==='Enter')sendCopilot()" data-i18n-ph="cop_ph">
+    <button onclick="sendCopilot()">→</button>
+  </div>
+</div>
+
+<script src="js/common.js"></script>
+<script>bootApp("js/platform.js")</script>
+</body>
+</html>

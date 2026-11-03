@@ -1,1974 +1,16 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr" id="root">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Observer // Autonomous Revenue Engine</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-/* ══════════════════════════════════════
-   DARK THEME (DEFAULT)
-══════════════════════════════════════ */
-:root{
-  --bg:#080a0e;--bg2:#0f1219;--bg3:#161b24;--bg4:#1c2130;--bg5:#232a3a;
-  --border:#ffffff0a;--border2:#ffffff14;--border3:#ffffff22;--border4:#ffffff35;
-  --text:#eeeae3;--text2:#8a8880;--text3:#515660;--text4:#333740;
-  --shadow:0 1px 3px #00000000;
-  --shadow-md:0 4px 16px #00000044;
-  --shadow-lg:0 8px 32px #00000066;
-  --hot:#e53935;--hot-bg:#e5393514;--hot-glow:#e5393530;
-  --warm:#f57c00;--warm-bg:#f57c0014;
-  --cold:#1e88e5;--cold-bg:#1e88e514;
-  --green:#2e7d32;--green-bg:#2e7d3214;--green-glow:#2e7d3230;
-  --purple:#7c4dff;--purple-bg:#7c4dff14;--purple-glow:#7c4dff30;
-  --teal:#00897b;--teal-bg:#00897b14;
-  --accent:#c89b3c;--accent2:#a67c2d;--accent-bg:#c89b3c14;
-  --wa:#25d366;--wa-bg:#25d36614;--wa-dark:#128c4a;
-  --font-display:'DM Serif Display',serif;
-  --font-body:'Instrument Sans',sans-serif;
-  --font-mono:'DM Mono',monospace;
-  --font-arabic:'IBM Plex Sans Arabic',sans-serif;
-  --r:8px;--rl:14px;--rxl:18px;
-  --transition:background .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease;
-}
-
-/* ══════════════════════════════════════
-   V3 ENHANCEMENTS
-══════════════════════════════════════ */
-:root {
-  --glass:rgba(255,255,255,0.025);
-  --glass-border:rgba(255,255,255,0.06);
-  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-}
-
-@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes borderGlow{0%,100%{opacity:.4}50%{opacity:.9}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes softIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulseRing{0%{transform:scale(.96);opacity:.6}50%{transform:scale(1.04);opacity:1}100%{transform:scale(.96);opacity:.6}}
-
-/* ══════════════════════════════════════
-   LIGHT THEME
-══════════════════════════════════════ */
-body.light{
-  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#f1f4f9;--bg4:#e8edf5;--bg5:#dde3ec;
-  --border:#0000000a;--border2:#00000014;--border3:#00000020;--border4:#00000032;
-  --text:#1a1d24;--text2:#4a5160;--text3:#8893a8;--text4:#c0c8d8;
-  --shadow:0 1px 3px #00000010;
-  --shadow-md:0 4px 16px #0000001a;
-  --shadow-lg:0 8px 32px #0000002a;
-  --hot:#c62828;--hot-bg:#c6282810;--hot-glow:#c6282820;
-  --warm:#e65100;--warm-bg:#e6510010;
-  --cold:#1565c0;--cold-bg:#1565c010;
-  --green:#1b5e20;--green-bg:#1b5e2010;--green-glow:#1b5e2020;
-  --purple:#6200ea;--purple-bg:#6200ea10;--purple-glow:#6200ea20;
-  --teal:#00695c;--teal-bg:#00695c10;
-  --accent:#b8860b;--accent2:#8b6508;--accent-bg:#b8860b10;
-  --wa:#0d9e4e;--wa-bg:#0d9e4e10;--wa-dark:#067a38;
-}
-
-/* ══════════════════════════════════════
-   COMPACT MODE
-══════════════════════════════════════ */
-body.compact{font-size:12.5px}
-body.compact .metric-card{padding:11px 14px}
-body.compact .metric-value{font-size:22px}
-body.compact .metrics-row{gap:9px;margin-bottom:13px}
-body.compact .panel-header{padding:10px 14px}
-body.compact .panel-body{padding:11px 14px}
-body.compact .lead-table td{padding:8px 11px}
-body.compact .lead-table th{padding:7px 11px}
-body.compact .full-table td{padding:8px 11px}
-body.compact .nav-item{padding:7px 14px}
-body.compact .activity-item{padding:8px 0}
-body.compact .nba-item{padding:10px 13px}
-body.compact .sla-item{padding:10px 13px}
-body.compact .topbar{height:48px;min-height:48px}
-body.compact .content{padding:16px}
-
-/* ══════════════════════════════════════
-   FOCUS MODE
-══════════════════════════════════════ */
-body.focus .sidebar{width:0;min-width:0;overflow:hidden;border:none}
-body.focus .main{width:100%}
-
-/* ══════════════════════════════════════
-   RTL — ARABIC
-══════════════════════════════════════ */
-[dir="rtl"]{font-family:var(--font-arabic),var(--font-body)}
-[dir="rtl"] body,[dir="rtl"] .nav-item,[dir="rtl"] .btn,[dir="rtl"] .metric-label,
-[dir="rtl"] .panel-title,[dir="rtl"] .agent-name,[dir="rtl"] .lead-name{
-  font-family:var(--font-arabic),var(--font-body);
-}
-[dir="rtl"] .sidebar{border-right:none;border-left:1px solid var(--border)}
-[dir="rtl"] .nav-item{border-left:none;border-right:2px solid transparent;flex-direction:row-reverse;text-align:right}
-[dir="rtl"] .nav-item.active{border-right-color:var(--accent);border-left-color:transparent}
-[dir="rtl"] .nav-badge{margin-right:auto;margin-left:0}
-[dir="rtl"] .logo-sub,.logo-tag{letter-spacing:0}
-[dir="rtl"] .topbar-right{margin-right:auto;margin-left:0}
-[dir="rtl"] .topbar{flex-direction:row-reverse}
-[dir="rtl"] .panel-header{flex-direction:row-reverse}
-[dir="rtl"] .panel-count{margin-right:auto;margin-left:0}
-[dir="rtl"] .panel-action{margin-right:auto;margin-left:0}
-[dir="rtl"] .metric-bar-fill{margin-right:0;margin-left:auto}
-[dir="rtl"] .activity-item{flex-direction:row-reverse;text-align:right}
-[dir="rtl"] .agent-pill{flex-direction:row-reverse}
-[dir="rtl"] .online-dot{margin-right:auto;margin-left:0}
-[dir="rtl"] .org-switcher{flex-direction:row-reverse}
-[dir="rtl"] .nba-item{grid-template-columns:auto 1fr auto;direction:rtl}
-[dir="rtl"] .score-item{flex-direction:row-reverse}
-[dir="rtl"] .wa-bubble.out{border-radius:10px 10px 10px 2px;align-self:flex-start}
-[dir="rtl"] .wa-bubble.in{border-radius:10px 10px 2px 10px;align-self:flex-end}
-[dir="rtl"] .copilot-panel{right:auto;left:24px}
-[dir="rtl"] .copilot-fab{right:auto;left:24px}
-[dir="rtl"] .control-group{flex-direction:row-reverse}
-[dir="rtl"] .topbar-controls{flex-direction:row-reverse}
-[dir="rtl"] .full-table th,[dir="rtl"] .full-table td,[dir="rtl"] .lead-table th,[dir="rtl"] .lead-table td{text-align:right}
-[dir="rtl"] .channel-row{flex-direction:row-reverse}
-[dir="rtl"] .funnel-label{left:auto;right:14px}
-[dir="rtl"] .funnel-num{right:auto;left:14px}
-[dir="rtl"] .wa-layout{direction:rtl}
-[dir="rtl"] .wa-c-avatar{margin-left:0;margin-right:0}
-[dir="rtl"] .ic-head{flex-direction:row-reverse}
-[dir="rtl"] .ic-tags{margin-right:auto;margin-left:0}
-
-/* ══════════════════════════════════════
-   BASE
-══════════════════════════════════════ */
-body{
-  background:var(--bg);color:var(--text);
-  font-family:var(--font-body);font-size:14px;line-height:1.5;
-  min-height:100vh;overflow-x:hidden;
-  transition:var(--transition);
-}
-.app{display:flex;height:100vh;overflow:hidden}
-
-/* ══════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════ */
-.sidebar{
-  width:228px;min-width:228px;
-  background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;z-index:10;overflow:hidden;
-  transition:width .25s ease,min-width .25s ease,var(--transition);
-  box-shadow:var(--shadow);
-  position:relative;
-}
-.sidebar::before{
-  content:'';position:absolute;inset:0;
-  background:var(--grain);pointer-events:none;opacity:.6;z-index:0;
-}
-.sidebar>*{position:relative;z-index:1;}
-body.light .sidebar{box-shadow:2px 0 8px #00000010}
-.logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.logo-mark{
-  font-family:var(--font-display);font-size:22px;
-  background:linear-gradient(135deg,var(--accent) 0%,#e8c06a 50%,var(--accent2) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  letter-spacing:-.5px;display:inline-block;
-}
-.logo-sub{font-size:9px;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px;font-family:var(--font-mono)}
-[dir="rtl"] .logo-sub{letter-spacing:0;font-family:var(--font-arabic);font-size:10px}
-.logo-tag{display:inline-flex;align-items:center;gap:4px;background:var(--purple-bg);border:1px solid var(--purple)33;color:var(--purple);font-size:9px;font-family:var(--font-mono);padding:2px 7px;border-radius:3px;margin-top:6px}
-.org-switcher{padding:9px 11px;margin:8px 10px 0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:8px;flex-shrink:0;transition:var(--transition)}
-.org-switcher:hover{border-color:var(--border3);background:var(--bg4)}
-.org-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
-.org-name{font-size:12px;font-weight:500;color:var(--text);flex:1}
-.org-arrow{font-size:10px;color:var(--text3)}
-.nav{flex:1;padding:6px 0;overflow-y:auto;scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.nav-section{font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:2px;padding:12px 16px 4px;font-family:var(--font-mono)}
-[dir="rtl"] .nav-section{letter-spacing:0;text-align:right;font-family:var(--font-arabic)}
-.nav-item{display:flex;align-items:center;gap:9px;padding:7.5px 16px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .12s;font-size:12.5px;user-select:none}
-.nav-item:hover{color:var(--text);background:var(--bg3)}
-.nav-item.active{
-  color:var(--accent);border-left-color:var(--accent);
-  background:linear-gradient(90deg,var(--accent-bg) 0%,transparent 100%);
-  box-shadow:inset 0 0 20px var(--accent-bg);
-}
-.nav-icon{width:14px;height:14px;opacity:.45;flex-shrink:0;transition:opacity .12s}
-.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:.9}
-.nav-badge{margin-left:auto;color:#fff;font-size:9.5px;font-family:var(--font-mono);padding:1px 5px;border-radius:8px;font-weight:600}
-.nav-badge.red{background:var(--hot)}
-.nav-badge.green{background:var(--green);color:#fff}
-.nav-badge.purple{background:var(--purple)}
-.sidebar-footer{padding:13px 16px;border-top:1px solid var(--border);flex-shrink:0}
-.agent-pill{display:flex;align-items:center;gap:9px}
-.agent-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;font-family:var(--font-mono);overflow:hidden;position:relative}
-.agent-avatar img,.ic-avatar img,.wa-c-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
-.agent-avatar.has-photo,.ic-avatar.has-photo,.wa-c-avatar.has-photo{background:var(--bg4)}
-.agent-name{font-size:12px;font-weight:500;color:var(--text)}
-.agent-role{font-size:10px;color:var(--text3)}
-.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:auto;box-shadow:0 0 5px var(--green-glow)}
-
-/* ══════════════════════════════════════
-   MAIN
-══════════════════════════════════════ */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;transition:width .25s ease}
-.topbar{
-  height:52px;min-height:52px;background:var(--bg2);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;
-  transition:var(--transition);box-shadow:var(--shadow);
-  position:relative;
-}
-.topbar::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent 0%,var(--accent)55 30%,var(--purple)55 70%,transparent 100%);
-  opacity:.5;
-}
-body.light .topbar{box-shadow:0 1px 4px #00000012}
-.page-title{font-family:var(--font-display);font-size:20px;color:var(--text);letter-spacing:-.3px}
-[dir="rtl"] .page-title{font-family:var(--font-arabic);font-size:17px}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-
-/* CONTROL BUTTONS */
-.topbar-controls{display:flex;align-items:center;gap:4px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);margin-left:8px}
-.ctrl-btn{
-  width:28px;height:28px;border-radius:6px;border:none;background:transparent;
-  color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;
-  transition:all .12s;position:relative;
-}
-.ctrl-btn:hover{background:var(--bg4);color:var(--text)}
-.ctrl-btn.active{background:var(--accent-bg);color:var(--accent)}
-.ctrl-tooltip{
-  position:absolute;bottom:calc(100%+6px);left:50%;transform:translateX(-50%);
-  background:var(--bg4);border:1px solid var(--border2);color:var(--text);
-  font-size:10.5px;font-family:var(--font-mono);padding:3px 8px;border-radius:5px;
-  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:50;
-}
-.ctrl-btn:hover .ctrl-tooltip{opacity:1}
-.ctrl-divider{width:1px;height:16px;background:var(--border3)}
-
-.search-bar{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 11px;width:190px;transition:var(--transition)}
-body.light .search-bar{box-shadow:inset 0 1px 3px #0000000a}
-.search-bar:focus-within{border-color:var(--border3)}
-.search-bar input{background:none;border:none;outline:none;color:var(--text);font-size:12.5px;font-family:var(--font-body);width:100%}
-[dir="rtl"] .search-bar input{font-family:var(--font-arabic);text-align:right}
-.search-bar input::placeholder{color:var(--text3)}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .12s;font-family:var(--font-body)}
-[dir="rtl"] .btn{font-family:var(--font-arabic)}
-.btn:hover{color:var(--text);border-color:var(--border3);background:var(--bg3)}
-body.light .btn:hover{box-shadow:var(--shadow)}
-.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
-.btn-primary:hover{background:var(--accent2);border-color:var(--accent2);color:#fff}
-.btn-wa{background:var(--wa-bg);color:var(--wa-dark);border-color:var(--wa)33;font-weight:600}
-.btn-wa:hover{background:var(--wa);color:#fff;border-color:var(--wa)}
-.btn-hot{background:var(--hot-bg);color:var(--hot);border-color:var(--hot)22}
-.btn-sm{padding:4px 10px;font-size:11px}
-.content{flex:1;overflow-y:auto;padding:20px;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;background-image:radial-gradient(var(--border) 1px,transparent 1px);background-size:28px 28px;background-position:0 0}
-body.light .content{background-image:radial-gradient(var(--border2) 1px,transparent 1px)}
-
-/* LIVE BADGES */
-.live-badge{display:inline-flex;align-items:center;gap:5px;background:var(--green-bg);border:1px solid var(--green)33;color:var(--green);font-size:9.5px;font-family:var(--font-mono);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
-.ai-badge{display:inline-flex;align-items:center;gap:4px;background:var(--purple-bg);border:1px solid var(--purple)33;color:var(--purple);font-size:9.5px;font-family:var(--font-mono);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
-
-/* VIEWS */
-.view{display:none}.view.active{display:block}
-
-/* ══════════════════════════════════════
-   HERO BANNER + ATMOSPHERIC IMAGERY
-══════════════════════════════════════ */
-.hero-banner{
-  position:relative;border-radius:var(--rxl);overflow:hidden;margin-bottom:16px;
-  min-height:148px;display:flex;align-items:flex-end;
-  border:1px solid var(--border2);box-shadow:var(--shadow-md);
-  background:var(--bg3);isolation:isolate;
-}
-.hero-banner img.hero-bg{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  z-index:0;filter:saturate(1.05);
-}
-.hero-banner::before{
-  content:'';position:absolute;inset:0;z-index:1;
-  background:linear-gradient(90deg,
-    rgba(8,10,14,.94) 0%,rgba(8,10,14,.82) 38%,
-    rgba(8,10,14,.45) 68%,rgba(8,10,14,.15) 100%);
-}
-body.light .hero-banner::before{
-  background:linear-gradient(90deg,
-    rgba(10,14,24,.90) 0%,rgba(15,20,34,.74) 40%,
-    rgba(20,28,48,.34) 70%,rgba(20,28,48,.05) 100%);
-}
-.hero-banner::after{
-  content:'';position:absolute;inset:0;z-index:1;background:var(--grain);
-  opacity:.5;pointer-events:none;mix-blend-mode:overlay;
-}
-.hero-content{position:relative;z-index:2;padding:20px 24px;width:100%}
-.hero-greeting{font-family:var(--font-display);font-size:25px;color:#fff;letter-spacing:-.4px;line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,.5)}
-[dir="rtl"] .hero-greeting{font-family:var(--font-arabic);font-size:21px}
-.hero-sub{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:5px;font-family:var(--font-body);text-shadow:0 1px 6px rgba(0,0,0,.5)}
-[dir="rtl"] .hero-sub{font-family:var(--font-arabic)}
-.hero-chips{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
-.hero-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.10);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11px;font-family:var(--font-mono);padding:4px 10px;border-radius:20px}
-.hero-chip .hc-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-.hero-chip.warm .hc-dot{background:var(--warm);box-shadow:0 0 6px var(--warm)}
-.hero-chip.purple .hc-dot{background:#b79bff;box-shadow:0 0 6px var(--purple)}
-.hero-loc{position:absolute;bottom:11px;right:16px;z-index:2;font-size:9.5px;font-family:var(--font-mono);color:rgba(255,255,255,.5);letter-spacing:.5px;display:flex;align-items:center;gap:4px}
-[dir="rtl"] .hero-loc{right:auto;left:16px}
-
-/* PANEL BANNER STRIP — thinner atmospheric image inside panels */
-.panel-banner{position:relative;height:84px;border-radius:var(--rl) var(--rl) 0 0;overflow:hidden;margin:-1px -1px 0}
-.panel-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.panel-banner::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,10,14,.25) 0%,rgba(8,10,14,.78) 100%)}
-.panel-banner-label{position:absolute;z-index:2;bottom:9px;left:14px;color:#fff;font-family:var(--font-display);font-size:15px;text-shadow:0 1px 8px rgba(0,0,0,.6)}
-[dir="rtl"] .panel-banner-label{left:auto;right:14px;font-family:var(--font-arabic)}
-.panel-banner-tag{position:absolute;z-index:2;top:9px;right:12px;background:rgba(255,255,255,.14);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:9.5px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px}
-[dir="rtl"] .panel-banner-tag{right:auto;left:12px}
-
-/* AI CALLING — sunset atmospheric card */
-.sunset-card{position:relative;border-radius:var(--rl);overflow:hidden;min-height:120px;display:flex;align-items:flex-end;margin-bottom:11px}
-.sunset-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.sunset-card::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,rgba(124,77,255,.55) 0%,rgba(20,12,40,.85) 55%,rgba(8,10,14,.92) 100%)}
-.sunset-card-body{position:relative;z-index:2;padding:14px 16px;color:#fff}
-
-/* AREA THUMBNAIL — small property location image */
-.area-thumb{width:34px;height:34px;border-radius:7px;object-fit:cover;flex-shrink:0;border:1px solid var(--border2)}
-
-/* ── PROPERTY IMAGERY (the product) ── */
-.prop-hero{position:relative;width:100%;height:150px;border-radius:var(--rl);overflow:hidden;margin-bottom:14px;background:var(--bg4)}
-.prop-hero img{width:100%;height:100%;object-fit:cover;display:block}
-.prop-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,10,14,0) 40%,rgba(8,10,14,.82) 100%)}
-.prop-hero-cap{position:absolute;z-index:2;bottom:10px;left:13px;right:13px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
-.prop-hero-title{color:#fff;font-family:var(--font-display);font-size:15px;text-shadow:0 1px 8px rgba(0,0,0,.7);line-height:1.2}
-.prop-hero-price{background:rgba(200,155,60,.92);color:#1a1208;font-family:var(--font-mono);font-size:12px;font-weight:600;padding:3px 9px;border-radius:5px;white-space:nowrap;backdrop-filter:blur(4px)}
-.prop-hero-tag{position:absolute;z-index:2;top:10px;left:11px;background:rgba(255,255,255,.16);backdrop-filter:blur(7px);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:9.5px;font-family:var(--font-mono);padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px}
-
-/* property card inside WhatsApp / chat (shared listing) */
-.wa-prop-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;overflow:hidden;max-width:240px;margin-top:4px}
-.wa-prop-card img{width:100%;height:118px;object-fit:cover;display:block}
-.wa-prop-body{padding:8px 11px}
-.wa-prop-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
-.wa-prop-meta{font-size:10.5px;color:var(--text3);font-family:var(--font-mono)}
-.wa-prop-price{font-size:13px;font-family:var(--font-mono);color:var(--accent);font-weight:600;margin-top:4px}
-
-/* small property strip in call header */
-.call-prop-strip{position:relative;height:62px;border-radius:var(--r);overflow:hidden;flex-shrink:0;width:110px}
-.call-prop-strip img{width:100%;height:100%;object-fit:cover}
-.call-prop-strip::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,10,14,0) 30%,rgba(8,10,14,.8))}
-.call-prop-strip span{position:absolute;z-index:2;bottom:5px;left:7px;right:5px;color:#fff;font-size:9px;font-family:var(--font-mono);line-height:1.2;text-shadow:0 1px 4px #000}
-
-/* ══════════════════════════════════════
-   METRICS
-══════════════════════════════════════ */
-.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
-.metric-card{
-  background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);
-  border:1px solid var(--border);border-radius:var(--rl);
-  padding:14px 16px;transition:border-color .2s,box-shadow .2s,transform .2s,var(--transition);
-  position:relative;overflow:hidden;cursor:default;
-}
-.metric-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-  opacity:0;transition:opacity .3s;
-}
-.metric-card.mc-hot::after{background:linear-gradient(90deg,transparent,var(--hot),transparent)}
-.metric-card.mc-green::after{background:linear-gradient(90deg,transparent,var(--green),transparent)}
-.metric-card.mc-warm::after{background:linear-gradient(90deg,transparent,var(--warm),transparent)}
-.metric-card.mc-purple::after{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
-.metric-card.mc-teal::after{background:linear-gradient(90deg,transparent,var(--teal),transparent)}
-.metric-card:hover{border-color:var(--border3);transform:translateY(-2px)}
-.metric-card:hover::after{opacity:1}
-body.light .metric-card{box-shadow:var(--shadow)}
-body.light .metric-card:hover{box-shadow:var(--shadow-md)}
-.metric-card::before{content:'';position:absolute;top:-15px;right:-15px;width:70px;height:70px;border-radius:50%;opacity:.07;pointer-events:none}
-.metric-card.mc-hot::before{background:var(--hot)}
-.metric-card.mc-green::before{background:var(--green)}
-.metric-card.mc-warm::before{background:var(--warm)}
-.metric-card.mc-purple::before{background:var(--purple)}
-.metric-card.mc-teal::before{background:var(--teal)}
-.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--font-mono);margin-bottom:5px}
-[dir="rtl"] .metric-label{letter-spacing:0;font-family:var(--font-arabic);text-align:right}
-.metric-value{font-size:26px;font-weight:600;color:var(--text);line-height:1;margin-bottom:4px;font-family:var(--font-display)}
-.metric-delta{font-size:10.5px;color:var(--green);font-family:var(--font-mono)}
-.metric-delta.neg{color:var(--hot)}.metric-delta.warn{color:var(--warm)}
-[dir="rtl"] .metric-delta{font-family:var(--font-arabic);text-align:right}
-.metric-bar{height:3px;background:var(--bg4);border-radius:3px;margin-top:10px;overflow:hidden}
-.metric-bar-fill{height:3px;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1)}
-
-/* ══════════════════════════════════════
-   PANELS
-══════════════════════════════════════ */
-.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
-.panel-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:13px}
-.panel{
-  background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);
-  overflow:hidden;transition:border-color .2s,box-shadow .2s,var(--transition);
-  position:relative;
-}
-.panel::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent 0%,var(--border3) 50%,transparent 100%);
-  pointer-events:none;
-}
-body.light .panel{box-shadow:var(--shadow)}
-body.light .panel:hover{box-shadow:var(--shadow-md)}
-.panel-wide{grid-column:span 2}
-.panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,var(--bg3) 0%,var(--bg2) 100%)}
-.panel-title{font-size:12.5px;font-weight:600;color:var(--text);letter-spacing:.2px}
-[dir="rtl"] .panel-title{font-family:var(--font-arabic)}
-.panel-count{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-left:auto}
-.panel-body{padding:14px 16px}
-.panel-action{cursor:pointer;font-size:11px;color:var(--accent);font-family:var(--font-mono);transition:color .12s,opacity .12s;margin-left:auto;opacity:.7}
-.panel-action:hover{color:var(--accent);opacity:1}
-
-/* ══════════════════════════════════════
-   TEMP + INTENT BADGES
-══════════════════════════════════════ */
-.temp{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.5px}
-.temp.hot{background:var(--hot-bg);color:var(--hot);border:1px solid var(--hot)22}
-.temp.warm{background:var(--warm-bg);color:var(--warm);border:1px solid var(--warm)22}
-.temp.cold{background:var(--cold-bg);color:var(--cold);border:1px solid var(--cold)22}
-.temp-dot{width:4px;height:4px;border-radius:50%;background:currentColor}
-.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%}
-.status-dot.online{background:var(--green);box-shadow:0 0 5px var(--green-glow)}
-.status-dot.busy{background:var(--warm)}
-.status-dot.offline{background:var(--text4)}
-.intent-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.3px}
-.intent-tag.buyer{background:var(--green-bg);color:var(--green)}
-.intent-tag.seller{background:var(--cold-bg);color:var(--cold)}
-.intent-tag.serious{background:var(--hot-bg);color:var(--hot)}
-.intent-tag.researching{background:var(--bg4);color:var(--text3)}
-
-/* ══════════════════════════════════════
-   AI HOT PULSE (data-driven color)
-══════════════════════════════════════ */
-@keyframes hotPulse{0%,100%{box-shadow:0 0 0 0 var(--hot-glow)}60%{box-shadow:0 0 0 3px var(--hot-glow)}}
-@keyframes aiGlow{0%,100%{box-shadow:0 0 0 0 var(--purple-glow)}60%{box-shadow:0 0 0 3px var(--purple-glow)}}
-@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.pulse-hot{animation:hotPulse 2.5s infinite}
-.pulse-ai{animation:aiGlow 2.5s infinite}
-.activity-item.new{animation:slideIn .28s ease}
-.view.active>*{animation:fadeUp .3s cubic-bezier(.22,1,.36,1) both}
-.view.active>*:nth-child(1){animation-delay:.02s}
-.view.active>*:nth-child(2){animation-delay:.07s}
-.view.active>*:nth-child(3){animation-delay:.12s}
-.view.active>*:nth-child(4){animation-delay:.17s}
-.view.active>*:nth-child(5){animation-delay:.22s}
-
-/* SCORE RING */
-.score-ring{position:relative;display:inline-flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 4px currentColor)}
-.score-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
-.score-val{font-family:var(--font-mono);font-size:11px;font-weight:600;z-index:1}
-
-/* ══════════════════════════════════════
-   LEAD TABLE
-══════════════════════════════════════ */
-.lead-table{width:100%;border-collapse:collapse}
-.lead-table th{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:1.4px;font-family:var(--font-mono);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;font-weight:400;background:var(--bg3)}
-[dir="rtl"] .lead-table th{text-align:right;font-family:var(--font-arabic);letter-spacing:0}
-.lead-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12.5px;transition:background .1s}
-.lead-table tr:last-child td{border-bottom:none}
-.lead-table tr:hover td{background:var(--bg3);cursor:pointer}
-.lead-name{color:var(--text);font-weight:500}
-/* hot row highlight */
-.lead-table tr.row-hot{background:linear-gradient(90deg,var(--hot-bg) 0%,transparent 100%)}
-.lead-table tr.row-hot:hover td{background:var(--hot-bg)!important}
-
-/* ══════════════════════════════════════
-   ACTIVITY FEED
-══════════════════════════════════════ */
-.activity-feed{display:flex;flex-direction:column}
-.activity-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);transition:background .12s}
-.activity-item:last-child{border-bottom:none}
-.activity-item:hover{background:var(--bg3);margin:0 -15px;padding:10px 15px;border-radius:var(--r)}
-.activity-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;box-shadow:0 2px 6px #00000020}
-.activity-text{font-size:12.5px;color:var(--text2);line-height:1.4}
-.activity-text strong{color:var(--text);font-weight:500}
-[dir="rtl"] .activity-text{text-align:right}
-.activity-time{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:2px}
-
-/* ══════════════════════════════════════
-   AI COPILOT
-══════════════════════════════════════ */
-.copilot-fab{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#5b3de0);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px var(--purple-glow),0 0 0 3px var(--purple-bg);z-index:100;transition:transform .2s,box-shadow .2s;font-size:17px}
-.copilot-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px var(--purple-glow),0 0 0 4px var(--purple-bg)}
-.copilot-panel{position:fixed;bottom:86px;right:24px;width:340px;background:var(--bg2);border:1px solid var(--border3);border-radius:var(--rxl);overflow:hidden;z-index:100;display:none;box-shadow:var(--shadow-lg),0 0 40px var(--purple-bg)}
-body.light .copilot-panel{box-shadow:0 20px 50px #0000002a}
-.copilot-panel.open{display:flex;flex-direction:column;animation:fadeUp .2s ease}
-.copilot-head{
-  padding:13px 15px;
-  background:linear-gradient(135deg,var(--purple-bg) 0%,var(--bg3) 100%);
-  border-bottom:1px solid var(--purple)22;display:flex;align-items:center;gap:9px;
-}
-.copilot-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#5b3de0);display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px var(--purple-glow)}
-.copilot-name{font-size:12.5px;font-weight:600;color:var(--text)}
-.copilot-status{font-size:10px;color:var(--purple);font-family:var(--font-mono)}
-.copilot-close{margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;transition:color .12s}
-.copilot-close:hover{color:var(--text)}
-.copilot-msgs{flex:1;max-height:300px;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:8px;scrollbar-width:none}
-.cop-msg{font-size:12.5px;line-height:1.6}
-.cop-msg.ai{background:var(--bg3);border:1px solid var(--border2);border-radius:9px 9px 9px 2px;padding:10px 12px;color:var(--text)}
-.cop-msg.user{background:linear-gradient(135deg,var(--purple-bg),var(--bg4));border:1px solid var(--purple)22;border-radius:9px 9px 2px 9px;padding:10px 12px;color:var(--text);text-align:right}
-.cop-msg.thinking{background:var(--bg3);border:1px solid var(--border);border-radius:9px 9px 9px 2px;padding:10px 12px;color:var(--text3)}
-.cop-action{display:inline-flex;align-items:center;gap:3px;background:var(--accent-bg);border:1px solid var(--accent)22;color:var(--accent);font-size:10.5px;font-family:var(--font-mono);padding:2px 8px;border-radius:4px;margin-top:4px;cursor:pointer;transition:background .12s}
-.cop-action:hover{background:var(--accent);color:#fff}
-.copilot-input-row{padding:11px;border-top:1px solid var(--border);display:flex;gap:7px;background:var(--bg2)}
-.copilot-input-row input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 12px;color:var(--text);font-size:12px;font-family:var(--font-body);outline:none;transition:border-color .15s}
-.copilot-input-row input:focus{border-color:var(--purple)55}
-.copilot-input-row button{background:linear-gradient(135deg,var(--purple),#5b3de0);border:none;border-radius:var(--r);padding:7px 12px;color:#fff;cursor:pointer;font-size:13px;flex-shrink:0;transition:opacity .15s}
-.copilot-input-row button:hover{opacity:.85}
-.cop-typing{display:flex;gap:4px;align-items:center;padding:2px 0}
-.cop-typing span{width:5px;height:5px;border-radius:50%;background:var(--purple);animation:copBounce .9s infinite}
-.cop-typing span:nth-child(2){animation-delay:.15s}
-.cop-typing span:nth-child(3){animation-delay:.3s}
-@keyframes copBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-
-/* ── VOICE COPILOT ── */
-.cop-mic{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text2);cursor:pointer;font-size:13px;flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center;position:relative}
-.cop-mic:hover{color:var(--purple);border-color:var(--purple)55}
-.cop-mic.listening{background:var(--hot-bg);border-color:var(--hot);color:var(--hot)}
-.cop-mic.listening::after{content:'';position:absolute;inset:-3px;border-radius:var(--r);border:1.5px solid var(--hot);animation:pulseRing 1.1s infinite;pointer-events:none}
-.cop-voice-toggle{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--font-mono);color:var(--text3);cursor:pointer;user-select:none;margin-left:auto}
-.cop-voice-toggle input{accent-color:var(--purple);cursor:pointer}
-.cop-listening-bar{display:none;align-items:center;gap:8px;padding:8px 13px;background:var(--hot-bg);border-top:1px solid var(--hot)22;font-size:11px;color:var(--hot);font-family:var(--font-mono)}
-.cop-listening-bar.show{display:flex}
-.cop-listening-bar .lw{display:flex;gap:2px;align-items:flex-end;height:14px}
-.cop-listening-bar .lw span{width:2.5px;background:var(--hot);border-radius:2px;animation:lwave .8s infinite ease-in-out}
-.cop-listening-bar .lw span:nth-child(1){animation-delay:0s}
-.cop-listening-bar .lw span:nth-child(2){animation-delay:.15s}
-.cop-listening-bar .lw span:nth-child(3){animation-delay:.3s}
-.cop-listening-bar .lw span:nth-child(4){animation-delay:.45s}
-.cop-listening-bar .lw span:nth-child(5){animation-delay:.6s}
-@keyframes lwave{0%,100%{height:4px}50%{height:14px}}
-.copilot-fab.wake-on{box-shadow:0 4px 20px var(--purple-glow),0 0 0 3px var(--purple-bg),0 0 0 6px var(--hot)22}
-
-/* ══════════════════════════════════════
-   SCORING / AI VIEWS
-══════════════════════════════════════ */
-.scoring-grid{display:grid;grid-template-columns:270px 1fr;gap:13px;margin-bottom:13px}
-.weight-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-.weight-label{font-size:12px;color:var(--text2);width:115px;flex-shrink:0}
-[dir="rtl"] .weight-label{text-align:right;font-family:var(--font-arabic)}
-.weight-bar-track{flex:1;height:5px;background:var(--bg4);border-radius:2px;overflow:hidden}
-.weight-bar-fill{height:5px;border-radius:2px;transition:width 1.2s ease}
-.weight-pts{font-size:11px;font-family:var(--font-mono);width:28px;text-align:right}
-.model-badge{display:inline-flex;align-items:center;gap:4px;background:var(--purple-bg);border:1px solid var(--purple)22;color:var(--purple);font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:4px}
-.score-queue{display:flex;flex-direction:column;gap:7px}
-.score-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:11px;transition:border-color .2s}
-body.light .score-item{box-shadow:var(--shadow)}
-.score-item.scoring{border-color:var(--purple)33;animation:aiGlow 2s infinite}
-.si-score-bar{width:80px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:3px}
-.si-score-fill{height:4px;border-radius:2px;transition:width 1.4s ease}
-
-/* INTENT */
-.intent-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.intent-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-body.light .intent-card{box-shadow:var(--shadow)}
-.ic-head{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
-.ic-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;font-family:var(--font-mono);overflow:hidden;flex-shrink:0}
-.ic-name{font-size:13px;font-weight:500;color:var(--text)}
-.ic-phone{font-size:10.5px;color:var(--text3);font-family:var(--font-mono)}
-.ic-tags{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
-.msg-thread{padding:13px 15px;display:flex;flex-direction:column;gap:7px;max-height:180px;overflow-y:auto}
-.msg-bubble{max-width:85%;padding:7px 11px;font-size:12px;line-height:1.4;border-radius:9px}
-.msg-bubble.in{background:var(--bg4);border:1px solid var(--border2);align-self:flex-start;color:var(--text);border-radius:9px 9px 9px 2px}
-.msg-bubble.out{background:var(--wa);color:#fff;align-self:flex-end;border-radius:9px 9px 2px 9px;font-weight:500}
-body.light .msg-bubble.out{background:var(--wa-dark);color:#fff}
-.nlp-bar{padding:9px 14px;background:var(--bg3);border-top:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap}
-.nlp-chip{font-size:9.5px;font-family:var(--font-mono);padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.3px}
-.nlp-chip.buyer{background:var(--green-bg);color:var(--green)}
-.nlp-chip.serious{background:var(--hot-bg);color:var(--hot)}
-.nlp-chip.urgent{background:var(--warm-bg);color:var(--warm)}
-.nlp-chip.researching{background:var(--bg5);color:var(--text3)}
-.nlp-chip.high-budget{background:var(--accent-bg);color:var(--accent)}
-.nlp-chip.seller{background:var(--cold-bg);color:var(--cold)}
-
-/* NBA */
-.nba-list{display:flex;flex-direction:column;gap:7px}
-.nba-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;transition:border-color .2s,box-shadow .2s,transform .15s,var(--transition)}
-body.light .nba-item{box-shadow:var(--shadow)}
-.nba-item:hover{border-color:var(--border3);transform:translateX(2px)}
-body.light .nba-item:hover{box-shadow:var(--shadow-md)}
-.nba-priority{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-family:var(--font-mono);font-weight:700;flex-shrink:0}
-.nba-priority.p1{background:var(--hot-bg);color:var(--hot);border:1px solid var(--hot)22}
-.nba-priority.p2{background:var(--warm-bg);color:var(--warm);border:1px solid var(--warm)22}
-.nba-priority.p3{background:var(--cold-bg);color:var(--cold);border:1px solid var(--cold)22}
-.nba-lead-name{font-size:13px;font-weight:500;color:var(--text)}
-.nba-action{font-size:11.5px;color:var(--text2);margin-top:1px}
-.nba-reason{font-size:10.5px;color:var(--text3);font-family:var(--font-mono);margin-top:2px}
-[dir="rtl"] .nba-lead-name,[dir="rtl"] .nba-action,[dir="rtl"] .nba-reason{text-align:right;font-family:var(--font-arabic)}
-.nba-btns{display:flex;gap:5px}
-
-/* ══════════════════════════════════════
-   WHATSAPP
-══════════════════════════════════════ */
-.wa-layout{display:grid;grid-template-columns:270px 1fr 250px;height:calc(100vh - 92px);gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:13px}
-body.light .wa-layout{box-shadow:var(--shadow-md)}
-.wa-contacts{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.wa-contacts-head{padding:11px 13px;border-bottom:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--text);flex-shrink:0;display:flex;align-items:center;gap:7px}
-.wa-contacts-list{overflow-y:auto;flex:1;scrollbar-width:none}
-.wa-contact{padding:10px 13px;display:flex;gap:9px;align-items:center;cursor:pointer;border-left:2px solid transparent;transition:all .12s}
-[dir="rtl"] .wa-contact{border-left:none;border-right:2px solid transparent;flex-direction:row-reverse}
-[dir="rtl"] .wa-contact.active{border-right-color:var(--wa-dark);border-left-color:transparent}
-.wa-contact:hover{background:var(--bg3)}
-.wa-contact.active{background:var(--wa-bg);border-left-color:var(--wa-dark)}
-.wa-c-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;font-family:var(--font-mono);overflow:hidden}
-.wa-c-name{font-size:12.5px;font-weight:500;color:var(--text)}
-.wa-c-preview{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wa-c-time{font-size:10px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0}
-.wa-c-badge{background:var(--wa-dark);color:#fff;font-size:9.5px;font-family:var(--font-mono);padding:1px 5px;border-radius:10px;margin-left:auto;font-weight:600}
-.wa-chat{display:flex;flex-direction:column;overflow:hidden}
-.wa-chat-head{padding:11px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.wa-chat-msgs{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:9px;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
-body.light .wa-chat-msgs{background:#f0f4fb}
-.wa-bubble{max-width:72%;padding:9px 13px;font-size:12.5px;line-height:1.5;border-radius:9px}
-.wa-bubble.in{background:var(--bg3);border:1px solid var(--border2);border-radius:9px 9px 9px 2px;align-self:flex-start;color:var(--text);box-shadow:0 1px 4px #00000018}
-body.light .wa-bubble.in{background:#fff;box-shadow:var(--shadow)}
-.wa-bubble.out{background:linear-gradient(135deg,#1a3a22,#1f4a2a);border:1px solid var(--wa)22;border-radius:9px 9px 2px 9px;align-self:flex-end;color:#e6f4ec;box-shadow:0 1px 4px #00000022}
-body.light .wa-bubble.out{background:linear-gradient(135deg,#d9f7e7,#c5f0d8);color:#1a3a22;border-color:#b7e8ca;box-shadow:var(--shadow)}
-.msg-time{font-size:9px;color:var(--text3);font-family:var(--font-mono);margin-top:2px;opacity:.6}
-.wa-ai-suggestion{background:var(--bg3);border:1px solid var(--border2);padding:9px 13px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;flex-shrink:0;border-top:1px solid var(--border)}
-body.light .wa-ai-suggestion{background:var(--purple-bg);border-top-color:var(--purple)22}
-.wa-input-area{padding:9px 13px;border-top:1px solid var(--border);display:flex;gap:7px;flex-shrink:0}
-.wa-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:18px;padding:7px 13px;color:var(--text);font-size:12.5px;font-family:var(--font-body);outline:none}
-[dir="rtl"] .wa-input{text-align:right;font-family:var(--font-arabic)}
-.wa-input:focus{border-color:var(--wa)44}
-.wa-send{background:var(--wa-dark);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .12s}
-.wa-send:hover{background:var(--wa)}
-.wa-sidebar{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
-[dir="rtl"] .wa-sidebar{border-left:none;border-right:1px solid var(--border)}
-.wa-sidebar-head{padding:12px 13px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text);flex-shrink:0}
-.wa-info-row{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
-[dir="rtl"] .wa-info-row{align-items:flex-end}
-.wa-info-label{font-size:9.5px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px}
-[dir="rtl"] .wa-info-label{font-family:var(--font-arabic);letter-spacing:0}
-.wa-info-val{font-size:12.5px;color:var(--text)}
-
-/* ══════════════════════════════════════
-   ANALYTICS — FUNNEL
-══════════════════════════════════════ */
-.funnel{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0}
-.funnel-bar{border-radius:5px;height:40px;display:flex;align-items:center;padding:0 14px;margin:0 auto;position:relative}
-.funnel-label{font-size:12px;font-weight:500;color:#fff;position:absolute;left:14px;white-space:nowrap}
-[dir="rtl"] .funnel-label{left:auto;right:14px}
-.funnel-num{font-size:13px;font-family:var(--font-mono);font-weight:600;position:absolute;right:14px;color:#ffffff99}
-[dir="rtl"] .funnel-num{right:auto;left:14px}
-.funnel-pct{font-size:10px;font-family:var(--font-mono);color:var(--text3);margin-left:8px;width:40px}
-.funnel-arrow{font-size:10px;color:var(--text4);text-align:center;line-height:1.2;margin:1px 0}
-
-/* ══════════════════════════════════════
-   CHANNEL ROI
-══════════════════════════════════════ */
-.channel-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:11px 13px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);transition:var(--transition)}
-body.light .channel-row{box-shadow:var(--shadow)}
-.channel-icon{width:30px;height:30px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.channel-name{font-size:13px;font-weight:500;color:var(--text);width:105px}
-.channel-bar-wrap{flex:1}
-.channel-bar-track{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:4px}
-.channel-bar-fill{height:5px;border-radius:3px;transition:width 1s ease}
-.channel-stats{display:flex;gap:10px}
-.channel-stat{font-size:10.5px;font-family:var(--font-mono);color:var(--text3)}
-.channel-stat span{color:var(--text2)}
-.channel-roi{font-size:14px;font-weight:700;font-family:var(--font-mono);width:56px;text-align:right}
-
-/* ══════════════════════════════════════
-   KANBAN
-══════════════════════════════════════ */
-.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;min-height:360px}
-.kanban-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-body.light .kanban-col{box-shadow:var(--shadow)}
-.kanban-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
-.kanban-stage{font-size:12px;font-weight:600;color:var(--text)}
-.kanban-num{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-left:auto}
-.kanban-cards{padding:8px;display:flex;flex-direction:column;gap:6px}
-.k-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s}
-body.light .k-card{background:#fff;box-shadow:var(--shadow)}
-.k-card:hover{border-color:var(--border4);transform:translateY(-2px);box-shadow:0 4px 12px #00000030}
-body.light .k-card:hover{box-shadow:var(--shadow-md)}
-.k-card[data-temp="hot"]{animation:hotPulse 3s infinite;border-color:var(--hot)22}
-.k-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
-.k-meta{font-size:10.5px;color:var(--text3);font-family:var(--font-mono)}
-.k-row{display:flex;align-items:center;justify-content:space-between;margin-top:5px}
-
-/* ══════════════════════════════════════
-   AGENT / FULL TABLE
-══════════════════════════════════════ */
-.full-table{width:100%;border-collapse:collapse}
-.full-table th{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-family:var(--font-mono);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
-[dir="rtl"] .full-table th{text-align:right;font-family:var(--font-arabic);letter-spacing:0}
-.full-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12.5px}
-.full-table tr:last-child td{border-bottom:none}
-.full-table tr:hover td{background:var(--bg3)}
-.response-time{font-size:10.5px;padding:2px 7px;border-radius:4px;font-family:var(--font-mono)}
-
-/* ══════════════════════════════════════
-   SLA
-══════════════════════════════════════ */
-.sla-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:11px;transition:var(--transition)}
-body.light .sla-item{box-shadow:var(--shadow)}
-.sla-lead-name{font-size:13px;font-weight:500;color:var(--text)}
-.sla-lead-meta{font-size:11px;color:var(--text3);font-family:var(--font-mono)}
-.sla-timer{font-family:var(--font-mono);font-size:13px;font-weight:600;min-width:68px;text-align:right}
-.sla-timer.ok{color:var(--green)}.sla-timer.warn{color:var(--warm)}.sla-timer.breach{color:var(--hot)}
-.sla-bar-wrap{width:110px}
-.sla-bar-track{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
-.sla-bar-fill{height:3px;border-radius:2px}
-
-/* ══════════════════════════════════════
-   COMPLIANCE
-══════════════════════════════════════ */
-.compliance-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
-.compliance-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:17px}
-body.light .compliance-card{box-shadow:var(--shadow)}
-.compliance-icon{font-size:22px;margin-bottom:9px}
-.compliance-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
-.compliance-desc{font-size:12px;color:var(--text3);margin-bottom:11px}
-.compliance-status{display:flex;align-items:center;gap:6px;font-size:11.5px;margin-bottom:5px}
-[dir="rtl"] .compliance-status{flex-direction:row-reverse}
-.ccheck{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
-.ccheck.ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green)22}
-.ccheck.warn{background:var(--warm-bg);color:var(--warm);border:1px solid var(--warm)22}
-
-/* ══════════════════════════════════════
-   CHART / SPARKLINE
-══════════════════════════════════════ */
-.mini-chart{display:flex;align-items:flex-end;gap:3px;height:50px}
-.bar-c{flex:1;border-radius:2px 2px 0 0;position:relative;cursor:pointer;transition:opacity .15s}
-.bar-c:hover{opacity:.72}
-.tooltip-box{position:absolute;bottom:calc(100%+5px);left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:10.5px;font-family:var(--font-mono);padding:4px 9px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
-body.light .tooltip-box{box-shadow:var(--shadow)}
-.bar-c:hover .tooltip-box{opacity:1}
-
-/* ══════════════════════════════════════
-   PIPELINE CARDS
-══════════════════════════════════════ */
-.pipe-stage{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;transition:var(--transition)}
-body.light .pipe-stage{background:#fff;box-shadow:var(--shadow)}
-.pipe-label{font-size:10.5px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
-[dir="rtl"] .pipe-label{text-align:right;font-family:var(--font-arabic);letter-spacing:0}
-.pipe-value{font-size:20px;font-family:var(--font-display);color:var(--text)}
-.pipe-sub{font-size:10.5px;color:var(--text3);font-family:var(--font-mono)}
-
-/* ══════════════════════════════════════
-   MODALS
-══════════════════════════════════════ */
-.modal-overlay{position:fixed;inset:0;background:#00000077;z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.modal-overlay.open{display:flex;animation:fadeUp .2s ease}
-.modal{
-  background:var(--bg2);border:1px solid var(--border3);border-radius:var(--rxl);
-  width:420px;overflow:hidden;box-shadow:var(--shadow-lg),0 0 60px #00000044;
-}
-body.light .modal{box-shadow:0 20px 50px #0000002a}
-.modal-head{
-  padding:16px 18px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(180deg,var(--bg3) 0%,var(--bg2) 100%);
-}
-.modal-title{font-family:var(--font-display);font-size:17px;color:var(--text);letter-spacing:-.2px}
-.modal-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:17px;line-height:1;transition:color .12s;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-.modal-close:hover{color:var(--text);background:var(--bg4)}
-.modal-body{padding:18px}
-.field-group{margin-bottom:13px}
-.field-label{font-size:10px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px}
-[dir="rtl"] .field-label{text-align:right;font-family:var(--font-arabic);letter-spacing:0}
-.field-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 12px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:var(--accent)55;box-shadow:0 0 0 3px var(--accent-bg)}
-[dir="rtl"] .field-input{text-align:right;font-family:var(--font-arabic)}
-.modal-foot{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:7px;justify-content:flex-end;background:var(--bg3)}
-
-/* NOTIF */
-.notif{display:flex;gap:11px;padding:11px 15px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
-.notif:hover{background:var(--bg3)}
-.notif.notif-unread{background:var(--accent-bg)}
-.notif-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.notif-text{font-size:12.5px;color:var(--text2);line-height:1.4}
-.notif-time{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:2px}
-
-/* ══════════════════════════════════════
-   PAYMENT PLAN BUTTONS
-══════════════════════════════════════ */
-.plan-btn{
-  padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);
-  color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;font-family:var(--font-body);
-  text-align:center;
-}
-.plan-btn:hover{border-color:var(--border3);color:var(--text);background:var(--bg4)}
-.plan-btn.active{background:var(--accent-bg);border-color:var(--accent)55;color:var(--accent);font-weight:600}
-.term-btn.active{background:var(--accent-bg);border-color:var(--accent)55;color:var(--accent);font-weight:600}
-
-/* ══════════════════════════════════════
-   GCC DEVELOPER CARDS — WITH HERO IMAGERY
-══════════════════════════════════════ */
-.dev-card{
-  background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);
-  border:1px solid var(--border);border-radius:var(--rl);
-  padding:0;cursor:pointer;transition:all .22s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden;
-  display:flex;flex-direction:column;
-}
-.dev-card:hover{border-color:var(--border3);transform:translateY(-3px);box-shadow:var(--shadow-md)}
-.dev-card:hover .dev-hero img{transform:scale(1.08)}
-.dev-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
-  background:var(--dev-accent,linear-gradient(90deg,var(--accent),var(--accent2)));
-}
-.dev-hero{
-  position:relative;width:100%;height:130px;overflow:hidden;
-  background:var(--bg4);
-  border-bottom:1px solid var(--border);
-}
-.dev-hero img{
-  width:100%;height:100%;object-fit:cover;display:block;
-  transition:transform .6s cubic-bezier(.22,1,.36,1);
-  filter:saturate(.92) contrast(1.02);
-}
-.dev-hero::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(8,10,14,.55) 75%,rgba(8,10,14,.85) 100%);
-  pointer-events:none;
-}
-body.light .dev-hero::after{
-  background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(20,25,35,.35) 75%,rgba(20,25,35,.55) 100%);
-}
-.dev-hero-tag{
-  position:absolute;top:10px;right:10px;z-index:2;
-  background:rgba(8,10,14,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.15);
-  color:#fff;font-size:9.5px;font-family:var(--font-mono);
-  padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;
-  display:inline-flex;align-items:center;gap:4px;
-}
-.dev-hero-flag{
-  position:absolute;top:10px;left:10px;z-index:2;
-  background:rgba(8,10,14,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.15);
-  color:#fff;font-size:14px;
-  padding:3px 8px;border-radius:4px;line-height:1;
-}
-.dev-hero-title{
-  position:absolute;left:14px;bottom:10px;right:14px;z-index:2;
-  color:#fff;font-family:var(--font-display);font-size:17px;line-height:1.15;
-  letter-spacing:-.2px;
-  text-shadow:0 2px 12px rgba(0,0,0,.6),0 1px 3px rgba(0,0,0,.5);
-}
-.dev-body{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
-.dev-head-row{display:flex;align-items:center;gap:11px;margin-bottom:11px}
-.dev-logo{
-  width:42px;height:42px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0;
-  border:1px solid var(--border2);
-  background:var(--bg);
-  overflow:hidden;position:relative;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
-}
-.dev-logo img{width:100%;height:100%;object-fit:cover;display:block}
-.dev-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;letter-spacing:-.1px}
-.dev-country{font-size:10.5px;color:var(--text3);font-family:var(--font-mono);margin-bottom:6px}
-.dev-stats{display:flex;gap:8px;margin-bottom:11px}
-.dev-stat{background:var(--bg4);border-radius:6px;padding:5px 9px;text-align:center;flex:1}
-.dev-stat-val{font-size:13px;font-weight:600;color:var(--text);font-family:var(--font-mono)}
-.dev-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-.dev-projects{margin-top:auto}
-.dev-project-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:3px 8px;border-radius:4px;margin:2px;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
-.dev-project-tag.flagship{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)22}
-.dev-desc{font-size:11.5px;color:var(--text3);margin-bottom:11px;line-height:1.55}
-.calc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
-.calc-row:last-child{border-bottom:none;font-weight:600;color:var(--text);padding-top:11px}
-.calc-label{font-size:12px;color:var(--text3)}
-.calc-value{font-size:13px;font-family:var(--font-mono);color:var(--text)}
-.comp-table{width:100%;border-collapse:collapse}
-.comp-table th{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-mono);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
-.comp-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12.5px}
-.comp-table tr.best-plan td{background:var(--green-bg);color:var(--text)}
-.comp-table tr.best-plan td:first-child{border-left:3px solid var(--green)}
-.best-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;background:var(--green-bg);color:var(--green);border:1px solid var(--green)22;padding:1px 6px;border-radius:3px;font-family:var(--font-mono)}
-
-body.light .seq-card{background:#fff;box-shadow:var(--shadow)}
-
-/* ══════════════════════════════════════
-   GCC HERO BANNER & EMPTY STATES
-══════════════════════════════════════ */
-.gcc-hero{
-  position:relative;
-  height:170px;
-  border-radius:var(--rl);
-  overflow:hidden;
-  margin-bottom:13px;
-  border:1px solid var(--border);
-  background:var(--bg4);
-}
-.gcc-hero img{
-  position:absolute;inset:0;
-  width:100%;height:100%;object-fit:cover;
-  filter:saturate(.95) contrast(1.05);
-}
-.gcc-hero::after{
-  content:'';position:absolute;inset:0;
-  background:
-    linear-gradient(180deg,rgba(8,10,14,.55) 0%,rgba(8,10,14,.35) 50%,rgba(8,10,14,.92) 100%),
-    linear-gradient(90deg,rgba(8,10,14,.85) 0%,rgba(8,10,14,.35) 50%,rgba(8,10,14,0) 100%);
-  pointer-events:none;
-}
-body.light .gcc-hero::after{
-  background:
-    linear-gradient(180deg,rgba(20,25,35,.35) 0%,rgba(20,25,35,.20) 50%,rgba(20,25,35,.75) 100%),
-    linear-gradient(90deg,rgba(20,25,35,.65) 0%,rgba(20,25,35,.20) 50%,rgba(20,25,35,0) 100%);
-}
-.gcc-hero-content{
-  position:absolute;inset:0;z-index:2;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:18px 22px;
-}
-.gcc-hero-title{
-  font-family:var(--font-display);font-size:28px;color:#fff;
-  letter-spacing:-.4px;line-height:1.1;margin-bottom:6px;
-  text-shadow:0 2px 16px rgba(0,0,0,.5);
-}
-.gcc-hero-sub{
-  font-size:12.5px;color:rgba(255,255,255,.85);font-family:var(--font-mono);
-  letter-spacing:.3px;text-shadow:0 1px 6px rgba(0,0,0,.5);
-}
-.gcc-hero-badge{
-  position:absolute;top:14px;right:16px;z-index:3;
-  background:rgba(255,255,255,.10);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.2);
-  color:#fff;font-size:10px;font-family:var(--font-mono);
-  padding:5px 11px;border-radius:5px;
-  display:inline-flex;align-items:center;gap:6px;
-}
-.gcc-hero-badge .live-dot{background:#22c55e;box-shadow:0 0 8px #22c55e}
-</style>
-</head>
-<body>
-<div class="app">
-
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-mark" data-i18n="brand">Observer</div>
-    <div class="logo-sub" data-i18n="brand_sub">Autonomous Revenue Engine</div>
-    <div style="display:flex;gap:5px;margin-top:6px;align-items:center">
-      <div class="logo-tag">⚡ <span data-i18n="ai_powered">AI-POWERED</span></div>
-      <div class="logo-tag" style="background:var(--green-bg);border-color:var(--green)33;color:var(--green)">v3</div>
-    </div>
-  </div>
-  <div class="org-switcher">
-    <div class="org-dot"></div>
-    <div style="flex:1">
-      <div class="org-name">Emaar Properties</div>
-      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)" data-i18n="org_sub">Dubai, UAE · Enterprise</div>
-    </div>
-    <div class="org-arrow">⌄</div>
-  </div>
-  <nav class="nav">
-    <div class="nav-section" data-i18n="nav_core">Core</div>
-    <div class="nav-item active" onclick="showView('dashboard',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
-      <span data-i18n="nav_dashboard">Dashboard</span><span class="nav-badge red">5</span>
-    </div>
-    <div class="nav-item" onclick="showView('pipeline',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h9M2 12h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_pipeline">Pipeline</span>
-    </div>
-    <div class="nav-item" onclick="showView('leads',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 13c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_leads">All Leads</span>
-    </div>
-    <div class="nav-section" data-i18n="nav_ai">AI Engine</div>
-    <div class="nav-item" onclick="showView('scoring',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_scoring">Lead Scoring</span><span class="nav-badge purple">AI</span>
-    </div>
-    <div class="nav-item" onclick="showView('intent',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8h2l2-5 2 10 2-5h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span data-i18n="nav_intent">Intent Detection</span>
-    </div>
-    <div class="nav-item" onclick="showView('nba',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 4H14l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4.5L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      <span data-i18n="nav_nba">Next Best Action</span>
-    </div>
-    <div class="nav-item" onclick="showView('call_assist',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 3.5c0 5 4.5 9.5 9.5 9.5l1.5-2.2-2.8-1.3-1.2 1.2c-1.6-.8-2.9-2.1-3.7-3.7l1.2-1.2L6 2.9 3.8 2C3.4 2 3 2.5 3 3.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      <span>Live Call Assistant</span><span class="nav-badge red">LIVE</span>
-    </div>
-    <div class="nav-section" data-i18n="nav_channels">Channels</div>
-    <div class="nav-item" onclick="showView('whatsapp',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13z" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 8.5c1.5 2 4.5 2 5-1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_wa">WhatsApp</span><span class="nav-badge green">14</span>
-    </div>
-    <div class="nav-item" onclick="showView('sms',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 3h12v8H9l-3 2V11H2V3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      <span data-i18n="nav_sms">SMS / Sequences</span>
-    </div>
-    <div class="nav-item" onclick="showView('social_auto',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2C4.69 2 2 4.46 2 7.5c0 1.7.82 3.22 2.12 4.26L3.5 14l2.38-1.18C6.54 12.93 7.26 13 8 13c3.31 0 6-2.46 6-5.5S11.31 2 8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="7.5" r=".7" fill="currentColor"/><circle cx="8" cy="7.5" r=".7" fill="currentColor"/><circle cx="10.5" cy="7.5" r=".7" fill="currentColor"/></svg>
-      <span>FB &amp; Instagram Auto</span><span class="nav-badge purple">NEW</span>
-    </div>
-    <div class="nav-section" data-i18n="nav_analytics">Analytics</div>
-    <div class="nav-item" onclick="showView('funnel',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 3h12l-4 5v5l-4-2V8L2 3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      <span data-i18n="nav_funnel">Conversion Funnel</span>
-    </div>
-    <div class="nav-item" onclick="showView('roi',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13V8M6 13V5M10 13V7M14 13V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_roi">Channel ROI</span>
-    </div>
-    <div class="nav-item" onclick="showView('agents',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 13c0-1.66 1.79-3 4-3M8 13c0-1.66 1.79-3 4-3s4 1.34 4 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_agents">Agent Performance</span>
-    </div>
-    <div class="nav-section">GCC Market</div>
-    <div class="nav-item" onclick="showView('gcc_developers',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="8" width="3" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="6.5" y="5" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="11" y="2" width="3" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
-      <span>GCC Developers</span><span class="nav-badge purple">NEW</span>
-    </div>
-    <div class="nav-item" onclick="showView('payment_calc',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span>Payment Plans</span><span class="nav-badge green">CALC</span>
-    </div>
-    <div class="nav-section" data-i18n="nav_enterprise">Enterprise</div>
-    <div class="nav-item" onclick="showView('sla',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_sla">SLA Tracking</span><span class="nav-badge red">2</span>
-    </div>
-    <div class="nav-item" onclick="showView('compliance',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2 4v4c0 3.18 2.58 5.74 6 6.5 3.42-.76 6-3.32 6-6.5V4L8 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      <span data-i18n="nav_compliance">Compliance</span>
-    </div>
-    <div class="nav-item" onclick="showView('notifications',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 00-4 4v3l-1.5 2h11L12 9V6a4 4 0 00-4-4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6.5 13.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span data-i18n="nav_notif">Notifications</span><span class="nav-badge red">9</span>
-    </div>
-  </nav>
-  <div class="sidebar-footer">
-    <div class="agent-pill">
-      <div class="agent-avatar has-photo" style="overflow:hidden">
-        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Sarah Ahmed" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='linear-gradient(135deg,var(--accent),var(--accent2))';this.parentElement.innerHTML='SA'">
-      </div>
-      <div>
-        <div class="agent-name">Sarah Ahmed</div>
-        <div class="agent-role">Sr. Agent · Admin</div>
-      </div>
-      <div class="online-dot"></div>
-    </div>
-  </div>
-</aside>
-
-<!-- ═══════════ MAIN ═══════════ -->
-<main class="main">
-  <div class="topbar">
-    <div class="page-title" id="page-title" data-i18n="nav_dashboard">Dashboard</div>
-    <div class="live-badge"><span class="live-dot"></span><span data-i18n="live">Live</span></div>
-    <div class="ai-badge">⚡ <span data-i18n="ai_active">AI Active</span></div>
-    <div class="topbar-right">
-      <!-- CONTROLS GROUP -->
-      <div class="topbar-controls" style="display:flex;align-items:center;gap:5px">
-        <!-- Theme Toggle -->
-        <div class="topbar-controls">
-          <button class="ctrl-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
-            🌗
-            <span class="ctrl-tooltip" data-i18n="tt_theme">Light / Dark mode</span>
-          </button>
-          <button class="ctrl-btn" id="densityBtn" onclick="toggleDensity()" title="Density">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="2" rx="1" fill="currentColor"/><rect x="1" y="5.5" width="11" height="2" rx="1" fill="currentColor"/><rect x="1" y="10" width="11" height="2" rx="1" fill="currentColor"/></svg>
-            <span class="ctrl-tooltip" data-i18n="tt_density">Compact / Comfortable</span>
-          </button>
-          <button class="ctrl-btn" id="focusBtn" onclick="toggleFocus()" title="Focus Mode">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 4V1h3M9 1h3v3M12 9v3H9M4 12H1V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            <span class="ctrl-tooltip" data-i18n="tt_focus">Focus Mode</span>
-          </button>
-          <button class="ctrl-btn" id="wakeBtn" onclick="toggleWakeWord()" title="Hey Observer wake word">
-            🎙️
-            <span class="ctrl-tooltip">Hands-free: "Hey Observer"</span>
-          </button>
-          <div class="ctrl-divider"></div>
-          <button class="ctrl-btn" id="langBtn" onclick="toggleLang()" style="font-size:11px;font-weight:700;width:34px" title="Language">
-            <span id="langLabel">AR</span>
-            <span class="ctrl-tooltip">عربي / English</span>
-          </button>
-        </div>
-      </div>
-      <div class="search-bar">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <input placeholder="Search leads, agents..." id="searchInput" data-i18n-ph="search_ph">
-      </div>
-      <button class="btn btn-wa" onclick="showView('whatsapp',null)">💬 <span data-i18n="nav_wa">WhatsApp</span></button>
-      <button class="btn btn-primary" onclick="openAddLead()">+ <span data-i18n="add_lead">Add Lead</span></button>
-    </div>
-  </div>
-
-  <div class="content">
-
-<!-- ═══════════ DASHBOARD ═══════════ -->
-<div class="view active" id="view-dashboard">
-  <!-- HERO WELCOME BANNER -->
-  <div class="hero-banner">
-    <img class="hero-bg" src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop" alt="Dubai skyline at dusk" onerror="this.style.display='none';this.closest('.hero-banner').style.background='linear-gradient(120deg,#0f1830,#1a1430,#2a1020)'">
-    <div class="hero-content">
-      <div class="hero-greeting" id="hero-greeting">Good evening, Sarah 👋</div>
-      <div class="hero-sub" id="hero-sub">Your AI workforce closed <strong style="color:#fff">3 viewings</strong> and re-engaged <strong style="color:#fff">214 cold leads</strong> while you were away.</div>
-      <div class="hero-chips">
-        <span class="hero-chip"><span class="hc-dot"></span> AI Active · 247 leads tracked</span>
-        <span class="hero-chip warm"><span class="hc-dot"></span> 34 hot 🔥</span>
-        <span class="hero-chip purple"><span class="hc-dot"></span> AED 4.2M pipeline</span>
-      </div>
-    </div>
-    <div class="hero-loc">📍 Dubai, UAE · Emaar Properties</div>
-  </div>
-  <div class="metrics-row">
-    <div class="metric-card mc-hot">
-      <div class="metric-label" data-i18n="m_total">Total Leads</div>
-      <div class="metric-value" id="m-total">247</div>
-      <div class="metric-delta">↑ +18 <span data-i18n="this_week">this week</span></div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:73%;background:var(--accent)"></div></div>
-    </div>
-    <div class="metric-card mc-hot">
-      <div class="metric-label" data-i18n="m_hot">Hot Leads 🔥</div>
-      <div class="metric-value" style="color:var(--hot)" id="m-hot">34</div>
-      <div class="metric-delta">↑ +5 <span data-i18n="today">today</span> · AI <span data-i18n="scored">scored</span></div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:34%;background:var(--hot)"></div></div>
-    </div>
-    <div class="metric-card mc-green">
-      <div class="metric-label" data-i18n="m_calls">Calls Booked</div>
-      <div class="metric-value" style="color:var(--green)">21</div>
-      <div class="metric-delta">↑ 61.7% <span data-i18n="booking_rate">booking rate</span></div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:62%;background:var(--green)"></div></div>
-    </div>
-    <div class="metric-card mc-warm">
-      <div class="metric-label" data-i18n="m_response">Avg Response</div>
-      <div class="metric-value" style="color:var(--warm)">4m</div>
-      <div class="metric-delta warn" data-i18n="speed_to_lead">↑ Speed to lead</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:88%;background:var(--warm)"></div></div>
-    </div>
-  </div>
-  <div class="metrics-row">
-    <div class="metric-card mc-purple">
-      <div class="metric-label" data-i18n="m_ai_score">AI Score Avg</div>
-      <div class="metric-value" style="color:var(--purple)">78</div>
-      <div class="metric-delta" style="color:var(--purple)">↑ XGBoost v2.4</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:78%;background:var(--purple)"></div></div>
-    </div>
-    <div class="metric-card mc-green">
-      <div class="metric-label" data-i18n="m_wa">WhatsApp Opens</div>
-      <div class="metric-value" style="color:var(--wa-dark)">89%</div>
-      <div class="metric-delta">↑ vs 28% email</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:89%;background:var(--wa-dark)"></div></div>
-    </div>
-    <div class="metric-card mc-teal">
-      <div class="metric-label" data-i18n="m_revenue">Revenue Pipeline</div>
-      <div class="metric-value" style="color:var(--teal)">AED 4.2M</div>
-      <div class="metric-delta" style="color:var(--teal)">↑ +12% MoM</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:68%;background:var(--teal)"></div></div>
-    </div>
-    <div class="metric-card mc-warm">
-      <div class="metric-label" data-i18n="m_cpl">Cost Per Lead</div>
-      <div class="metric-value" style="color:var(--warm)">AED 42</div>
-      <div class="metric-delta">↓ -18% vs last month</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:42%;background:var(--warm)"></div></div>
-    </div>
-  </div>
-  <div class="panel-grid">
-    <div class="panel">
-      <div class="panel-header">
-        <span style="font-size:13px">🔥</span>
-        <span class="panel-title" data-i18n="hot_leads_panel">Hot Leads — Act Now</span>
-        <span class="panel-count" id="hot-count">34 total</span>
-      </div>
-      <table class="lead-table">
-        <thead><tr><th data-i18n="col_lead">Lead</th><th data-i18n="col_score">AI Score</th><th data-i18n="col_intent">Intent</th><th data-i18n="col_time">Time</th><th></th></tr></thead>
-        <tbody id="hot-leads-table"></tbody>
-      </table>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title" data-i18n="live_activity">Live Activity Stream</span>
-        <div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span data-i18n="realtime">Real-time</span></div>
-      </div>
-      <div style="max-height:290px;overflow-y:auto">
-        <div class="activity-feed" id="activity-feed" style="padding:0 15px"></div>
-      </div>
-    </div>
-  </div>
-  <div class="panel-grid">
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title" data-i18n="nba_panel">Next Best Actions</span>
-        <div class="ai-badge" style="font-size:9px">⚡ AI</div>
-        <span class="panel-action" onclick="showView('nba',null)" data-i18n="view_all">View all →</span>
-      </div>
-      <div class="panel-body" style="padding:11px 13px"><div id="dash-nba"></div></div>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title" data-i18n="temp_dist">Lead Temperature Distribution</span>
-      </div>
-      <div class="panel-body">
-        <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">
-          <div style="text-align:center"><div style="font-size:22px;font-weight:600;color:var(--hot);font-family:var(--font-display)">34</div><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono)" data-i18n="hot">HOT</div></div>
-          <div style="text-align:center"><div style="font-size:22px;font-weight:600;color:var(--warm);font-family:var(--font-display)">89</div><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono)" data-i18n="warm">WARM</div></div>
-          <div style="text-align:center"><div style="font-size:22px;font-weight:600;color:var(--cold);font-family:var(--font-display)">124</div><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono)" data-i18n="cold">COLD</div></div>
-          <div style="flex:1"><div style="height:7px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:5px"><div style="width:13.7%;background:var(--hot)"></div><div style="width:36%;background:var(--warm)"></div><div style="width:50.3%;background:var(--cold)"></div></div><div style="font-size:11px;color:var(--text3)" data-i18n="total_leads_ai">247 total · AI-scored</div></div>
-        </div>
-        <div class="mini-chart" id="daily-chart" style="height:52px"></div>
-        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:5px" data-i18n="daily_chart_label">Daily new leads — last 14 days</div>
-      </div>
-    </div>
-  </div>
-  <div class="panel-grid-3">
-    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="agents_today">Agents Today</span></div><div id="agent-today"></div></div>
-    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="pipeline_velocity">Pipeline Velocity</span></div><div class="panel-body"><div id="pipe-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div></div></div>
-    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="channel_mix">Channel Mix Today</span></div><div class="panel-body" id="channel-mix"></div></div>
-  </div>
-
-  <!-- AUTOMATION SUMMARY + SOCIAL SNAPSHOT -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px">
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">🤖 Today's Automation Summary</span>
-        <div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Running</div>
-      </div>
-      <div class="panel-body" id="dash-auto-summary"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">📱 Social Leads Snapshot</span>
-        <span class="panel-action" onclick="showView('social_auto',null)">View all →</span>
-      </div>
-      <div class="panel-body" id="dash-social-snapshot"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ PIPELINE ═══════════ -->
-<div class="view" id="view-pipeline">
-  <div class="metrics-row">
-    <div class="metric-card"><div class="metric-label" data-i18n="new">New</div><div class="metric-value">48</div><div class="metric-delta">↑ today</div><div class="metric-bar"><div class="metric-bar-fill" style="width:48%;background:var(--cold)"></div></div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="qualified">Qualified</div><div class="metric-value">31</div><div class="metric-delta">64.5% rate</div><div class="metric-bar"><div class="metric-bar-fill" style="width:64%;background:var(--warm)"></div></div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="meeting_set">Meeting Set</div><div class="metric-value">19</div><div class="metric-delta">61.2% rate</div><div class="metric-bar"><div class="metric-bar-fill" style="width:61%;background:var(--purple)"></div></div></div>
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="closed">Closed Won</div><div class="metric-value" style="color:var(--green)">7</div><div class="metric-delta">36.8% close rate</div><div class="metric-bar"><div class="metric-bar-fill" style="width:37%;background:var(--green)"></div></div></div>
-  </div>
-
-  <!-- Revenue forecast banner -->
-  <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:var(--rl);padding:14px 18px;margin-bottom:13px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.5px">Weighted Pipeline</div><div style="font-size:24px;font-family:var(--font-display);color:var(--accent)">AED 6.84M</div></div>
-    <div style="width:1px;height:36px;background:var(--border2)"></div>
-    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Best Case</div><div style="font-size:16px;font-weight:600;color:var(--green)">AED 12.2M</div></div>
-    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Commit</div><div style="font-size:16px;font-weight:600;color:var(--text)">AED 4.1M</div></div>
-    <div><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Avg Deal Size</div><div style="font-size:16px;font-weight:600;color:var(--text)">AED 2.44M</div></div>
-    <div style="margin-left:auto">
-      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:5px">Close probability by stage</div>
-      <div style="display:flex;gap:5px;align-items:center">
-        <span style="font-size:10px;font-family:var(--font-mono);color:var(--cold)">New 10%</span>
-        <span style="font-size:10px;color:var(--text4)">→</span>
-        <span style="font-size:10px;font-family:var(--font-mono);color:var(--warm)">Qual 30%</span>
-        <span style="font-size:10px;color:var(--text4)">→</span>
-        <span style="font-size:10px;font-family:var(--font-mono);color:var(--purple)">Meet 60%</span>
-        <span style="font-size:10px;color:var(--text4)">→</span>
-        <span style="font-size:10px;font-family:var(--font-mono);color:var(--accent)">Offer 85%</span>
-        <span style="font-size:10px;color:var(--text4)">→</span>
-        <span style="font-size:10px;font-family:var(--font-mono);color:var(--green)">Closed 100%</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header"><span class="panel-title" data-i18n="deal_pipeline">Deal Pipeline — Kanban</span><span class="panel-count">5 stages</span></div>
-    <div class="panel-body" style="overflow-x:auto"><div class="kanban" id="kanban-board"></div></div>
-  </div>
-</div>
-
-<!-- ═══════════ ALL LEADS ═══════════ -->
-<div class="view" id="view-leads">
-  <div style="display:flex;align-items:center;gap:7px;margin-bottom:13px;flex-wrap:wrap">
-    <button class="btn btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="filterLeads('all',this)" data-i18n="filter_all">All (247)</button>
-    <button class="btn btn-sm" onclick="filterLeads('hot',this)">🔥 <span data-i18n="filter_hot">Hot (34)</span></button>
-    <button class="btn btn-sm" onclick="filterLeads('warm',this)" data-i18n="filter_warm">Warm (89)</button>
-    <button class="btn btn-sm" onclick="filterLeads('cold',this)" data-i18n="filter_cold">Cold (124)</button>
-    <button class="btn btn-sm" onclick="filterLeads('buyer',this)" data-i18n="filter_buyers">Buyers</button>
-    <button class="btn btn-sm" onclick="filterLeads('seller',this)" data-i18n="filter_sellers">Sellers</button>
-  </div>
-  <div class="panel">
-    <div class="panel-header"><span class="panel-title" data-i18n="nav_leads">All Leads</span><span class="panel-count" id="leads-count">247 leads</span></div>
-    <table class="lead-table">
-      <thead><tr><th data-i18n="col_lead">Lead</th><th data-i18n="col_source">Source</th><th data-i18n="col_score">AI Score</th><th data-i18n="col_intent">Intent</th><th data-i18n="col_temp">Temp</th><th data-i18n="col_budget">Budget</th><th data-i18n="col_agent">Agent</th><th data-i18n="col_last">Last Contact</th><th></th></tr></thead>
-      <tbody id="all-leads-table"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ═══════════ AI SCORING ═══════════ -->
-<div class="view" id="view-scoring">
-  <div class="metrics-row">
-    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="model">Model</div><div class="metric-value" style="font-size:18px;color:var(--purple)">XGBoost</div><div class="metric-delta" style="color:var(--purple)">v2.4 · 91.3% acc.</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="scored_today">Scored Today</div><div class="metric-value">184</div><div class="metric-delta">↑ +22 new</div></div>
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="high_intent">High Intent</div><div class="metric-value" style="color:var(--green)">47</div><div class="metric-delta">↑ 25.5% of scored</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="avg_score">Avg Score</div><div class="metric-value" style="color:var(--accent)">78</div><div class="metric-delta warn">↑ vs 61 last month</div></div>
-  </div>
-  <div class="scoring-grid">
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title" data-i18n="feature_weights">Model Feature Weights</span><div class="model-badge">⚡ XGBoost v2.4</div></div>
-      <div class="panel-body" id="weight-settings"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title" data-i18n="live_queue">Live Scoring Queue</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span><span data-i18n="processing">Processing</span></div></div>
-      <div class="panel-body" style="padding:11px"><div class="score-queue" id="score-queue"></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ INTENT DETECTION ═══════════ -->
-<div class="view" id="view-intent">
-  <div class="metrics-row">
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="buyers_detected">Buyers Detected</div><div class="metric-value" style="color:var(--green)">163</div><div class="metric-delta">↑ NLP classified</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="sellers">Sellers</div><div class="metric-value" style="color:var(--cold)">84</div><div class="metric-delta">34% of leads</div></div>
-    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="high_urgency">High Urgency</div><div class="metric-value" style="color:var(--hot)">51</div><div class="metric-delta">↑ Act immediately</div></div>
-    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="nlp_model">NLP Model</div><div class="metric-value" style="font-size:18px;color:var(--purple)">GPT-NLP</div><div class="metric-delta" style="color:var(--purple)">WA + SMS</div></div>
-  </div>
-  <div class="intent-grid" id="intent-grid"></div>
-</div>
-
-<!-- ═══════════ NEXT BEST ACTION ═══════════ -->
-<div class="view" id="view-nba">
-  <div class="metrics-row">
-    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="urgent_actions">Urgent Actions</div><div class="metric-value" style="color:var(--hot)">12</div><div class="metric-delta">Act in 30 min</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="scheduled">Scheduled</div><div class="metric-value">28</div><div class="metric-delta">Queued by AI</div></div>
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="completed_today">Completed Today</div><div class="metric-value" style="color:var(--green)">41</div><div class="metric-delta">↑ 87% execution</div></div>
-    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="ai_confidence">AI Confidence</div><div class="metric-value" style="color:var(--purple)">94%</div><div class="metric-delta" style="color:var(--purple)">Engine accuracy</div></div>
-  </div>
-  <div class="panel">
-    <div class="panel-header"><span class="panel-title" data-i18n="ai_actions">AI-Recommended Actions</span><div class="ai-badge" style="font-size:9px">⚡ <span data-i18n="ranked_revenue">Ranked by revenue impact</span></div></div>
-    <div class="panel-body" style="padding:11px"><div class="nba-list" id="nba-list"></div></div>
-  </div>
-</div>
-
-<!-- ═══════════ LIVE CALL ASSISTANT ═══════════ -->
-<div class="view" id="view-call_assist">
-  <div class="metrics-row">
-    <div class="metric-card mc-hot"><div class="metric-label">Call Status</div><div class="metric-value" style="font-size:18px;color:var(--hot)" id="call-status-val">🔴 Live</div><div class="metric-delta" id="call-duration">02:14 elapsed</div></div>
-    <div class="metric-card mc-purple"><div class="metric-label">AI Sentiment</div><div class="metric-value" style="font-size:18px;color:var(--purple)" id="call-sentiment">Positive ↗</div><div class="metric-delta" style="color:var(--purple)">Buyer engaged</div></div>
-    <div class="metric-card mc-green"><div class="metric-label">Close Probability</div><div class="metric-value" style="color:var(--green)" id="call-close-prob">73%</div><div class="metric-delta">↑ +12% this call</div></div>
-    <div class="metric-card"><div class="metric-label">Talk Ratio</div><div class="metric-value" style="color:var(--accent)">38<span style="font-size:14px">:62</span></div><div class="metric-delta">You : Lead · ideal</div></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 340px;gap:13px;align-items:start">
-    <!-- LEFT: live transcript + AI cues -->
-    <div style="display:flex;flex-direction:column;gap:13px">
-      <div class="panel">
-        <div class="panel-header">
-          <span class="panel-title">📞 Live Call — Ahmed Al Khalidi</span>
-          <div style="display:flex;gap:7px;align-items:center">
-            <span class="live-badge" style="font-size:9px"><span class="live-dot"></span>Recording</span>
-            <button class="btn btn-sm btn-hot" onclick="endCallDemo()">End Call</button>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg3)">
-          <div class="agent-avatar has-photo" style="width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0">
-            <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Ahmed Al Khalidi" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.classList.remove('has-photo');this.parentElement.innerHTML='AK'">
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:600;color:var(--text)">Ahmed Al Khalidi</div>
-            <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">+971 50 234 5678 · Score 87 🔥 · Cash buyer</div>
-          </div>
-          <div class="call-prop-strip">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&q=80&auto=format&fit=crop" alt="Dubai Hills villa" onerror="this.style.display='none'">
-            <span>5BR · Dubai Hills<br>AED 4.2M</span>
-          </div>
-        </div>
-        <div class="panel-body" style="padding:0">
-          <div id="call-transcript" style="max-height:280px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px"></div>
-        </div>
-      </div>
-
-      <!-- AI WHISPER CUES -->
-      <div class="panel" style="border-color:var(--purple)33">
-        <div class="panel-header" style="background:linear-gradient(135deg,var(--purple-bg),transparent)">
-          <span class="panel-title">⚡ AI Whisper — say this next</span>
-          <span class="ai-badge" style="font-size:9px">Real-time</span>
-        </div>
-        <div class="panel-body" id="call-whisper"></div>
-      </div>
-    </div>
-
-    <!-- RIGHT: objection handler + lead context + auto-capture -->
-    <div style="display:flex;flex-direction:column;gap:13px">
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">🛡️ Objection Handler</span></div>
-        <div class="panel-body" id="call-objections" style="padding:11px"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">📝 AI Auto-Capture</span><span style="font-size:9px;color:var(--green);font-family:var(--font-mono)">● Saving to CRM</span></div>
-        <div class="panel-body" id="call-capture" style="padding:11px"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">🎯 Live Talking Points</span></div>
-        <div class="panel-body" id="call-talkpoints" style="padding:11px"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ WHATSAPP ═══════════ -->
-<div class="view" id="view-whatsapp">
-
-  <div class="wa-layout">
-    <div class="wa-contacts">
-      <div class="wa-contacts-head">💬 <span data-i18n="wa_head">WhatsApp — 14 unread</span></div>
-      <div class="wa-contacts-list" id="wa-contacts"></div>
-    </div>
-    <div class="wa-chat">
-      <div class="wa-chat-head">
-        <div class="wa-c-avatar has-photo" style="width:32px;height:32px;border-radius:50%;background:#1a3a2a;color:var(--wa-dark);overflow:hidden">
-          <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Ahmed Al Khalidi" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.innerHTML='AK'">
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:500;color:var(--text)">Ahmed Al Khalidi</div>
-          <div style="font-size:10.5px;color:var(--wa-dark);font-family:var(--font-mono)">🟢 Online · <span data-i18n="buyer">Buyer</span> · Score 87</div>
-        </div>
-        <div style="margin-left:auto;display:flex;gap:7px">
-          <span class="temp hot"><span class="temp-dot"></span><span data-i18n="hot">Hot</span></span>
-          <button class="btn btn-sm btn-primary">📞 <span data-i18n="call_now">Call Now</span></button>
-        </div>
-      </div>
-      <div class="wa-chat-msgs" id="wa-msgs"></div>
-      <div class="wa-ai-suggestion">
-        <div style="font-size:9px;color:var(--purple);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0">⚡ AI</div>
-        <div id="wa-suggestion" style="flex:1;font-size:12px;color:var(--text2)">"Hi Ahmed, I found 3 villas in Dubai Hills matching your AED 4M budget. Shall I send the shortlist?"</div>
-        <button class="btn btn-sm btn-primary" onclick="sendWaSuggestion()" data-i18n="use_suggestion">Use ↑</button>
-      </div>
-      <div class="wa-input-area">
-        <input class="wa-input" id="wa-input" placeholder="Type a message..." data-i18n-ph="type_message">
-        <button class="wa-send" onclick="sendWaMessage()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M13 7L1 1l2 6-2 6 12-6z" fill="#fff"/></svg></button>
-      </div>
-    </div>
-    <div class="wa-sidebar">
-      <div class="wa-sidebar-head" data-i18n="lead_intel">Lead Intelligence</div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="ai_score_label">AI Score</div><div class="wa-info-val" style="color:var(--hot);font-family:var(--font-mono)">87 / 100 🔥</div></div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="col_intent">Intent</div><div style="display:flex;gap:4px;margin-top:4px"><span class="nlp-chip buyer" data-i18n="buyer">Buyer</span><span class="nlp-chip serious" data-i18n="serious">Serious</span></div></div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="col_budget">Budget</div><div class="wa-info-val">AED 3.5M – 4.5M</div></div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="pref_area">Preferred Area</div><div class="wa-info-val">Dubai Hills, MBR City</div></div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="timeframe">Timeframe</div><div class="wa-info-val" style="color:var(--hot)">1–2 months 🔥</div></div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="col_source">Source</div><div class="wa-info-val">Bayut · Property Finder</div></div>
-      <div class="wa-info-row"><div class="wa-info-label" data-i18n="financing">Financing</div><div class="wa-info-val" data-i18n="cash_buyer">Cash buyer</div></div>
-      <div style="padding:11px 13px;display:flex;flex-direction:column;gap:6px">
-        <button class="btn btn-primary" style="width:100%;justify-content:center">📅 <span data-i18n="book_viewing">Book Viewing</span></button>
-        <button class="btn" style="width:100%;justify-content:center">📋 <span data-i18n="assign_crm">Assign to CRM</span></button>
-        <button class="btn" style="width:100%;justify-content:center">🏡 <span data-i18n="send_shortlist">Send Shortlist</span></button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ SMS / AI FOLLOW-UP ═══════════ -->
-<div class="view" id="view-sms">
-  <div class="metrics-row">
-    <div class="metric-card mc-purple"><div class="metric-label">Active Sequences</div><div class="metric-value" style="color:var(--purple)">7</div><div class="metric-delta">⚡ Fully automated</div><div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--purple)"></div></div></div>
-    <div class="metric-card mc-green"><div class="metric-label">Messages Sent Today</div><div class="metric-value" style="color:var(--green)">1,847</div><div class="metric-delta">↑ SMS + WA + Email</div><div class="metric-bar"><div class="metric-bar-fill" style="width:82%;background:var(--green)"></div></div></div>
-    <div class="metric-card mc-hot"><div class="metric-label">Leads Re-Engaged</div><div class="metric-value" style="color:var(--hot)">214</div><div class="metric-delta">↑ From cold sequences</div><div class="metric-bar"><div class="metric-bar-fill" style="width:58%;background:var(--hot)"></div></div></div>
-    <div class="metric-card mc-warm"><div class="metric-label">Avg Open Rate</div><div class="metric-value" style="color:var(--warm)">74%</div><div class="metric-delta">WA: 89% · SMS: 72% · Email: 32%</div><div class="metric-bar"><div class="metric-bar-fill" style="width:74%;background:var(--warm)"></div></div></div>
-  </div>
-
-  <!-- ⚡ MULTI-CHANNEL ORCHESTRATION ENGINE -->
-  <div class="panel" style="margin-bottom:13px">
-    <div class="panel-header">
-      <span class="panel-title">⚡ Multi-Channel Orchestration Engine</span>
-      <span class="ai-badge" style="font-size:9px">🤖 Auto-Cascade</span>
-    </div>
-    <div class="panel-body">
-      <div id="orch-desc" style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6"></div>
-      <div id="orch-waterfall" style="display:flex;gap:0;overflow-x:auto;padding-bottom:6px;margin-bottom:16px"></div>
-      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px">🔴 Live Lead Journeys — where each lead is in the cascade right now</div>
-      <div id="orch-journeys" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-  </div>
-
-  <!-- Channel tabs -->
-  <div style="display:flex;gap:6px;margin-bottom:13px">
-    <button class="btn btn-primary btn-sm seq-tab" onclick="filterSeqs('all',this)">All Sequences (7)</button>
-    <button class="btn btn-sm seq-tab" onclick="filterSeqs('whatsapp',this)">💬 WhatsApp (3)</button>
-    <button class="btn btn-sm seq-tab" onclick="filterSeqs('sms',this)">📱 SMS (2)</button>
-    <button class="btn btn-sm seq-tab" onclick="filterSeqs('email',this)">📧 Email (1)</button>
-    <button class="btn btn-sm seq-tab" onclick="filterSeqs('ai_call',this)">🤖 AI Call (1)</button>
-    <div style="margin-left:auto"><button class="btn btn-sm btn-primary" onclick="alert('Sequence builder — coming soon')">+ New Sequence</button></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 340px;gap:13px;align-items:start">
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">Automation Sequences</span><span class="panel-count" id="seq-count">7 active</span></div>
-      <div class="panel-body" id="sms-sequences"></div>
-    </div>
-
-    <!-- Right sidebar: live queue -->
-    <div style="display:flex;flex-direction:column;gap:13px">
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">🔴 Live Send Queue</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Live</div></div>
-        <div class="panel-body" id="seq-live-queue"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">📊 7-Day Performance</span></div>
-        <div class="panel-body" id="seq-perf-chart"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FOLLOW-UP TEMPLATE LIBRARY -->
-  <div class="panel" style="margin-top:13px">
-    <div class="panel-header">
-      <span class="panel-title">🔁 Follow-Up Automation Library</span>
-      <span class="ai-badge" style="font-size:9px">⚡ Lifecycle Nurture</span>
-    </div>
-    <div class="panel-body">
-      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Never let a lead go cold. One-click enroll any contact segment into a ready-made nurture cadence — auto-personalized with name, budget, and preferred area. Fires on WhatsApp first, SMS fallback.</div>
-      <div id="followup-templates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:11px"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ CONVERSION FUNNEL ═══════════ -->
-<div class="view" id="view-funnel">
-  <div class="metrics-row">
-    <div class="metric-card"><div class="metric-label" data-i18n="top_funnel">Top of Funnel</div><div class="metric-value">247</div><div class="metric-delta" data-i18n="total_leads_label">Total leads</div></div>
-    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="qual_rate">Qualified Rate</div><div class="metric-value" style="color:var(--warm)">64%</div><div class="metric-delta warn">Industry avg: 45%</div></div>
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="meeting_rate">Meeting Rate</div><div class="metric-value" style="color:var(--green)">38%</div><div class="metric-delta">↑ +6pp MoM</div></div>
-    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="close_rate">Close Rate</div><div class="metric-value" style="color:var(--hot)">12%</div><div class="metric-delta">↑ Top quartile</div></div>
-  </div>
-  <div class="panel-grid">
-    <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="conv_funnel">Conversion Funnel</span></div><div class="panel-body"><div class="funnel" id="conv-funnel"></div></div></div>
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title" data-i18n="dropoff">Drop-off Analysis</span></div>
-      <div class="panel-body">
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Lead → Qualified</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--hot)">-36%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do1">Main reason: Slow response time (&gt;15 min)</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:64%;height:3px;background:var(--warm);border-radius:2px"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Qualified → Meeting</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--warm)">-41%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do2">Main reason: No WhatsApp follow-up</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:59%;height:3px;background:var(--green);border-radius:2px"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Meeting → Offer</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--green)">-28%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do3">Main reason: Property mismatch</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:72%;height:3px;background:var(--accent);border-radius:2px"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">Offer → Closed</span><span style="font-size:12px;font-family:var(--font-mono);color:var(--teal)">-31%</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:5px" data-i18n="do4">Main reason: Financing delays</div><div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:69%;height:3px;background:var(--teal);border-radius:2px"></div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ CHANNEL ROI ═══════════ -->
-<div class="view" id="view-roi">
-  <div class="metrics-row">
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="best_roi">Best ROI Channel</div><div class="metric-value" style="font-size:18px;color:var(--wa-dark)">WhatsApp</div><div class="metric-delta">412% ROI · AED 18 CPL</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="ad_spend">Total Ad Spend</div><div class="metric-value">AED 10.4K</div><div class="metric-delta">This month</div></div>
-    <div class="metric-card mc-teal"><div class="metric-label" data-i18n="rev_attributed">Revenue Attributed</div><div class="metric-value" style="color:var(--teal)">AED 4.2M</div><div class="metric-delta">↑ Tracked deals</div></div>
-    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="m_cpl">Blended CPL</div><div class="metric-value" style="color:var(--warm)">AED 42</div><div class="metric-delta warn">↓ -18% MoM</div></div>
-  </div>
-  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="channel_perf">Channel Performance & ROI</span></div><div class="panel-body" id="channel-roi"></div></div>
-</div>
-
-<!-- ═══════════ AGENTS ═══════════ -->
-<div class="view" id="view-agents">
-  <div class="metrics-row">
-    <div class="metric-card"><div class="metric-label" data-i18n="active_agents">Active Agents</div><div class="metric-value">8</div><div class="metric-delta">3 online now</div></div>
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="top_converter">Top Converter</div><div class="metric-value" style="font-size:18px">Sarah A.</div><div class="metric-delta">32% conv. rate</div></div>
-    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="avg_response">Avg Response</div><div class="metric-value" style="color:var(--warm)">6m 12s</div><div class="metric-delta warn">Target: &lt;5 min</div></div>
-    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="sla_breaches">SLA Breaches</div><div class="metric-value" style="color:var(--hot)">2</div><div class="metric-delta neg">Action required</div></div>
-  </div>
-  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="agent_leaderboard">Agent Leaderboard</span></div>
-    <table class="full-table">
-      <thead><tr><th>#</th><th data-i18n="col_agent">Agent</th><th data-i18n="status">Status</th><th data-i18n="hot">Hot</th><th data-i18n="booked">Booked</th><th data-i18n="conv_rate">Conv.</th><th data-i18n="response_time_col">Response</th><th data-i18n="col_score">AI Score</th><th>SLA</th></tr></thead>
-      <tbody id="agent-table"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ═══════════ SLA TRACKING ═══════════ -->
-<div class="view" id="view-sla">
-  <div class="metrics-row">
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="sla_compliance">SLA Compliance</div><div class="metric-value" style="color:var(--green)">91%</div><div class="metric-delta">Target: 95%</div><div class="metric-bar"><div class="metric-bar-fill" style="width:91%;background:var(--green)"></div></div></div>
-    <div class="metric-card mc-hot"><div class="metric-label" data-i18n="active_breaches">Active Breaches</div><div class="metric-value" style="color:var(--hot)">2</div><div class="metric-delta neg">Escalation needed</div></div>
-    <div class="metric-card mc-warm"><div class="metric-label" data-i18n="at_risk">At Risk</div><div class="metric-value" style="color:var(--warm)">5</div><div class="metric-delta warn">Next 15 minutes</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="resolved_today">Resolved Today</div><div class="metric-value" style="color:var(--green)">18</div><div class="metric-delta">↑ Good work</div></div>
-  </div>
-  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="sla_queue">SLA Queue — Response Time Tracker</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Live</div></div><div class="panel-body" style="padding:11px" id="sla-list"></div></div>
-</div>
-
-<!-- ═══════════ COMPLIANCE ═══════════ -->
-<div class="view" id="view-compliance">
-  <div class="metrics-row">
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="overall_status">Overall Status</div><div class="metric-value" style="color:var(--green);font-size:18px" data-i18n="compliant">Compliant</div><div class="metric-delta">Last audit: 2d ago</div></div>
-    <div class="metric-card"><div class="metric-label" data-i18n="data_region">Data Region</div><div class="metric-value" style="font-size:18px">UAE</div><div class="metric-delta">AWS ME (Bahrain)</div></div>
-    <div class="metric-card mc-warm"><div class="metric-label">PDPL Status</div><div class="metric-value" style="color:var(--warm);font-size:18px" data-i18n="review">Review</div><div class="metric-delta warn">1 item pending</div></div>
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="encryption">Encryption</div><div class="metric-value" style="color:var(--green);font-size:18px">AES-256</div><div class="metric-delta">At rest + in transit</div></div>
-  </div>
-  <div class="compliance-grid" id="compliance-grid"></div>
-  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="audit_log">Audit Log — Last 24 Hours</span></div>
-    <table class="full-table"><thead><tr><th data-i18n="time">Time</th><th data-i18n="event">Event</th><th data-i18n="user">User</th><th>IP</th><th data-i18n="status">Status</th></tr></thead><tbody id="audit-log"></tbody></table>
-  </div>
-</div>
-
-<!-- ═══════════ NOTIFICATIONS ═══════════ -->
-<div class="view" id="view-notifications">
-  <div class="panel"><div class="panel-header"><span class="panel-title" data-i18n="nav_notif">Notifications</span><span class="panel-count">9 unread</span></div><div id="notif-list"></div></div>
-</div>
-
-<!-- ═══════════ GCC DEVELOPERS ═══════════ -->
-<div class="view" id="view-gcc_developers">
-  <!-- HERO BANNER -->
-  <div class="gcc-hero">
-    <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=85&auto=format&fit=crop" alt="GCC Skyline" loading="lazy" onerror="this.style.display='none'">
-    <div class="gcc-hero-badge"><span class="live-dot" style="width:6px;height:6px;border-radius:50%;display:inline-block;animation:blink 1.4s infinite"></span>Live · 6 countries</div>
-    <div class="gcc-hero-content">
-      <div class="gcc-hero-title">GCC Real Estate Intelligence</div>
-      <div class="gcc-hero-sub">42 DEVELOPERS · 187 PROJECTS · $2.1T PIPELINE · UAE · KSA · QATAR · KUWAIT · BAHRAIN · OMAN</div>
-    </div>
-  </div>
-
-  <div class="metrics-row" style="grid-template-columns:repeat(5,1fr)">
-    <div class="metric-card mc-hot"><div class="metric-label">GCC Developers</div><div class="metric-value">42</div><div class="metric-delta">Across 6 countries</div></div>
-    <div class="metric-card mc-green"><div class="metric-label">Total Projects</div><div class="metric-value">187</div><div class="metric-delta">Active & Upcoming</div></div>
-    <div class="metric-card mc-purple"><div class="metric-label">Pipeline Value</div><div class="metric-value" style="font-size:18px">$2.1T</div><div class="metric-delta">Combined GCC</div></div>
-    <div class="metric-card mc-warm"><div class="metric-label">Avg Unit Price</div><div class="metric-value" style="font-size:18px">AED 2.8M</div><div class="metric-delta">↑ 12% YoY</div></div>
-    <div class="metric-card mc-teal"><div class="metric-label">Off-Plan Ratio</div><div class="metric-value">68%</div><div class="metric-delta">of total inventory</div></div>
-  </div>
-
-  <!-- FILTER TABS -->
-  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
-    <button class="btn btn-primary btn-sm gcc-filter" onclick="filterGCC('all',this)">All GCC (42)</button>
-    <button class="btn btn-sm gcc-filter" onclick="filterGCC('UAE',this)">🇦🇪 UAE (14)</button>
-    <button class="btn btn-sm gcc-filter" onclick="filterGCC('KSA',this)">🇸🇦 Saudi Arabia (11)</button>
-    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Qatar',this)">🇶🇦 Qatar (6)</button>
-    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Kuwait',this)">🇰🇼 Kuwait (4)</button>
-    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Bahrain',this)">🇧🇭 Bahrain (4)</button>
-    <button class="btn btn-sm gcc-filter" onclick="filterGCC('Oman',this)">🇴🇲 Oman (3)</button>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Leading GCC Developers & Flagship Projects</span>
-      <span class="panel-count" id="gcc-count">42 developers</span>
-    </div>
-    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:13px" id="gcc-dev-grid"></div>
-  </div>
-</div>
-
-<!-- ═══════════ PAYMENT CALCULATOR ═══════════ -->
-<div class="view" id="view-payment_calc">
-  <div class="metrics-row" style="grid-template-columns:repeat(4,1fr)">
-    <div class="metric-card mc-green" id="calc-m-monthly"><div class="metric-label">Monthly Payment</div><div class="metric-value" id="calc-monthly-val" style="font-size:20px">—</div><div class="metric-delta">EMI estimate</div></div>
-    <div class="metric-card mc-teal" id="calc-m-downpay"><div class="metric-label">Down Payment</div><div class="metric-value" id="calc-dp-val" style="font-size:20px">—</div><div class="metric-delta" id="calc-dp-pct">% of price</div></div>
-    <div class="metric-card mc-purple" id="calc-m-roi"><div class="metric-label">Expected ROI</div><div class="metric-value" id="calc-roi-val" style="font-size:20px;color:var(--green)">—</div><div class="metric-delta">Annual yield</div></div>
-    <div class="metric-card mc-warm" id="calc-m-total"><div class="metric-label">Total Cost</div><div class="metric-value" id="calc-total-val" style="font-size:18px">—</div><div class="metric-delta">Inc. fees & interest</div></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start">
-
-    <!-- INPUT PANEL -->
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">⚡ Real-Time Payment Calculator</span><div class="ai-badge">AI-Powered</div></div>
-      <div class="panel-body">
-        <!-- PROPERTY PRICE -->
-        <div class="field-group">
-          <div class="field-label">Property Price (AED)</div>
-          <input class="field-input" id="calc-price" type="number" placeholder="e.g. 2500000" value="2500000" oninput="calcAll()">
-        </div>
-        <!-- PAYMENT PLAN TYPE -->
-        <div class="field-group">
-          <div class="field-label">Payment Plan</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="plan-selector">
-            <button class="plan-btn active" data-plan="mortgage" onclick="selectPlan('mortgage',this)">🏦 Bank Mortgage</button>
-            <button class="plan-btn" data-plan="developer" onclick="selectPlan('developer',this)">🏗️ Developer Plan</button>
-            <button class="plan-btn" data-plan="cash" onclick="selectPlan('cash',this)">💵 Full Cash</button>
-            <button class="plan-btn" data-plan="posthandover" onclick="selectPlan('posthandover',this)">📋 Post-Handover</button>
-          </div>
-        </div>
-
-        <!-- DOWN PAYMENT -->
-        <div class="field-group" id="dp-group">
-          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-            <div class="field-label">Down Payment</div>
-            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent)" id="dp-pct-label">20%</span>
-          </div>
-          <input type="range" id="calc-dp" min="5" max="80" value="20" step="1" oninput="updateDP();calcAll()" style="width:100%;accent-color:var(--accent);cursor:pointer">
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">
-            <span>Min 5%</span><span id="dp-aed-label">AED 500,000</span><span>Max 80%</span>
-          </div>
-        </div>
-
-        <!-- LOAN TERM (Mortgage only) -->
-        <div class="field-group" id="term-group">
-          <div class="field-label">Loan Term (Years)</div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap" id="term-selector">
-            <button class="btn btn-sm term-btn active" onclick="selectTerm(5,this)">5 yr</button>
-            <button class="btn btn-sm term-btn" onclick="selectTerm(10,this)">10 yr</button>
-            <button class="btn btn-sm term-btn" onclick="selectTerm(15,this)">15 yr</button>
-            <button class="btn btn-sm term-btn" onclick="selectTerm(20,this)">20 yr</button>
-            <button class="btn btn-sm term-btn" onclick="selectTerm(25,this)">25 yr</button>
-          </div>
-        </div>
-
-        <!-- INTEREST RATE -->
-        <div class="field-group" id="rate-group">
-          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-            <div class="field-label">Interest Rate (Annual %)</div>
-            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent)" id="rate-label">4.5%</span>
-          </div>
-          <input type="range" id="calc-rate" min="2" max="12" value="4.5" step="0.1" oninput="updateRate();calcAll()" style="width:100%;accent-color:var(--accent);cursor:pointer">
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">
-            <span>2%</span><span>UAE Bank Rate (EIBOR+)</span><span>12%</span>
-          </div>
-        </div>
-
-        <!-- RENTAL YIELD (for ROI) -->
-        <div class="field-group">
-          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-            <div class="field-label">Expected Rental Yield (%)</div>
-            <span style="font-size:11px;font-family:var(--font-mono);color:var(--green)" id="yield-label">6.5%</span>
-          </div>
-          <input type="range" id="calc-yield" min="2" max="15" value="6.5" step="0.1" oninput="updateYield();calcAll()" style="width:100%;accent-color:var(--green);cursor:pointer">
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">
-            <span>2% (Low)</span><span>Dubai Avg ~6-8%</span><span>15% (High)</span>
-          </div>
-        </div>
-
-        <!-- PROPERTY TYPE -->
-        <div class="field-group">
-          <div class="field-label">Property Type</div>
-          <select class="field-input" id="calc-type" onchange="calcAll()">
-            <option value="apartment">Apartment</option>
-            <option value="villa">Villa / Townhouse</option>
-            <option value="commercial">Commercial</option>
-            <option value="offplan">Off-Plan</option>
-          </select>
-        </div>
-
-        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px" onclick="calcAll()">⚡ Recalculate & Get AI Summary</button>
-      </div>
-    </div>
-
-    <!-- RESULTS PANEL -->
-    <div>
-      <!-- PAYMENT BREAKDOWN -->
-      <div class="panel" style="margin-bottom:13px">
-        <div class="panel-header"><span class="panel-title">Payment Breakdown</span></div>
-        <div class="panel-body" id="calc-breakdown">
-          <div style="text-align:center;color:var(--text3);padding:20px">Enter property details to calculate</div>
-        </div>
-      </div>
-
-      <!-- AI ANALYSIS -->
-      <div class="panel">
-        <div class="panel-header">
-          <span class="panel-title">AI Investment Analysis</span>
-          <div class="ai-badge">⚡ Claude</div>
-        </div>
-        <div class="panel-body">
-          <div id="calc-ai-response" style="font-size:12.5px;line-height:1.7;color:var(--text2)">
-            <div style="color:var(--text3);font-style:italic">Click "Recalculate & Get AI Summary" to get a real-time investment analysis from AI...</div>
-          </div>
-          <div id="calc-ai-loading" style="display:none">
-            <div class="cop-typing" style="justify-content:flex-start;padding:8px 0"><span></span><span></span><span></span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPARISON TABLE -->
-  <div class="panel" style="margin-top:13px">
-    <div class="panel-header"><span class="panel-title">Plan Comparison — All Payment Options</span></div>
-    <div class="panel-body" id="calc-comparison"></div>
-  </div>
-</div>
-
-<!-- ═══════════ FACEBOOK & INSTAGRAM AUTOMATION ═══════════ -->
-<div class="view" id="view-social_auto">
-
-  <!-- SOCIAL HERO BANNER -->
-  <div class="hero-banner" style="min-height:120px">
-    <img class="hero-bg" src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1600&q=80&auto=format&fit=crop" alt="Social media engagement" onerror="this.style.display='none';this.closest('.hero-banner').style.background='linear-gradient(120deg,#4267B2,#7c4dff,#e1306c)'">
-    <div class="hero-content">
-      <div class="hero-greeting" style="font-size:21px">📘📸 Facebook &amp; Instagram, on Autopilot</div>
-      <div class="hero-sub">Every DM, comment, and Lead Ad answered in seconds — qualified, nurtured, and called by AI. <strong style="color:#fff">Zero leads slip through.</strong></div>
-      <div class="hero-chips">
-        <span class="hero-chip"><span class="hc-dot"></span> 4,742 leads auto-handled</span>
-        <span class="hero-chip warm"><span class="hc-dot"></span> 100% response rate</span>
-        <span class="hero-chip purple"><span class="hc-dot"></span> 318 AI calls placed</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- KPI METRICS ROW -->
-  <div class="metrics-row">
-    <div class="metric-card mc-purple">
-      <div class="metric-label">Total Social Leads</div>
-      <div class="metric-value" style="color:var(--purple)" id="sm-total">4,742</div>
-      <div class="metric-delta">↑ All responded automatically</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:94%;background:var(--purple)"></div></div>
-    </div>
-    <div class="metric-card mc-green">
-      <div class="metric-label">Auto-Responded</div>
-      <div class="metric-value" style="color:var(--green)">4,742</div>
-      <div class="metric-delta">↑ 100% response rate</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--green)"></div></div>
-    </div>
-    <div class="metric-card mc-hot">
-      <div class="metric-label">AI Calls Made</div>
-      <div class="metric-value" style="color:var(--hot)" id="sm-calls">318</div>
-      <div class="metric-delta">↑ Unclosed leads followed up</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:67%;background:var(--hot)"></div></div>
-    </div>
-    <div class="metric-card mc-warm">
-      <div class="metric-label">Pipeline Value</div>
-      <div class="metric-value" style="color:var(--warm)">AED 6.1M</div>
-      <div class="metric-delta">↑ From social automation</div>
-      <div class="metric-bar"><div class="metric-bar-fill" style="width:78%;background:var(--warm)"></div></div>
-    </div>
-  </div>
-
-  <!-- TWO COLUMN GRID: Workflow Map + Live Conversations -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px">
-
-    <!-- WORKFLOW AUTOMATION MAP -->
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Automation Workflows</span>
-        <div style="display:flex;gap:6px">
-          <span class="live-badge" style="font-size:9px"><span class="live-dot"></span>Running</span>
-          <button class="btn btn-sm btn-primary" onclick="addWorkflow()">+ New Flow</button>
-        </div>
-      </div>
-      <div class="panel-body" id="workflow-list"></div>
-    </div>
-
-    <!-- LIVE CONVERSATION FEED -->
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Live Conversation Feed</span>
-        <span class="panel-count" id="sm-conv-count">Loading...</span>
-      </div>
-      <div class="panel-body" id="social-conv-feed" style="max-height:360px;overflow-y:auto"></div>
-    </div>
-  </div>
-
-  <!-- AI CALLING PANEL + OPPORTUNITY PIPELINE -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px">
-
-    <!-- AI CALLING ENGINE -->
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">🤖 AI Calling Engine</span>
-        <div class="ai-badge" style="font-size:9px">⚡ GoHighLevel AI</div>
-      </div>
-      <div class="panel-body">
-        <div class="sunset-card">
-          <img src="https://images.unsplash.com/photo-1518684079-3c830dcef090?w=900&q=80&auto=format&fit=crop" alt="Dubai sunset over the marina" onerror="this.style.display='none';this.closest('.sunset-card').style.background='linear-gradient(105deg,#7c4dff,#2a1040)'">
-          <div class="sunset-card-body">
-            <div style="font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⚡ Always-On AI Workforce</div>
-            <div style="font-size:12.5px;line-height:1.6;color:#fff">
-              When a lead comes in from Facebook or Instagram and does <strong>not close</strong>, the AI automatically calls them — qualifying, answering questions, and booking viewings — <strong>while you're watching the sunset with your family.</strong>
-            </div>
-          </div>
-        </div>
-        <div id="ai-call-queue"></div>
-      </div>
-    </div>
-
-    <!-- OPPORTUNITY PIPELINE (KANBAN LITE) -->
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Opportunity Pipeline</span>
-        <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Drag leads across stages →</span>
-      </div>
-      <div class="panel-body" id="social-pipeline" style="overflow-x:auto"></div>
-    </div>
-  </div>
-
-  <!-- CHANNEL STATS ROW -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">Facebook Page Performance</span><span style="font-size:10px;color:var(--cold);font-family:var(--font-mono)">📘 Meta</span></div>
-      <div class="panel-body" id="fb-stats"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">Instagram Performance</span><span style="font-size:10px;color:var(--hot);font-family:var(--font-mono)">📸 Meta</span></div>
-      <div class="panel-body" id="ig-stats"></div>
-    </div>
-  </div>
-
-</div>
-<!-- /FACEBOOK & INSTAGRAM AUTOMATION -->
-
-  </div><!-- /content -->
-</main>
-</div><!-- /app -->
-
-<!-- MODALS -->
-<div class="modal-overlay" id="add-lead-modal">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title" data-i18n="add_lead_title">Add New Lead</div><button class="modal-close" onclick="closeModal('add-lead-modal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field-group"><div class="field-label" data-i18n="full_name">Full Name</div><input class="field-input" placeholder="Mohammed Al Rashid"></div>
-      <div class="field-group"><div class="field-label" data-i18n="wa_phone">WhatsApp / Phone</div><input class="field-input" placeholder="+971 50 000 0000"></div>
-      <div class="field-group"><div class="field-label" data-i18n="col_source">Source</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn btn-sm" onclick="selectType(this)">Bayut</button>
-          <button class="btn btn-sm" onclick="selectType(this)">Property Finder</button>
-          <button class="btn btn-sm" onclick="selectType(this)">Facebook</button>
-          <button class="btn btn-sm" onclick="selectType(this)">WhatsApp</button>
-          <button class="btn btn-sm" onclick="selectType(this)">Referral</button>
-        </div>
-      </div>
-      <div class="field-group"><div class="field-label" data-i18n="budget_aed">Budget (AED)</div><input class="field-input" placeholder="e.g. 2,500,000"></div>
-      <div class="field-group"><div class="field-label" data-i18n="pref_area">Preferred Area</div><input class="field-input" placeholder="e.g. Dubai Hills, Downtown"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('add-lead-modal')" data-i18n="cancel">Cancel</button>
-      <button class="btn btn-primary" onclick="closeModal('add-lead-modal')">⚡ <span data-i18n="add_score">Add & Score</span></button>
-    </div>
-  </div>
-</div>
-<div class="modal-overlay" id="lead-detail-modal">
-  <div class="modal" style="width:500px">
-    <div class="modal-head"><div class="modal-title" id="modal-lead-name">Lead Details</div><button class="modal-close" onclick="closeModal('lead-detail-modal')">✕</button></div>
-    <div class="modal-body" id="modal-lead-body"></div>
-  </div>
-</div>
-
-<!-- AI COPILOT -->
-<button class="copilot-fab" id="copilot-fab" onclick="toggleCopilot()" title="AI Copilot">⚡</button>
-<div class="copilot-panel" id="copilot-panel">
-  <div class="copilot-head">
-    <div class="copilot-avatar">⚡</div>
-    <div>
-      <div class="copilot-name" data-i18n="copilot_name">Observer AI Copilot</div>
-      <div class="copilot-status" data-i18n="copilot_status">● Online · Analyzing 247 leads</div>
-    </div>
-    <label class="cop-voice-toggle" title="Speak replies aloud">
-      <input type="checkbox" id="cop-voice-out" onchange="toggleVoiceOut()"> 🔊 Voice
-    </label>
-    <button class="copilot-close" onclick="toggleCopilot()">✕</button>
-  </div>
-  <div class="copilot-msgs" id="copilot-msgs">
-    <div class="cop-msg ai">👋 <span data-i18n="copilot_intro">I'm your AI Copilot. Right now: <strong>Ahmed Al Khalidi (Score: 87)</strong> has been viewing listings for 40 mins. No contact yet.</span> <span class="cop-action" onclick="showView('whatsapp',null)">→ Contact</span>
-      <div style="margin-top:7px;font-size:10.5px;color:var(--text3);font-family:var(--font-mono)">🎤 Tap the mic or say <strong style="color:var(--purple)">"Hey Observer"</strong> to command hands-free.</div>
-    </div>
-  </div>
-  <div class="cop-listening-bar" id="cop-listening-bar">
-    <div class="lw"><span></span><span></span><span></span><span></span><span></span></div>
-    <span id="cop-listening-text">Listening…</span>
-  </div>
-  <div class="copilot-input-row">
-    <button class="cop-mic" id="cop-mic" onclick="toggleVoiceInput()" title="Voice command">🎤</button>
-    <input id="cop-input" placeholder="Ask, or tap 🎤 to speak..." onkeypress="if(event.key==='Enter')sendCopilot()" data-i18n-ph="cop_ph">
-    <button onclick="sendCopilot()">→</button>
-  </div>
-</div>
-
-<script>
 // ══════════════════════════════════════════════════
 // TRANSLATIONS
 // ══════════════════════════════════════════════════
 const T = {
   en: {
-    brand:'Observer', brand_sub:'Autonomous Revenue Engine', ai_powered:'AI-POWERED',
-    org_sub:'Dubai, UAE · Enterprise',
+    brand:'Observer', brand_sub:'Autonomous Revenue Engine', ai_powered:'DEMO',
+    org_sub:'Sample agency',
     nav_core:'Core', nav_dashboard:'Dashboard', nav_pipeline:'Pipeline', nav_leads:'All Leads',
     nav_ai:'AI Engine', nav_scoring:'Lead Scoring', nav_intent:'Intent Detection', nav_nba:'Next Best Action',
     nav_channels:'Channels', nav_wa:'WhatsApp', nav_sms:'SMS / Sequences', nav_social_auto:'FB & Instagram Automation',
     nav_analytics:'Analytics', nav_funnel:'Conversion Funnel', nav_roi:'Channel ROI', nav_agents:'Agent Performance',
     nav_enterprise:'Enterprise', nav_sla:'SLA Tracking', nav_compliance:'Compliance', nav_notif:'Notifications',
-    live:'Live', ai_active:'AI Active', add_lead:'Add Lead',
+    live:'Demo', ai_active:'Sample data', add_lead:'Add Lead',
     m_total:'Total Leads', m_hot:'Hot Leads 🔥', m_calls:'Calls Booked', m_response:'Avg Response',
     m_ai_score:'AI Score Avg', m_wa:'WhatsApp Opens', m_revenue:'Revenue Pipeline', m_cpl:'Cost Per Lead',
     this_week:'this week', today:'today', scored:'scored', booking_rate:'booking rate',
@@ -1982,7 +24,7 @@ const T = {
     agents_today:'Agents Today', pipeline_velocity:'Pipeline Velocity', channel_mix:'Channel Mix Today',
     new:'New', qualified:'Qualified', meeting_set:'Meeting Set', closed:'Closed Won',
     deal_pipeline:'Deal Pipeline — Kanban',
-    filter_all:'All (247)', filter_hot:'Hot (34)', filter_warm:'Warm (89)', filter_cold:'Cold (124)',
+    filter_all:'All (0)', filter_hot:'Hot (0)', filter_warm:'Warm (0)', filter_cold:'Cold (0)',
     filter_buyers:'Buyers', filter_sellers:'Sellers',
     model:'Model', scored_today:'Scored Today', high_intent:'High Intent', avg_score:'Avg Score',
     feature_weights:'Model Feature Weights', live_queue:'Live Scoring Queue', processing:'Processing',
@@ -2017,14 +59,14 @@ const T = {
     search_ph:'Search leads, agents...',
   },
   ar: {
-    brand:'أوبزرفر', brand_sub:'محرك الإيرادات الذاتي', ai_powered:'مدعوم بالذكاء الاصطناعي',
-    org_sub:'دبي، الإمارات · مؤسسة',
+    brand:'أوبزرفر', brand_sub:'محرك الإيرادات الذاتي', ai_powered:'عرض',
+    org_sub:'وكالة تجريبية',
     nav_core:'الأساسيات', nav_dashboard:'لوحة القيادة', nav_pipeline:'خط المبيعات', nav_leads:'جميع العملاء',
     nav_ai:'محرك الذكاء الاصطناعي', nav_scoring:'تقييم العملاء', nav_intent:'كشف النية', nav_nba:'أفضل إجراء قادم',
     nav_channels:'القنوات', nav_wa:'واتساب', nav_sms:'رسائل / تسلسلات', nav_social_auto:'أتمتة فيسبوك وإنستغرام',
     nav_analytics:'التحليلات', nav_funnel:'قمع التحويل', nav_roi:'عائد القنوات', nav_agents:'أداء الوكلاء',
     nav_enterprise:'المؤسسة', nav_sla:'تتبع مستوى الخدمة', nav_compliance:'الامتثال', nav_notif:'الإشعارات',
-    live:'مباشر', ai_active:'الذكاء نشط', add_lead:'إضافة عميل',
+    live:'عرض', ai_active:'بيانات تجريبية', add_lead:'إضافة عميل',
     m_total:'إجمالي العملاء', m_hot:'العملاء الساخنون 🔥', m_calls:'المكالمات المحجوزة', m_response:'متوسط الاستجابة',
     m_ai_score:'متوسط نقاط الذكاء', m_wa:'فتح واتساب', m_revenue:'خط الإيرادات', m_cpl:'تكلفة العميل',
     this_week:'هذا الأسبوع', today:'اليوم', scored:'مُقيَّم', booking_rate:'معدل الحجز',
@@ -2038,7 +80,7 @@ const T = {
     agents_today:'الوكلاء اليوم', pipeline_velocity:'سرعة خط المبيعات', channel_mix:'مزيج القنوات اليوم',
     new:'جديد', qualified:'مؤهل', meeting_set:'اجتماع محدد', closed:'صفقات مغلقة',
     deal_pipeline:'خط الصفقات — كانبان',
-    filter_all:'الكل (247)', filter_hot:'ساخن (34)', filter_warm:'دافئ (89)', filter_cold:'بارد (124)',
+    filter_all:'الكل (0)', filter_hot:'ساخن (0)', filter_warm:'دافئ (0)', filter_cold:'بارد (0)',
     filter_buyers:'المشترون', filter_sellers:'البائعون',
     model:'النموذج', scored_today:'مُقيَّم اليوم', high_intent:'نية عالية', avg_score:'متوسط النقاط',
     feature_weights:'أوزان ميزات النموذج', live_queue:'قائمة التقييم المباشر', processing:'يعالج',
@@ -2127,16 +169,8 @@ function toggleFocus() {
 // ══════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════
-const leads=[
-  {id:1,name:'Ahmed Al Khalidi',phone:'+971 50 234 5678',score:87,temp:'hot',type:'Buyer',source:'Bayut',budget:'AED 4M',timeframe:'1-2 mo',financing:'Cash',agent:'Sarah A.',status:'Qualifying',intent:'buyer',urgency:'serious',area:'Dubai Hills',photo:'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:2,name:'Fatima Al Zaabi',phone:'+971 55 876 5432',score:81,temp:'hot',type:'Buyer',source:'Property Finder',budget:'AED 2.8M',timeframe:'3 mo',financing:'Mortgage',agent:'Khalid M.',status:'Meeting Set',intent:'buyer',urgency:'serious',area:'Downtown',photo:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:3,name:'Mohammad Siddiqui',phone:'+971 52 345 6789',score:73,temp:'warm',type:'Seller',source:'Facebook',budget:'AED 1.5M',timeframe:'6 mo',financing:'N/A',agent:'Leila R.',status:'New',intent:'seller',urgency:'researching',area:'JVC',photo:'https://images.unsplash.com/photo-1463453091185-61582044d556?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:4,name:'Rania Hassan',phone:'+971 50 567 8901',score:69,temp:'warm',type:'Buyer',source:'Referral',budget:'AED 3.2M',timeframe:'2 mo',financing:'Cash',agent:'Ahmed T.',status:'Qualified',intent:'buyer',urgency:'serious',area:'Palm Jumeirah',photo:'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:5,name:'Omar Al Farouq',phone:'+971 56 789 0123',score:44,temp:'cold',type:'Buyer',source:'Bayut',budget:'AED 900K',timeframe:'12 mo',financing:'Mortgage',agent:'Unassigned',status:'New',intent:'buyer',urgency:'researching',area:'Sharjah',photo:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:6,name:'Nour Al Mansouri',phone:'+971 55 234 5678',score:91,temp:'hot',type:'Buyer',source:'WhatsApp',budget:'AED 6M',timeframe:'<1 mo',financing:'Cash',agent:'Sarah A.',status:'Offer Stage',intent:'buyer',urgency:'serious',area:'Emirates Hills',photo:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:7,name:'Tariq Mahmoud',phone:'+971 50 890 1234',score:55,temp:'warm',type:'Seller',source:'Property Finder',budget:'AED 2.1M',timeframe:'4 mo',financing:'N/A',agent:'Khalid M.',status:'Qualified',intent:'seller',urgency:'researching',area:'Business Bay',photo:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:8,name:'Sara Al Blooshi',phone:'+971 52 012 3456',score:38,temp:'cold',type:'Buyer',source:'Facebook',budget:'AED 750K',timeframe:'18 mo',financing:'Mortgage',agent:'Unassigned',status:'New',intent:'buyer',urgency:'researching',area:'Ajman',photo:'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-];
+// Leads come from /api/leads (loaded by common.js before this script runs).
+const leads=window.__leads||[];
 
 // ── PROPERTY IMAGE LIBRARY — realistic GCC residential, mapped by area ──
 // Uses photo IDs already proven to render in this app (developer hero set),
@@ -2163,7 +197,7 @@ function listingFor(lead){
     img: propImg(lead.area, 600),
     imgSmall: propImg(lead.area, 280),
     price: lead.budget,
-    meta: `${p.beds} Bed · ${lead.area} · ${lead.type==='Seller'?'For Valuation':'For Sale'}`,
+    meta: `${p.beds} Bed · ${esc(lead.area)} · ${lead.type==='Seller'?'For Valuation':'For Sale'}`,
     ref: 'OBS-' + (1000 + (lead.id||1)*7)
   };
 }
@@ -2187,7 +221,7 @@ const activityEvents=[
   {icon:'📞',color:'var(--green-bg)',text:'<strong>Sarah Ahmed</strong> booked a viewing with Fatima Al Zaabi for tomorrow 10am'},
   {icon:'⚡',color:'var(--purple-bg)',text:'AI Copilot flagged <strong>5 leads</strong> with no contact in 2+ hours — SLA risk'},
   {icon:'🏠',color:'var(--accent-bg)',text:'<strong>Jaber Al Nuaimi</strong> deal closed — AED 3.8M villa in Dubai Hills'},
-  {icon:'📊',color:'var(--cold-bg)',text:'XGBoost re-scored <strong>184 leads</strong> — 47 upgraded, 12 downgraded'},
+  {icon:'📊',color:'var(--cold-bg)',text:'Sample event: scoring rules re-ran over <strong>184 leads</strong> (illustrative)'},
 ];
 const nbaData=[
   {p:'p1',lead:'Ahmed Al Khalidi',action:'Send WhatsApp now',reason:'Score 87 · Cash buyer · Viewed 8 listings · No contact',channel:'💬 WhatsApp',btn:'Send'},
@@ -2835,18 +869,18 @@ Give a concise 3-4 sentence analysis covering: (1) is this a good buy given curr
 }
 
 
-const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function tempBadge(t){return`<span class="temp ${t}"><span class="temp-dot"></span>${t}</span>`}
 // Avatar helper — renders <img> if photo URL is present, falls back to initials gradient on error
 function avatarHTML(person, opts={}){
   const cls = opts.class || 'agent-avatar';
   const size = opts.size || 30;
   const fs = opts.fs || (size<28?9.5:11);
-  const initials = person.initials || (person.name?person.name.split(' ').map(n=>n[0]).slice(0,2).join(''):'?');
+  // Letters/digits only: initials are also placed inside an inline onerror JS string below.
+  const initials = String(person.initials || (person.name?person.name.split(' ').map(n=>n[0]||'').slice(0,2).join(''):'?')).replace(/[^\p{L}\p{N}]/gu,'')||'?';
   const extraStyle = opts.style || '';
   const bg = opts.bg || '';
   if(person.photo){
-    return `<div class="${cls} has-photo" style="width:${size}px;height:${size}px;font-size:${fs}px;${extraStyle}"><img src="${person.photo}" alt="${person.name||''}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='${bg||'linear-gradient(135deg,var(--accent),var(--accent2))'}';this.parentElement.innerHTML='${initials}'"></div>`;
+    return `<div class="${cls} has-photo" style="width:${size}px;height:${size}px;font-size:${fs}px;${extraStyle}"><img src="${esc(person.photo)}" alt="${esc(person.name||'')}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='${bg||'linear-gradient(135deg,var(--accent),var(--accent2))'}';this.parentElement.innerHTML='${initials}'"></div>`;
   }
   return `<div class="${cls}" style="width:${size}px;height:${size}px;font-size:${fs}px;${bg?'background:'+bg+';':''}${extraStyle}">${initials}</div>`;
 }
@@ -2869,9 +903,9 @@ function renderHotLeads(){
   const hot=leads.filter(l=>l.temp==='hot');
   document.getElementById('hot-leads-table').innerHTML=hot.map(l=>`
     <tr class="row-hot pulse-hot" onclick="openLead(${l.id})">
-      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:28,fs:10})}<div><span class="lead-name">${l.name}</span><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${l.source}</div></div></div></td>
+      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:28,fs:10})}<div><span class="lead-name">${esc(l.name)}</span><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${esc(l.source)}</div></div></div></td>
       <td>${scoreRingHTML(l.score)}</td>
-      <td><span class="intent-tag ${l.intent}">${l.intent}</span></td>
+      <td><span class="intent-tag ${esc(l.intent)}">${esc(l.intent)}</span></td>
       <td><span style="font-size:10px;font-family:var(--font-mono);color:var(--text3)">2m ago</span></td>
       <td><button class="btn btn-sm btn-wa" onclick="event.stopPropagation();showView('whatsapp',null)">💬</button></td>
     </tr>`).join('');
@@ -2887,13 +921,13 @@ function renderAllLeads(filter='all'){
   document.getElementById('leads-count').textContent=list.length+' leads';
   document.getElementById('all-leads-table').innerHTML=list.map(l=>`
     <tr class="${l.temp==='hot'?'row-hot':''}" onclick="openLead(${l.id})">
-      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:26,fs:9.5})}<span class="lead-name">${l.name}</span></div></td>
-      <td><span style="font-size:10.5px;font-family:var(--font-mono);color:var(--text3)">${l.source}</span></td>
+      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:26,fs:9.5})}<span class="lead-name">${esc(l.name)}</span></div></td>
+      <td><span style="font-size:10.5px;font-family:var(--font-mono);color:var(--text3)">${esc(l.source)}</span></td>
       <td>${scoreRingHTML(l.score,13)}</td>
-      <td><span class="intent-tag ${l.intent}">${l.intent}</span> <span class="intent-tag ${l.urgency}" style="margin-left:3px">${l.urgency}</span></td>
+      <td><span class="intent-tag ${esc(l.intent)}">${esc(l.intent)}</span> <span class="intent-tag ${esc(l.urgency)}" style="margin-left:3px">${esc(l.urgency)}</span></td>
       <td>${tempBadge(l.temp)}</td>
-      <td style="font-family:var(--font-mono);font-size:12px">${l.budget}</td>
-      <td>${l.agent}</td>
+      <td style="font-family:var(--font-mono);font-size:12px">${esc(l.budget)}</td>
+      <td>${esc(l.agent)}</td>
       <td><span style="font-size:10px;font-family:var(--font-mono);color:var(--text3)">2h ago</span></td>
       <td><button class="btn btn-sm btn-wa" onclick="event.stopPropagation()">💬</button></td>
     </tr>`).join('');
@@ -2983,8 +1017,8 @@ function renderScoreQueue(){
     <div class="score-item" onclick="explainScore(${l.id})" style="cursor:pointer">
       ${avatarHTML(l,{size:30,fs:10})}
       <div style="flex:1;min-width:0">
-        <div style="font-size:12.5px;font-weight:500;color:var(--text)">${l.name}</div>
-        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${l.source} · ${top2}</div>
+        <div style="font-size:12.5px;font-weight:500;color:var(--text)">${esc(l.name)}</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${esc(l.source)} · ${top2}</div>
       </div>
       <div style="text-align:right;margin-right:6px">
         <div style="font-size:15px;font-family:var(--font-mono);font-weight:700;color:${fill}">${r.score}</div>
@@ -3002,13 +1036,13 @@ function explainScore(leadId){
   const fill = r.temp==='hot'?'var(--hot)':r.temp==='warm'?'var(--warm)':'var(--cold)';
   const body = document.getElementById('modal-lead-body');
   const titleEl = document.getElementById('modal-lead-name');
-  if(titleEl) titleEl.innerHTML = `⚡ Why ${lead.name} scored <span style="color:${fill}">${r.score}</span>`;
+  if(titleEl) titleEl.innerHTML = `⚡ Why ${esc(lead.name)} scored <span style="color:${fill}">${r.score}</span>`;
   body.innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
       ${avatarHTML(lead,{size:46,fs:15})}
       <div style="flex:1">
-        <div style="font-size:15px;font-weight:600;color:var(--text)">${lead.name}</div>
-        <div style="font-size:11.5px;color:var(--text3);font-family:var(--font-mono)">${lead.source} · ${lead.budget} · ${r.bt.tier} · ${lead.area}</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text)">${esc(lead.name)}</div>
+        <div style="font-size:11.5px;color:var(--text3);font-family:var(--font-mono)">${esc(lead.source)} · ${esc(lead.budget)} · ${r.bt.tier} · ${esc(lead.area)}</div>
       </div>
       <div style="text-align:center">
         <div style="font-size:30px;font-family:var(--font-display);color:${fill};line-height:1">${r.score}</div>
@@ -3041,7 +1075,7 @@ function renderIntentGrid(){
     <div class="intent-card">
       <div class="ic-head">
         ${avatarHTML(l,{class:'ic-avatar',size:30,fs:11})}
-        <div style="flex:1"><div class="ic-name">${l.name}</div><div class="ic-phone">${l.phone}</div></div>
+        <div style="flex:1"><div class="ic-name">${esc(l.name)}</div><div class="ic-phone">${esc(l.phone)}</div></div>
         <div style="text-align:right">
           <div style="font-size:9px;font-family:var(--font-mono);color:var(--purple)">CONFIDENCE</div>
           <div style="font-size:15px;font-family:var(--font-mono);font-weight:700;color:var(--purple)">${intent.confidence}%</div>
@@ -3347,24 +1381,29 @@ function renderDashSocialSnapshot(){
 }
 
 // Kanban with deal values
+const STAGES=['New','Qualified','Meeting Set','Offer Stage','Closed Won'];
+function stageOf(status){
+  const t=String(status||'').toLowerCase();
+  if(/clos|won/.test(t))return 'Closed Won';
+  if(/offer/.test(t))return 'Offer Stage';
+  if(/meet|view/.test(t))return 'Meeting Set';
+  if(/qualif/.test(t))return 'Qualified';
+  return 'New';
+}
+// "AED 2.8M", "900K", "2,500,000" -> number (0 if unparseable)
+function parseAED(b){
+  const m=String(b||'').replace(/,/g,'').match(/(\d+(?:\.\d+)?)\s*([mk])?/i);
+  if(!m)return 0;
+  return parseFloat(m[1])*({m:1e6,k:1e3}[(m[2]||'').toLowerCase()]||1);
+}
 function renderKanban(){
   const kanbanEl=document.getElementById('kanban-board');if(!kanbanEl)return;
   const stageProb={New:10,Qualified:30,'Meeting Set':60,'Offer Stage':85,'Closed Won':100};
   const stageColor={New:'var(--cold)',Qualified:'var(--warm)','Meeting Set':'var(--purple)','Offer Stage':'var(--accent)','Closed Won':'var(--green)'};
-  const dealValues={
-    'New':[{name:'Omar Al Farouq',type:'Buyer',time:'2m ago',temp:'cold',score:44,budget:'AED 1.2M'},{name:'Sara Al Blooshi',type:'Buyer',time:'14m ago',temp:'cold',score:38,budget:'AED 750K'}],
-    'Qualified':[{name:'Rania Hassan',type:'Buyer',time:'1h ago',temp:'warm',score:69,budget:'AED 2.8M'},{name:'Tariq Mahmoud',type:'Seller',time:'2h ago',temp:'warm',score:55,budget:'AED 1.9M'}],
-    'Meeting Set':[{name:'Fatima Al Zaabi',type:'Buyer',time:'3h ago',temp:'hot',score:81,budget:'AED 3.5M'}],
-    'Offer Stage':[{name:'Nour Al Mansouri',type:'Buyer',time:'Yesterday',temp:'hot',score:91,budget:'AED 5.2M'}],
-    'Closed Won':[{name:'Jaber Al Nuaimi',type:'Buyer',time:'2d ago',temp:'hot',score:88,budget:'AED 3.8M'}],
-  };
-  kanbanEl.innerHTML=Object.entries(dealValues).map(([stage,cards])=>{
-    const prob=stageProb[stage];
-    const color=stageColor[stage];
-    const totalVal=cards.reduce((sum,c)=>{
-      const n=parseFloat(c.budget.replace('AED ','').replace('M','000000').replace('K','000'));
-      return sum+n;
-    },0);
+  kanbanEl.innerHTML=STAGES.map(stage=>{
+    const cards=leads.filter(l=>stageOf(l.status)===stage);
+    const color=stageColor[stage],prob=stageProb[stage];
+    const totalVal=cards.reduce((sum,c)=>sum+parseAED(c.budget),0);
     return`<div class="kanban-col">
       <div class="kanban-col-head">
         <span style="color:${color};font-weight:700">${stage}</span>
@@ -3373,20 +1412,37 @@ function renderKanban(){
           <span style="font-size:9px;font-family:var(--font-mono);color:${color}">${prob}%</span>
         </div>
       </div>
-      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text3);padding:0 12px 8px">
-        ${totalVal>=1000000?'AED '+(totalVal/1000000).toFixed(1)+'M':'AED '+(totalVal/1000).toFixed(0)+'K'} in stage
-      </div>
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text3);padding:0 12px 8px">${fmtAED(totalVal)} in stage</div>
       ${cards.map(c=>`
-        <div class="kanban-card" onclick="openLead(1)" style="border-left:2px solid ${color}44">
-          <div class="kanban-card-name">${c.name}</div>
+        <div class="kanban-card" onclick="openLead(${c.id})" style="border-left:2px solid ${color}44">
+          <div class="kanban-card-name">${esc(c.name)}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-            <span class="temp ${c.temp}" style="font-size:9px"><span class="temp-dot"></span>${c.temp}</span>
-            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent);font-weight:600">${c.budget}</span>
+            <span class="temp ${esc(c.temp)}" style="font-size:9px"><span class="temp-dot"></span>${esc(c.temp)}</span>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent);font-weight:600">${esc(c.budget)}</span>
           </div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">${c.type} · Score ${c.score} · ${c.time}</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">${esc(c.type)} · Score ${esc(c.score)}</div>
         </div>`).join('')}
     </div>`;
   }).join('');
+}
+// Everything on the dashboard that can be derived from real leads.
+function renderLiveStats(){
+  const n=leads.length,hot=leads.filter(l=>l.temp==='hot').length,warm=leads.filter(l=>l.temp==='warm').length,cold=n-hot-warm;
+  const meet=leads.filter(l=>stageOf(l.status)==='Meeting Set').length;
+  const pipe=leads.filter(l=>stageOf(l.status)!=='Closed Won').reduce((a,l)=>a+parseAED(l.budget),0);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  const counts={all:n,hot,warm,cold};
+  for(const lang in T)for(const k in counts)if(T[lang]['filter_'+k])T[lang]['filter_'+k]=T[lang]['filter_'+k].replace(/\(\d+\)/,`(${counts[k]})`);
+  document.querySelectorAll('[data-i18n^="filter_"]').forEach(e=>{const t=T[currentLang][e.dataset.i18n];if(t)e.textContent=t});
+  set('m-total',n);set('m-hot',hot);set('m-meet',meet);
+  set('m-total-d',`${warm} warm · ${cold} cold`);set('m-hot-d',n?Math.round(hot/n*100)+'% of all leads':'No leads yet');
+  set('m-meet-d',n?Math.round(meet/n*100)+'% of leads at Meeting Set':'');
+  set('chip-total',`${n} lead${n===1?'':'s'} tracked`);set('chip-hot',`${hot} hot 🔥`);set('chip-pipe',`${fmtAED(pipe)} open pipeline`);
+  set('hero-sub',n?`You have ${hot} hot lead${hot===1?'':'s'} and ${meet} at Meeting Set.`:'No leads yet. Add one or import a CSV from the Leads page.');
+  const me=window.__me||{};
+  set('org-name',me.agency||'Your agency');set('user-name',me.email||'');set('user-role',me.role||'');
+  set('hero-loc','📍 '+(me.agency||''));
+  const hl=document.getElementById('hot-count');if(hl)hl.textContent=hot+' total';
 }
 function renderNotifs(){
   document.getElementById('notif-list').innerHTML=notifs.map(n=>`
@@ -3418,6 +1474,7 @@ function showView(id,el){
     document.getElementById('page-title').textContent=t[titleKey]||id;
   }
   // lazy renders
+  if(id==='team'){renderTeam();renderIntegrations();}
   if(id==='scoring'){renderWeights();renderScoreQueue();}
   if(id==='intent')renderIntentGrid();
   if(id==='nba')renderNBA();
@@ -3430,7 +1487,7 @@ function showView(id,el){
   if(id==='compliance'){renderCompliance();renderAuditLog();}
   if(id==='sms'){renderSMSSequences();renderOrchestration();renderFollowUpTemplates();}
   if(id==='social_auto'){renderSocialWorkflows();renderSocialConvFeed();renderAICallQueue();renderSocialPipeline();renderFbStats();renderIgStats();}
-  if(!viewTitles[id]) document.getElementById('page-title').textContent = id==='social_auto'?'FB & Instagram Automation':id==='call_assist'?'Live Call Assistant':id;
+  if(!viewTitles[id]) document.getElementById('page-title').textContent = id==='social_auto'?'FB & Instagram Automation':id==='call_assist'?'Live Call Assistant':id==='team'?'Team':id;
 
   // Animate metric bars on view change
   setTimeout(()=>{
@@ -3456,7 +1513,56 @@ function filterLeads(f,tab){
 // ══════════════════════════════════════════════════
 // MODALS
 // ══════════════════════════════════════════════════
-function openAddLead(){document.getElementById('add-lead-modal').classList.add('open')}
+let editingLeadId=null;
+function openAddLead(){
+  editingLeadId=null;
+  ['al-name','al-phone','al-budget','al-area'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#add-lead-modal .modal-body .btn').forEach(b=>{b.style.borderColor='';b.style.color='';b.style.background=''});
+  document.getElementById('al-status').value='New';document.getElementById('al-save').textContent='⚡ Add & Score';
+  document.getElementById('add-lead-modal').classList.add('open');
+}
+function editLead(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  closeModal('lead-detail-modal');openAddLead();editingLeadId=id;
+  document.getElementById('al-name').value=l.name;document.getElementById('al-phone').value=l.phone;
+  document.getElementById('al-budget').value=l.budget;document.getElementById('al-area').value=l.area;document.getElementById('al-status').value=stageOf(l.status);
+  document.querySelectorAll('#add-lead-modal .modal-body .btn').forEach(b=>{if(b.textContent.trim()===l.source)selectType(b)});
+  document.getElementById('al-save').textContent='Save changes';
+}
+function refreshLeadViews(){
+  renderHotLeads();renderAllLeads();renderLiveStats();
+  if(typeof renderKanban==='function')renderKanban();
+  const a=document.querySelector('#view-scoring.active');if(a)renderScoreQueue();
+}
+async function saveLead(){
+  const src=[...document.querySelectorAll('#add-lead-modal .modal-body .btn')].find(b=>b.style.color)?.textContent.trim()||'';
+  const data={name:document.getElementById('al-name').value,phone:document.getElementById('al-phone').value,
+    budget:document.getElementById('al-budget').value,area:document.getElementById('al-area').value,source:src,status:document.getElementById('al-status').value};
+  if(!data.name.trim()){toastMsg('Name is required');return}
+  try{
+    if(editingLeadId){const r=await api('PATCH','/api/leads/'+editingLeadId,data);leads.splice(leads.findIndex(x=>x.id===editingLeadId),1,r)}
+    else leads.push(await api('POST','/api/leads',data));
+    closeModal('add-lead-modal');refreshLeadViews();toastMsg(editingLeadId?'Lead updated':'Lead added');
+  }catch(e){toastMsg(e.message)}
+}
+async function deleteLead(id){
+  if(!confirm('Delete this lead permanently?'))return;
+  try{await api('DELETE','/api/leads/'+id);leads.splice(leads.findIndex(x=>x.id===id),1);closeModal('lead-detail-modal');refreshLeadViews();toastMsg('Lead deleted')}
+  catch(e){toastMsg(e.message)}
+}
+async function importLeadsCSV(input){
+  const f=input.files[0];input.value='';if(!f)return;
+  try{
+    const r=await api('POST','/api/leads/import',{csv:await f.text()});
+    leads.splice(0,leads.length,...await api('GET','/api/leads'));refreshLeadViews();
+    toastMsg(`Imported ${r.imported}`+(r.duplicates?`, ${r.duplicates} already existed (merged)`:'')+(r.skipped?`, skipped ${r.skipped} (row ${r.errors[0].row}: ${r.errors[0].error})`:''));
+  }catch(e){toastMsg(e.message)}
+}
+function toastMsg(t){
+  const el=document.createElement('div');el.setAttribute('role','status');el.className='toast-msg';el.textContent=t;
+  el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg4);color:var(--text);border:1px solid var(--border2);padding:9px 16px;border-radius:8px;font-size:12.5px;z-index:400';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})});
 function selectType(btn){
@@ -3478,18 +1584,19 @@ function openLead(id){
     </div>
     <div style="display:flex;align-items:center;gap:13px;margin-bottom:16px">
       ${avatarHTML(l,{size:40,fs:13})}
-      <div><div style="font-size:15px;font-weight:500">${l.name}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${l.phone} · Ref ${listing.ref}</div></div>
+      <div><div style="font-size:15px;font-weight:500">${esc(l.name)}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${esc(l.phone)} · Ref ${listing.ref}</div></div>
       <div style="margin-left:auto">${scoreRingHTML(l.score,18)}</div>
       <div>${tempBadge(l.temp)}</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      ${[['Type',l.type],['Intent',l.intent+' · '+l.urgency],['Timeframe',l.timeframe],['Budget',l.budget],['Financing',l.financing],['Source',l.source],['Agent',l.agent],['Area',l.area]].map(([k,v])=>`
-        <div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px"><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono);margin-bottom:2px;text-transform:uppercase">${k}</div><div style="font-size:12.5px;color:var(--text);font-weight:500">${v}</div></div>`).join('')}
+      ${[['Type',l.type],['Intent',l.intent+' · '+l.urgency],['Timeframe',l.timeframe],['Budget',l.budget],['Financing',l.financing],['Source',l.source],['Agent',l.agent],['Area',l.area],...(l.notes?[['Notes',l.notes]]:[])].map(([k,v])=>`
+        <div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px"><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono);margin-bottom:2px;text-transform:uppercase">${k}</div><div style="font-size:12.5px;color:var(--text);font-weight:500">${esc(v)}</div></div>`).join('')}
     </div>
     <div style="display:flex;gap:6px">
       <button class="btn btn-wa" style="flex:1;justify-content:center">💬 WhatsApp</button>
       <button class="btn btn-primary" style="flex:1;justify-content:center">📅 Book Viewing</button>
-      <button class="btn" style="flex:1;justify-content:center">Assign</button>
+      <button class="btn" style="flex:1;justify-content:center" onclick="editLead(${l.id})">✎ Edit</button>
+      ${(window.__me||{}).role==='admin'?`<button class="btn" style="flex:1;justify-content:center;color:var(--hot)" onclick="deleteLead(${l.id})">🗑 Delete</button>`:''}
     </div>`;
   document.getElementById('lead-detail-modal').classList.add('open');
 }
@@ -3517,12 +1624,14 @@ function toggleCopilot(){document.getElementById('copilot-panel').classList.togg
 
 const COPILOT_SYSTEM = `You are Observer AI Copilot — a sharp, data-driven real estate CRM assistant for a Dubai property agency.
 
-Current platform data snapshot:
-- 247 total leads: 34 hot, 89 warm, 124 cold
-- AI scoring model: XGBoost v2.4 (91.3% accuracy)
+IMPORTANT: everything below is illustrative SAMPLE data from a concept prototype, not live or real. Say so when you cite it, never present it as real results, and do not give investment, tax or legal advice.
+
+Sample data snapshot:
+- 247 total leads: 34 hot, 89 warm, 124 cold (sample)
+- Lead scoring: rule-based sample weights (not a trained model; no accuracy figure exists)
 - Top priority leads: Ahmed Al Khalidi (score 87, cash buyer, 6-week timeline), Nour Al Mansouri (score 91, offer pending), Fatima Al Zaabi (score 81, viewing tomorrow)
 - 2 active SLA breaches. Avg response time: 6m 12s (target: <5 min)
-- Best channel: WhatsApp (89% open rate, 412% ROI)
+- Best channel in the sample data: WhatsApp (no verified open-rate or ROI figures)
 - Revenue pipeline: AED 4.2M
 - 8 active agents, top converter: Sarah Ahmed (32% conv. rate)
 - GCC Developer coverage: 42 developers across UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman
@@ -3644,7 +1753,7 @@ function tryVoiceCommand(text){
 function flashCopilot(msg){
   const m = document.getElementById('copilot-msgs');
   if(!m) return;
-  m.innerHTML += `<div class="cop-msg ai" style="font-family:var(--font-mono);font-size:11px;color:var(--purple)">🎤 ${msg}</div>`;
+  m.innerHTML += `<div class="cop-msg ai" style="font-family:var(--font-mono);font-size:11px;color:var(--purple)">🎤 ${esc(msg)}</div>`;
   m.scrollTop = m.scrollHeight;
 }
 
@@ -4160,6 +2269,7 @@ function enrollTemplate(i,btn){
 // ══════════════════════════════════════════════════
 renderHotLeads();
 renderAllLeads();
+renderLiveStats();
 renderActivity();
 renderDashNBA();
 renderDailyChart();
@@ -4185,9 +2295,9 @@ function updateHeroGreeting(){
   const h=new Date().getHours();
   const ar = currentLang==='ar';
   let g;
-  if(h<12) g = ar?'صباح الخير، سارة':'Good morning, Sarah';
-  else if(h<17) g = ar?'مساء الخير، سارة':'Good afternoon, Sarah';
-  else g = ar?'مساء الخير، سارة':'Good evening, Sarah';
+  if(h<12) g = ar?'صباح الخير':'Good morning';
+  else if(h<17) g = ar?'مساء الخير':'Good afternoon';
+  else g = ar?'مساء الخير':'Good evening';
   el.textContent = g+' 👋';
 }
 updateHeroGreeting();
@@ -4210,6 +2320,103 @@ setTimeout(()=>{
 document.querySelectorAll('.metric-value').forEach(el=>{
   el.style.animation='countUp .5s cubic-bezier(.22,1,.36,1) both';
 });
-</script>
-</body>
-</html>
+
+
+// ── Team & roles ─────────────────────────────────────────────────────
+(function(){
+  const me=window.__me||{},admin=me.role==='admin';
+  if(admin)document.getElementById('nav-team').style.display='';
+  // Agents cannot import or delete (the server enforces this too); hide the controls.
+  if(!admin){const imp=document.querySelector('[onclick*="csv-file"]');if(imp)imp.style.display='none';}
+})();
+async function renderTeam(){
+  const body=document.getElementById('team-table');
+  try{
+    const {users,invites}=await api('GET','/api/users'),me=window.__me||{};
+    document.getElementById('team-count').textContent=users.length+' member'+(users.length===1?'':'s')+(invites.length?` · ${invites.length} pending`:'');
+    body.innerHTML=users.map(u=>`<tr><td>${esc(u.email)}${u.email===me.email?' <span style="color:var(--text3)">(you)</span>':''}</td>
+      <td>${u.role==='investor'?`Investor · ${esc(u.investor_id)}`:`<select class="field-input" style="width:auto;padding:4px 8px" onchange="setRole(${Number(u.id)},this)" aria-label="Role for ${esc(u.email)}"><option value="agent"${u.role==='agent'?' selected':''}>Agent</option><option value="admin"${u.role==='admin'?' selected':''}>Admin</option></select>`}</td>
+      <td>${u.email===me.email?'':`<button class="btn btn-sm" style="color:var(--hot)" onclick="removeUser(${Number(u.id)})">Remove</button>`}</td></tr>`).join('')
+      +invites.map(i=>`<tr><td>${esc(i.email)} <span style="color:var(--text3)">· invited</span></td><td>${esc(i.role)}</td>
+      <td><button class="btn btn-sm" onclick="revokeInvite(${Number(i.id)})">Revoke</button></td></tr>`).join('');
+  }catch(e){body.textContent=e.message}
+}
+async function onInviteRole(){
+  const inv=document.getElementById('inv-role').value==='investor',wrap=document.getElementById('inv-investor-wrap');
+  wrap.style.display=inv?'':'none';
+  if(inv&&!document.getElementById('inv-investor').options.length){
+    try{
+      const b=await api('GET','/api/portfolio/bootstrap'),sel=document.getElementById('inv-investor');
+      if(b.empty){toastMsg('Load the sample portfolio first (open the Portfolio prototype)');return}
+      b.investors.forEach(i=>{const o=document.createElement('option');o.value=i.id;o.textContent=i.name;sel.appendChild(o)});
+    }catch(e){toastMsg(e.message)}
+  }
+}
+async function sendInvite(){
+  try{
+    const role=document.getElementById('inv-role').value;
+    const r=await api('POST','/api/users/invite',{email:document.getElementById('inv-email').value,role,investor_id:role==='investor'?document.getElementById('inv-investor').value:undefined});
+    document.getElementById('inv-link').value=location.origin+'/login.html?invite='+encodeURIComponent(r.token);
+    document.getElementById('inv-result').style.display='';document.getElementById('inv-email').value='';
+    renderTeam();
+  }catch(e){toastMsg(e.message)}
+}
+function copyInvite(){copyField('inv-link')}
+function copyField(id){
+  const i=document.getElementById(id);i.select();
+  (navigator.clipboard?navigator.clipboard.writeText(i.value):Promise.reject()).then(()=>toastMsg('Link copied'),()=>{document.execCommand('copy');toastMsg('Link copied')});
+}
+async function setRole(id,sel){
+  try{await api('PATCH','/api/users/'+id,{role:sel.value});toastMsg('Role updated')}catch(e){toastMsg(e.message);renderTeam()}
+}
+async function removeUser(id){
+  if(!confirm('Remove this person? They lose access immediately.'))return;
+  try{await api('DELETE','/api/users/'+id);renderTeam();toastMsg('Removed')}catch(e){toastMsg(e.message)}
+}
+async function revokeInvite(id){try{await api('DELETE','/api/invites/'+id);renderTeam()}catch(e){toastMsg(e.message)}}
+
+async function renderIntegrations(){
+  const body=document.getElementById('intg-table');
+  try{
+    const {integrations}=await api('GET','/api/integrations');
+    document.getElementById('intg-count').textContent=integrations.length?integrations.length+' active':'';
+    body.innerHTML=integrations.length?integrations.map(i=>{
+      const pull=i.kind==='pull',when=pull?i.last_sync_at:i.last_used_at;
+      const note=i.last_error?`<div style="color:var(--hot);font-size:11px">${esc(i.last_error)}</div>`:(pull&&i.more?'<div style="color:var(--warm);font-size:11px">More contacts to import: press Sync again</div>':'');
+      return `<tr><td>${esc(i.label)} <span style="color:var(--text3);font-size:11px">${pull?'· HubSpot pull':'· webhook'}</span>${note}</td>
+      <td style="color:var(--text3)">${when?esc(new Date(when).toLocaleString()):'never'}</td><td>${esc(i.received)}</td>
+      <td style="white-space:nowrap">${pull?`<button class="btn btn-sm btn-primary" onclick="syncIntegration(${Number(i.id)},this)">Sync now</button> `:''}<button class="btn btn-sm" style="color:var(--hot)" onclick="revokeIntegration(${Number(i.id)})">${pull?'Remove':'Revoke'}</button></td></tr>`;
+    }).join(''):'<tr><td colspan="4" style="color:var(--text3);padding:14px">No integrations yet.</td></tr>';
+  }catch(e){body.textContent=e.message}
+}
+async function connectHubspot(){
+  const btn=document.getElementById('hs-connect'),tok=document.getElementById('hs-token');
+  btn.disabled=true;
+  try{
+    await api('POST','/api/integrations',{adapter:'hubspot',label:'HubSpot',config:{token:tok.value}});
+    tok.value='';toastMsg('HubSpot connected. Press Sync now to import contacts.');renderIntegrations();
+  }catch(e){toastMsg(e.message)}finally{btn.disabled=false}
+}
+async function syncIntegration(id,btn){
+  btn.disabled=true;btn.textContent='Syncing…';
+  try{
+    const r=await api('POST',`/api/integrations/${id}/sync`);
+    leads.splice(0,leads.length,...await api('GET','/api/leads'));refreshLeadViews();
+    toastMsg(`Synced ${r.fetched}: ${r.created} new, ${r.duplicates} already existed`+(r.skipped?`, ${r.skipped} skipped (no name or phone)`:'')+(r.done?'':'. More to import: press Sync again'));
+  }catch(e){toastMsg(e.message)}
+  renderIntegrations();
+}
+async function createIntegration(){
+  try{
+    const r=await api('POST','/api/integrations',{adapter:'webhook',label:document.getElementById('intg-label').value});
+    const url=location.origin+r.path;
+    document.getElementById('intg-url').value=url;
+    document.getElementById('intg-curl').textContent=`curl -X POST '${url}' \\\n  -H 'content-type: application/json' \\\n  -d '{"name":"Layla Hassan","phone":"050 111 2233","email":"layla@example.com","budget":2500000,"message":"Interested in 2BR"}'`;
+    document.getElementById('intg-result').style.display='';document.getElementById('intg-label').value='';
+    renderIntegrations();
+  }catch(e){toastMsg(e.message)}
+}
+async function revokeIntegration(id){
+  if(!confirm('Revoke this webhook? Systems posting to it will stop working.'))return;
+  try{await api('DELETE','/api/integrations/'+id);renderIntegrations()}catch(e){toastMsg(e.message)}
+}

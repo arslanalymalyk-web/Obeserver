@@ -1,0 +1,12 @@
+/* Shared accessibility styles */
+:focus-visible { outline: 2px solid var(--accent, #4f8cff); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Persistent prototype banner (shared by the voice and CRM pages) */
+.proto-banner{background:#2a2f3a;color:#f3f4f7;padding:7px 16px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;line-height:1.4;position:relative;z-index:60}
+.proto-banner strong{background:#f5b84a;color:#2b1d00;padding:1px 8px;border-radius:99px;font-size:11.5px;white-space:nowrap}
+.proto-banner a{color:inherit;margin-inline-start:auto;text-decoration:underline;font-size:12px}
+body.has-banner{display:flex;flex-direction:column;height:100vh}
+body.has-banner .app{flex:1;min-height:0;height:auto}
