@@ -24,13 +24,17 @@ Email + password (scrypt). Session is an HMAC-signed, HttpOnly, SameSite=Lax coo
 | PATCH/DELETE | `/api/users/:id`, `/api/invites/:id` | admin only: change role / remove / revoke. Cannot remove yourself or demote the last admin |
 | GET/POST | `/api/auth/invite`, `/api/auth/accept` | public: look up an invite, set a password and join |
 | GET/POST/DELETE | `/api/integrations`, `/api/integrations/:id` | admin only: create/list/revoke lead-intake webhooks (key shown once, only its hash stored) |
+| POST | `/api/integrations/:id/sync` | admin only: run one sync pass of a pull integration (up to 10 pages / 1000 contacts; press again to continue from the saved cursor) |
 | POST | `/api/intake/:key` | public, key-authenticated: one lead or a list (max 200) in JSON; flexible field names; dedupes |
 | POST/GET | `/api/calls`, GET `/api/calls/:id` | create/list/read saved voice calls and transcripts |
 | POST | `/api/calls/:id/say`, `/api/calls/:id/end` | one agent turn (server-side prompt, EN/AR, history from DB); `text:""` connects the call |
 | POST | `/api/claude` | session-gated proxy, model and max_tokens fixed server-side |
 
 ## Lead sources (adapters)
-`lib/adapters.js` defines the contract: `{ id, label, kind, normalize(raw, ctx) }`. The shipped adapter is a generic push webhook (`kind: 'push'`) that maps common portal/ad-platform field names (name/full_name, phone/mobile/whatsapp, email, budget/price, area/location/community, message/notes, ...) and uses the integration's label as the lead source. A pull-style CRM adapter (HubSpot, Salesforce) would add `pull(config, since)` and reuse `normalize` and `upsertLeads`. No third-party CRM adapter is implemented yet.
+`lib/adapters.js` defines the contract: `{ id, label, kind, normalize(raw, ctx) }`. The shipped adapter is a generic push webhook (`kind: 'push'`) that maps common portal/ad-platform field names (name/full_name, phone/mobile/whatsapp, email, budget/price, area/location/community, message/notes, ...) and uses the integration's label as the lead source. 
+**HubSpot (pull, read-only)** is the first CRM connector. An admin pastes a private-app access token (scope `crm.objects.contacts.read`); it is checked against HubSpot immediately, then stored AES-256-GCM encrypted (`DATA_KEY`, falling back to `SESSION_SECRET`) and never returned by the API. **Sync now** reads contacts via `GET /crm/v3/objects/contacts` (paged with `after`), maps name/phone/email/city/message, maps `lifecyclestage` to a pipeline stage (MQL/SQL -> Qualified, opportunity -> Offer Stage, customer -> Closed Won, else New), and merges through `upsertLeads`. Each contact carries a stable `external_id` (`hubspot:<id>`), so re-syncing never duplicates, even contacts with no phone or email. A pass handles up to 1000 contacts and saves its cursor in the same transaction as the leads; HubSpot rate limits (429) return partial progress to resume. Existing leads only get blank fields filled, so later edits in HubSpot do not overwrite Observer. Nothing is written back to HubSpot.
+
+**Verification status:** built from HubSpot's documented CRM v3 API and tested against a mock server that follows that response shape. It has **not** been run against a real HubSpot account (the build environment cannot reach api.hubapi.com). Treat the first real sync as the acceptance test.
 
 **Duplicates:** matched by phone (last 9 digits, so `+971 50 111 2233` equals `050 111 2233`) or email (case-insensitive), via generated columns `phone_key`/`email_key`. A match fills the existing lead's empty fields and never overwrites. Applies to webhooks and CSV import, including duplicates inside one batch. Manual "Add lead" does not dedupe.
 
@@ -44,4 +48,5 @@ See `.env.example`. `DATABASE_URL`, `SESSION_SECRET` (32+ chars) are required; `
 - Pipeline kanban, funnel, ROI and the voice agent views still use mock data; the Leads view, scoring queue, hot leads and detail modal use real leads.
 - Voice demo (Live Voice Demo view): browser SpeechRecognition (`ar-AE`/`en-US`) -> `/api/calls/:id/say` -> Claude -> browser speechSynthesis. No telephony. Recognition needs Chrome/Edge; Arabic speech needs an Arabic voice installed (text still works). The queue console, scripts and analytics views remain mock.
 - The webhook key is in the URL path, so reverse proxies may log it; revoke and recreate if it leaks.
-- Next: a real pull adapter (HubSpot), password reset, email delivery for invites.
+- Syncs are manual (button); there is no scheduler yet. Changes made in HubSpot after import are not pulled in (blank fields only).
+- Next: scheduled sync, password reset, email delivery for invites.

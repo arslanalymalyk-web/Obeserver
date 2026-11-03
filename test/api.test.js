@@ -9,10 +9,32 @@ const mock = http.createServer(async (q, r) => {
   let b = ''; for await (const c of q) b += c; seen.push(JSON.parse(b));
   r.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ content: [{ type: 'text', text: 'reply ' + seen.length }] }));
 });
+// Mock HubSpot CRM v3 contacts API: bearer auth, `after` paging, optional one-off 429 / rejection.
+const hs = { token: 'good-token', rateLimitAt: 0, calls: 0 };
+const contacts = Array.from({ length: 250 }, (_, i) => {
+  const id = String(i + 1), props = { firstname: 'Contact', lastname: id, phone: '0521' + id.padStart(6, '0'), email: `c${id}@hs.test`, city: 'Dubai', lifecyclestage: 'lead' };
+  if (id === '1') Object.assign(props, { firstname: 'Layla', lastname: 'H', phone: '+971 50 111 2233', email: '', message: 'From HubSpot' });
+  if (id === '2') Object.assign(props, { firstname: 'Nameonly', lastname: '', phone: '', email: '' });
+  if (id === '3') Object.assign(props, { firstname: '', lastname: '', phone: '', email: 'emailonly@hs.test' });
+  if (id === '4') Object.assign(props, { firstname: '', lastname: '', phone: '', email: '' });
+  if (id === '5') props.lifecyclestage = 'customer';
+  if (id === '6') props.lifecyclestage = 'salesqualifiedlead';
+  return { id, properties: props };
+});
+const hsrv = http.createServer((q, r) => {
+  const u = new URL(q.url, 'http://x'); hs.calls++;
+  const out = (c, o) => r.writeHead(c, { 'content-type': 'application/json' }).end(JSON.stringify(o));
+  if (q.headers.authorization !== 'Bearer ' + hs.token) return out(401, { status: 'error', message: 'invalid token' });
+  if (u.pathname !== '/crm/v3/objects/contacts') return out(404, {});
+  if (hs.rateLimitAt && hs.calls === hs.rateLimitAt) return out(429, { status: 'error' });
+  const limit = Number(u.searchParams.get('limit')), from = Number(u.searchParams.get('after') || 0), page = contacts.slice(from, from + limit);
+  out(200, { results: page, ...(from + limit < contacts.length ? { paging: { next: { after: String(from + limit) } } } : {}) });
+});
 const srv = http.createServer(async (q, r) => { if (!(await handle(q, r))) r.writeHead(404).end(); });
 
 async function main() {
   await new Promise(r => mock.listen(0, r));
+  await new Promise(r => hsrv.listen(0, r)); process.env.HUBSPOT_API_URL = 'http://127.0.0.1:' + hsrv.address().port;
   process.env.ANTHROPIC_API_KEY = 'test'; process.env.ANTHROPIC_API_URL = 'http://127.0.0.1:' + mock.address().port;
   await new Promise(r => srv.listen(0, r));
   const base = 'http://127.0.0.1:' + srv.address().port;
@@ -134,6 +156,45 @@ async function main() {
   assert.equal(JSON.stringify(ig2).includes(ig.key), false, 'key is never listed again');
   assert.equal((await a('DELETE', '/api/integrations/' + ig2.id)).s, 200);
   assert.equal((await raw(ig.key, { name: 'late' })).s, 404, 'revoked key stops working');
+  // HubSpot pull connector
+  assert.equal((await a('POST', '/api/integrations', { adapter: 'hubspot', label: 'HubSpot', config: { token: 'wrong' } })).s, 400, 'bad token rejected up front');
+  assert.match((await a('POST', '/api/integrations', { adapter: 'hubspot', label: 'HubSpot', config: { token: 'wrong' } })).j.error, /rejected the token/);
+  assert.equal((await a('POST', '/api/integrations', { adapter: 'hubspot', label: 'HubSpot', config: {} })).s, 400, 'credentials required');
+  const hub = (await a('POST', '/api/integrations', { adapter: 'hubspot', label: 'HubSpot', config: { token: 'good-token' } })).j;
+  assert.ok(hub.id && !hub.key && !JSON.stringify(hub).includes('good-token'), 'no key or token in the response');
+  const dbrow = (await (await require('../lib/db').db()).query('SELECT config_enc FROM integrations WHERE id=$1', [hub.id])).rows[0];
+  assert.ok(dbrow.config_enc && !dbrow.config_enc.includes('good-token'), 'token is encrypted at rest');
+  const listed = (await a('GET', '/api/integrations')).j.integrations.find(i => i.id === hub.id);
+  assert.equal(listed.kind, 'pull'); assert.equal(listed.has_credentials, true); assert.equal(JSON.stringify(listed).includes('good-token'), false);
+  assert.equal((await b('POST', `/api/integrations/${hub.id}/sync`)).s, 404, 'other tenant cannot sync it');
+  assert.equal((await c2('POST', `/api/integrations/${hub.id}/sync`)).s, 403, 'agents cannot sync');
+  assert.equal((await a('POST', `/api/integrations/${ig.id}/sync`)).s, 404, 'revoked webhook id has no sync');
+  const s1 = (await a('POST', `/api/integrations/${hub.id}/sync`)).j;
+  assert.deepEqual([s1.fetched, s1.created, s1.duplicates, s1.skipped, s1.done], [250, 248, 1, 1, true], 'first sync');
+  const LA = (await a('GET', '/api/leads')).j;
+  assert.equal(LA.find(l => l.name === 'Contact 5').status, 'Closed Won'); assert.equal(LA.find(l => l.name === 'Contact 6').status, 'Qualified');
+  assert.equal(LA.find(l => l.name === 'emailonly').email, 'emailonly@hs.test', 'name falls back to the email prefix');
+  assert.equal(LA.find(l => l.name === 'Contact 7').source, 'HubSpot');
+  assert.equal(LA.filter(l => l.phone.replace(/\D/g, '').endsWith('501112233')).length, 1, 'existing lead merged, not duplicated');
+  const s2 = (await a('POST', `/api/integrations/${hub.id}/sync`)).j;
+  assert.deepEqual([s2.created, s2.duplicates, s2.skipped], [0, 249, 1], 'a re-sync creates nothing, even for contacts with no phone/email');
+  // rate limit mid-way keeps progress and resumes; runs on a fresh tenant
+  const hubB = (await b('POST', '/api/integrations', { adapter: 'hubspot', label: 'HubSpot', config: { token: 'good-token' } })).j;
+  hs.calls = 0; hs.rateLimitAt = 2;
+  const p1 = (await b('POST', `/api/integrations/${hubB.id}/sync`)).j;
+  assert.deepEqual([p1.fetched, p1.limited, p1.done], [100, true, false], 'partial on 429');
+  assert.equal((await b('GET', '/api/integrations')).j.integrations.find(i => i.id === hubB.id).more, true);
+  hs.rateLimitAt = 0;
+  const p2 = (await b('POST', `/api/integrations/${hubB.id}/sync`)).j;
+  assert.deepEqual([p2.fetched, p2.done], [150, true], 'resumes from the saved cursor');
+  assert.equal((await b('GET', '/api/leads')).j.length, 249, 'no gaps and no duplicates across the two runs');
+  assert.equal((await b('GET', '/api/integrations')).j.integrations.find(i => i.id === hubB.id).more, false);
+  hs.token = 'rotated';
+  const bad = await a('POST', `/api/integrations/${hub.id}/sync`);
+  assert.equal(bad.s, 400); assert.match(bad.j.error, /rejected the token/);
+  assert.match((await a('GET', '/api/integrations')).j.integrations.find(i => i.id === hub.id).last_error, /rejected/);
+  hs.token = 'good-token';
+  assert.equal((await a('DELETE', '/api/integrations/' + hub.id)).s, 200);
   // admin management
   const users = (await a('GET', '/api/users')).j.users, agentRow = users.find(u => u.role === 'agent'), adminRow = users.find(u => u.role === 'admin');
   assert.equal((await a('DELETE', '/api/users/' + adminRow.id)).s, 400, 'cannot remove yourself');
@@ -151,4 +212,4 @@ async function main() {
   await a('POST', '/api/auth/logout', {});
   console.log('all API tests passed');
 }
-main().then(() => 0, e => { console.error(e); process.exitCode = 1; }).finally(() => { srv.close(); mock.close(); close(); });
+main().then(() => 0, e => { console.error(e); process.exitCode = 1; }).finally(() => { srv.close(); mock.close(); hsrv.close(); close(); });

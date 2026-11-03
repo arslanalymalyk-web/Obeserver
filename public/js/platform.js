@@ -2366,11 +2366,31 @@ async function renderIntegrations(){
   try{
     const {integrations}=await api('GET','/api/integrations');
     document.getElementById('intg-count').textContent=integrations.length?integrations.length+' active':'';
-    body.innerHTML=integrations.length?integrations.map(i=>`<tr><td>${esc(i.label)}</td>
-      <td style="color:var(--text3)">${i.last_used_at?esc(new Date(i.last_used_at).toLocaleString()):'never'}</td><td>${esc(i.received)}</td>
-      <td><button class="btn btn-sm" style="color:var(--hot)" onclick="revokeIntegration(${Number(i.id)})">Revoke</button></td></tr>`).join('')
-      :'<tr><td colspan="4" style="color:var(--text3);padding:14px">No webhooks yet.</td></tr>';
+    body.innerHTML=integrations.length?integrations.map(i=>{
+      const pull=i.kind==='pull',when=pull?i.last_sync_at:i.last_used_at;
+      const note=i.last_error?`<div style="color:var(--hot);font-size:11px">${esc(i.last_error)}</div>`:(pull&&i.more?'<div style="color:var(--warm);font-size:11px">More contacts to import: press Sync again</div>':'');
+      return `<tr><td>${esc(i.label)} <span style="color:var(--text3);font-size:11px">${pull?'· HubSpot pull':'· webhook'}</span>${note}</td>
+      <td style="color:var(--text3)">${when?esc(new Date(when).toLocaleString()):'never'}</td><td>${esc(i.received)}</td>
+      <td style="white-space:nowrap">${pull?`<button class="btn btn-sm btn-primary" onclick="syncIntegration(${Number(i.id)},this)">Sync now</button> `:''}<button class="btn btn-sm" style="color:var(--hot)" onclick="revokeIntegration(${Number(i.id)})">${pull?'Remove':'Revoke'}</button></td></tr>`;
+    }).join(''):'<tr><td colspan="4" style="color:var(--text3);padding:14px">No integrations yet.</td></tr>';
   }catch(e){body.textContent=e.message}
+}
+async function connectHubspot(){
+  const btn=document.getElementById('hs-connect'),tok=document.getElementById('hs-token');
+  btn.disabled=true;
+  try{
+    await api('POST','/api/integrations',{adapter:'hubspot',label:'HubSpot',config:{token:tok.value}});
+    tok.value='';toastMsg('HubSpot connected. Press Sync now to import contacts.');renderIntegrations();
+  }catch(e){toastMsg(e.message)}finally{btn.disabled=false}
+}
+async function syncIntegration(id,btn){
+  btn.disabled=true;btn.textContent='Syncing…';
+  try{
+    const r=await api('POST',`/api/integrations/${id}/sync`);
+    leads.splice(0,leads.length,...await api('GET','/api/leads'));refreshLeadViews();
+    toastMsg(`Synced ${r.fetched}: ${r.created} new, ${r.duplicates} already existed`+(r.skipped?`, ${r.skipped} skipped (no name or phone)`:'')+(r.done?'':'. More to import: press Sync again'));
+  }catch(e){toastMsg(e.message)}
+  renderIntegrations();
 }
 async function createIntegration(){
   try{

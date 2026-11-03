@@ -85,3 +85,13 @@ CREATE TABLE IF NOT EXISTS integrations (
   last_used_at TIMESTAMPTZ,
   received     INT NOT NULL DEFAULT 0
 );
+
+-- Pull-style integrations (e.g. HubSpot): encrypted credentials + sync progress.
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS config_enc   TEXT NOT NULL DEFAULT '';
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS cursor       TEXT;
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS last_sync_at TIMESTAMPTZ;
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS last_error   TEXT NOT NULL DEFAULT '';
+
+-- Stable id from the source system (e.g. 'hubspot:51'), so re-syncing never duplicates a contact that has no phone/email.
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS external_id TEXT;
+CREATE INDEX IF NOT EXISTS leads_external_idx ON leads (tenant_id, external_id) WHERE external_id IS NOT NULL;
