@@ -24,7 +24,7 @@ const T = {
     agents_today:'Agents Today', pipeline_velocity:'Pipeline Velocity', channel_mix:'Channel Mix Today',
     new:'New', qualified:'Qualified', meeting_set:'Meeting Set', closed:'Closed Won',
     deal_pipeline:'Deal Pipeline — Kanban',
-    filter_all:'All (247)', filter_hot:'Hot (34)', filter_warm:'Warm (89)', filter_cold:'Cold (124)',
+    filter_all:'All (0)', filter_hot:'Hot (0)', filter_warm:'Warm (0)', filter_cold:'Cold (0)',
     filter_buyers:'Buyers', filter_sellers:'Sellers',
     model:'Model', scored_today:'Scored Today', high_intent:'High Intent', avg_score:'Avg Score',
     feature_weights:'Model Feature Weights', live_queue:'Live Scoring Queue', processing:'Processing',
@@ -80,7 +80,7 @@ const T = {
     agents_today:'الوكلاء اليوم', pipeline_velocity:'سرعة خط المبيعات', channel_mix:'مزيج القنوات اليوم',
     new:'جديد', qualified:'مؤهل', meeting_set:'اجتماع محدد', closed:'صفقات مغلقة',
     deal_pipeline:'خط الصفقات — كانبان',
-    filter_all:'الكل (247)', filter_hot:'ساخن (34)', filter_warm:'دافئ (89)', filter_cold:'بارد (124)',
+    filter_all:'الكل (0)', filter_hot:'ساخن (0)', filter_warm:'دافئ (0)', filter_cold:'بارد (0)',
     filter_buyers:'المشترون', filter_sellers:'البائعون',
     model:'النموذج', scored_today:'مُقيَّم اليوم', high_intent:'نية عالية', avg_score:'متوسط النقاط',
     feature_weights:'أوزان ميزات النموذج', live_queue:'قائمة التقييم المباشر', processing:'يعالج',
@@ -1381,24 +1381,29 @@ function renderDashSocialSnapshot(){
 }
 
 // Kanban with deal values
+const STAGES=['New','Qualified','Meeting Set','Offer Stage','Closed Won'];
+function stageOf(status){
+  const t=String(status||'').toLowerCase();
+  if(/clos|won/.test(t))return 'Closed Won';
+  if(/offer/.test(t))return 'Offer Stage';
+  if(/meet|view/.test(t))return 'Meeting Set';
+  if(/qualif/.test(t))return 'Qualified';
+  return 'New';
+}
+// "AED 2.8M", "900K", "2,500,000" -> number (0 if unparseable)
+function parseAED(b){
+  const m=String(b||'').replace(/,/g,'').match(/(\d+(?:\.\d+)?)\s*([mk])?/i);
+  if(!m)return 0;
+  return parseFloat(m[1])*({m:1e6,k:1e3}[(m[2]||'').toLowerCase()]||1);
+}
 function renderKanban(){
   const kanbanEl=document.getElementById('kanban-board');if(!kanbanEl)return;
   const stageProb={New:10,Qualified:30,'Meeting Set':60,'Offer Stage':85,'Closed Won':100};
   const stageColor={New:'var(--cold)',Qualified:'var(--warm)','Meeting Set':'var(--purple)','Offer Stage':'var(--accent)','Closed Won':'var(--green)'};
-  const dealValues={
-    'New':[{name:'Omar Al Farouq',type:'Buyer',time:'2m ago',temp:'cold',score:44,budget:'AED 1.2M'},{name:'Sara Al Blooshi',type:'Buyer',time:'14m ago',temp:'cold',score:38,budget:'AED 750K'}],
-    'Qualified':[{name:'Rania Hassan',type:'Buyer',time:'1h ago',temp:'warm',score:69,budget:'AED 2.8M'},{name:'Tariq Mahmoud',type:'Seller',time:'2h ago',temp:'warm',score:55,budget:'AED 1.9M'}],
-    'Meeting Set':[{name:'Fatima Al Zaabi',type:'Buyer',time:'3h ago',temp:'hot',score:81,budget:'AED 3.5M'}],
-    'Offer Stage':[{name:'Nour Al Mansouri',type:'Buyer',time:'Yesterday',temp:'hot',score:91,budget:'AED 5.2M'}],
-    'Closed Won':[{name:'Jaber Al Nuaimi',type:'Buyer',time:'2d ago',temp:'hot',score:88,budget:'AED 3.8M'}],
-  };
-  kanbanEl.innerHTML=Object.entries(dealValues).map(([stage,cards])=>{
-    const prob=stageProb[stage];
-    const color=stageColor[stage];
-    const totalVal=cards.reduce((sum,c)=>{
-      const n=parseFloat(c.budget.replace('AED ','').replace('M','000000').replace('K','000'));
-      return sum+n;
-    },0);
+  kanbanEl.innerHTML=STAGES.map(stage=>{
+    const cards=leads.filter(l=>stageOf(l.status)===stage);
+    const color=stageColor[stage],prob=stageProb[stage];
+    const totalVal=cards.reduce((sum,c)=>sum+parseAED(c.budget),0);
     return`<div class="kanban-col">
       <div class="kanban-col-head">
         <span style="color:${color};font-weight:700">${stage}</span>
@@ -1407,20 +1412,37 @@ function renderKanban(){
           <span style="font-size:9px;font-family:var(--font-mono);color:${color}">${prob}%</span>
         </div>
       </div>
-      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text3);padding:0 12px 8px">
-        ${totalVal>=1000000?'AED '+(totalVal/1000000).toFixed(1)+'M':'AED '+(totalVal/1000).toFixed(0)+'K'} in stage
-      </div>
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text3);padding:0 12px 8px">${fmtAED(totalVal)} in stage</div>
       ${cards.map(c=>`
-        <div class="kanban-card" onclick="openLead(1)" style="border-left:2px solid ${color}44">
-          <div class="kanban-card-name">${c.name}</div>
+        <div class="kanban-card" onclick="openLead(${c.id})" style="border-left:2px solid ${color}44">
+          <div class="kanban-card-name">${esc(c.name)}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-            <span class="temp ${c.temp}" style="font-size:9px"><span class="temp-dot"></span>${c.temp}</span>
-            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent);font-weight:600">${c.budget}</span>
+            <span class="temp ${esc(c.temp)}" style="font-size:9px"><span class="temp-dot"></span>${esc(c.temp)}</span>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--accent);font-weight:600">${esc(c.budget)}</span>
           </div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">${c.type} · Score ${c.score} · ${c.time}</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px">${esc(c.type)} · Score ${esc(c.score)}</div>
         </div>`).join('')}
     </div>`;
   }).join('');
+}
+// Everything on the dashboard that can be derived from real leads.
+function renderLiveStats(){
+  const n=leads.length,hot=leads.filter(l=>l.temp==='hot').length,warm=leads.filter(l=>l.temp==='warm').length,cold=n-hot-warm;
+  const meet=leads.filter(l=>stageOf(l.status)==='Meeting Set').length;
+  const pipe=leads.filter(l=>stageOf(l.status)!=='Closed Won').reduce((a,l)=>a+parseAED(l.budget),0);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  const counts={all:n,hot,warm,cold};
+  for(const lang in T)for(const k in counts)if(T[lang]['filter_'+k])T[lang]['filter_'+k]=T[lang]['filter_'+k].replace(/\(\d+\)/,`(${counts[k]})`);
+  document.querySelectorAll('[data-i18n^="filter_"]').forEach(e=>{const t=T[currentLang][e.dataset.i18n];if(t)e.textContent=t});
+  set('m-total',n);set('m-hot',hot);set('m-meet',meet);
+  set('m-total-d',`${warm} warm · ${cold} cold`);set('m-hot-d',n?Math.round(hot/n*100)+'% of all leads':'No leads yet');
+  set('m-meet-d',n?Math.round(meet/n*100)+'% of leads at Meeting Set':'');
+  set('chip-total',`${n} lead${n===1?'':'s'} tracked`);set('chip-hot',`${hot} hot 🔥`);set('chip-pipe',`${fmtAED(pipe)} open pipeline`);
+  set('hero-sub',n?`You have ${hot} hot lead${hot===1?'':'s'} and ${meet} at Meeting Set.`:'No leads yet. Add one or import a CSV from the Leads page.');
+  const me=window.__me||{};
+  set('org-name',me.agency||'Your agency');set('user-name',me.email||'');set('user-role',me.role||'');
+  set('hero-loc','📍 '+(me.agency||''));
+  const hl=document.getElementById('hot-count');if(hl)hl.textContent=hot+' total';
 }
 function renderNotifs(){
   document.getElementById('notif-list').innerHTML=notifs.map(n=>`
@@ -1495,26 +1517,26 @@ function openAddLead(){
   editingLeadId=null;
   ['al-name','al-phone','al-budget','al-area'].forEach(id=>document.getElementById(id).value='');
   document.querySelectorAll('#add-lead-modal .modal-body .btn').forEach(b=>{b.style.borderColor='';b.style.color='';b.style.background=''});
-  document.getElementById('al-save').textContent='⚡ Add & Score';
+  document.getElementById('al-status').value='New';document.getElementById('al-save').textContent='⚡ Add & Score';
   document.getElementById('add-lead-modal').classList.add('open');
 }
 function editLead(id){
   const l=leads.find(x=>x.id===id);if(!l)return;
   closeModal('lead-detail-modal');openAddLead();editingLeadId=id;
   document.getElementById('al-name').value=l.name;document.getElementById('al-phone').value=l.phone;
-  document.getElementById('al-budget').value=l.budget;document.getElementById('al-area').value=l.area;
+  document.getElementById('al-budget').value=l.budget;document.getElementById('al-area').value=l.area;document.getElementById('al-status').value=stageOf(l.status);
   document.querySelectorAll('#add-lead-modal .modal-body .btn').forEach(b=>{if(b.textContent.trim()===l.source)selectType(b)});
   document.getElementById('al-save').textContent='Save changes';
 }
 function refreshLeadViews(){
-  renderHotLeads();renderAllLeads();
+  renderHotLeads();renderAllLeads();renderLiveStats();
   if(typeof renderKanban==='function')renderKanban();
   const a=document.querySelector('#view-scoring.active');if(a)renderScoreQueue();
 }
 async function saveLead(){
   const src=[...document.querySelectorAll('#add-lead-modal .modal-body .btn')].find(b=>b.style.color)?.textContent.trim()||'';
   const data={name:document.getElementById('al-name').value,phone:document.getElementById('al-phone').value,
-    budget:document.getElementById('al-budget').value,area:document.getElementById('al-area').value,source:src};
+    budget:document.getElementById('al-budget').value,area:document.getElementById('al-area').value,source:src,status:document.getElementById('al-status').value};
   if(!data.name.trim()){toastMsg('Name is required');return}
   try{
     if(editingLeadId){const r=await api('PATCH','/api/leads/'+editingLeadId,data);leads.splice(leads.findIndex(x=>x.id===editingLeadId),1,r)}
@@ -2244,6 +2266,7 @@ function enrollTemplate(i,btn){
 // ══════════════════════════════════════════════════
 renderHotLeads();
 renderAllLeads();
+renderLiveStats();
 renderActivity();
 renderDashNBA();
 renderDailyChart();
@@ -2269,9 +2292,9 @@ function updateHeroGreeting(){
   const h=new Date().getHours();
   const ar = currentLang==='ar';
   let g;
-  if(h<12) g = ar?'صباح الخير، سارة':'Good morning, Sarah';
-  else if(h<17) g = ar?'مساء الخير، سارة':'Good afternoon, Sarah';
-  else g = ar?'مساء الخير، سارة':'Good evening, Sarah';
+  if(h<12) g = ar?'صباح الخير':'Good morning';
+  else if(h<17) g = ar?'مساء الخير':'Good afternoon';
+  else g = ar?'مساء الخير':'Good evening';
   el.textContent = g+' 👋';
 }
 updateHeroGreeting();

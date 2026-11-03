@@ -24,7 +24,7 @@
   <div class="org-switcher">
     <div class="org-dot"></div>
     <div style="flex:1">
-      <div class="org-name">Emaar Properties</div>
+      <div class="org-name" id="org-name">Your agency</div>
       <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)" data-i18n="org_sub">Dubai, UAE · Enterprise</div>
     </div>
     <div class="org-arrow">⌄</div>
@@ -115,8 +115,8 @@
         <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces" alt="Sarah Ahmed" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='linear-gradient(135deg,var(--accent),var(--accent2))';this.parentElement.innerHTML='SA'">
       </div>
       <div>
-        <div class="agent-name">Sarah Ahmed</div>
-        <div class="agent-role">Sr. Agent · Admin</div>
+        <div class="agent-name" id="user-name">You</div>
+        <div class="agent-role" id="user-role"></div>
       </div>
       <div class="online-dot"></div>
     </div>
@@ -178,38 +178,38 @@
     <img class="hero-bg" src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop" alt="Dubai skyline at dusk" onerror="this.style.display='none';this.closest('.hero-banner').style.background='linear-gradient(120deg,#0f1830,#1a1430,#2a1020)'">
     <div class="hero-content">
       <div class="hero-greeting" id="hero-greeting">Good evening, Sarah 👋</div>
-      <div class="hero-sub" id="hero-sub">Your AI workforce closed <strong style="color:#fff">3 viewings</strong> and re-engaged <strong style="color:#fff">214 cold leads</strong> while you were away.</div>
+      <div class="hero-sub" id="hero-sub"></div>
       <div class="hero-chips">
-        <span class="hero-chip"><span class="hc-dot"></span> AI Active · 247 leads tracked</span>
-        <span class="hero-chip warm"><span class="hc-dot"></span> 34 hot 🔥</span>
-        <span class="hero-chip purple"><span class="hc-dot"></span> AED 4.2M pipeline</span>
+        <span class="hero-chip"><span class="hc-dot"></span> <span id="chip-total"></span></span>
+        <span class="hero-chip warm"><span class="hc-dot"></span> <span id="chip-hot"></span></span>
+        <span class="hero-chip purple"><span class="hc-dot"></span> <span id="chip-pipe"></span></span>
       </div>
     </div>
-    <div class="hero-loc">📍 Dubai, UAE · Emaar Properties</div>
+    <div class="hero-loc" id="hero-loc"></div>
   </div>
   <div class="metrics-row">
     <div class="metric-card mc-hot">
       <div class="metric-label" data-i18n="m_total">Total Leads</div>
       <div class="metric-value" id="m-total">247</div>
-      <div class="metric-delta">↑ +18 <span data-i18n="this_week">this week</span></div>
+      <div class="metric-delta" id="m-total-d"></div>
       <div class="metric-bar"><div class="metric-bar-fill" style="width:73%;background:var(--accent)"></div></div>
     </div>
     <div class="metric-card mc-hot">
       <div class="metric-label" data-i18n="m_hot">Hot Leads 🔥</div>
       <div class="metric-value" style="color:var(--hot)" id="m-hot">34</div>
-      <div class="metric-delta">↑ +5 <span data-i18n="today">today</span> · AI <span data-i18n="scored">scored</span></div>
+      <div class="metric-delta" id="m-hot-d"></div>
       <div class="metric-bar"><div class="metric-bar-fill" style="width:34%;background:var(--hot)"></div></div>
     </div>
     <div class="metric-card mc-green">
       <div class="metric-label" data-i18n="m_calls">Calls Booked</div>
-      <div class="metric-value" style="color:var(--green)">21</div>
-      <div class="metric-delta">↑ 61.7% <span data-i18n="booking_rate">booking rate</span></div>
+      <div class="metric-value" style="color:var(--green)" id="m-meet">0</div>
+      <div class="metric-delta" id="m-meet-d"></div>
       <div class="metric-bar"><div class="metric-bar-fill" style="width:62%;background:var(--green)"></div></div>
     </div>
     <div class="metric-card mc-warm">
       <div class="metric-label" data-i18n="m_response">Avg Response</div>
-      <div class="metric-value" style="color:var(--warm)">4m</div>
-      <div class="metric-delta warn" data-i18n="speed_to_lead">↑ Speed to lead</div>
+      <div class="metric-value" style="color:var(--warm)">—</div>
+      <div class="metric-delta warn">Tracked once messaging is connected</div>
       <div class="metric-bar"><div class="metric-bar-fill" style="width:88%;background:var(--warm)"></div></div>
     </div>
   </div>
@@ -352,10 +352,10 @@
 <!-- ═══════════ ALL LEADS ═══════════ -->
 <div class="view" id="view-leads">
   <div style="display:flex;align-items:center;gap:7px;margin-bottom:13px;flex-wrap:wrap">
-    <button class="btn btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="filterLeads('all',this)" data-i18n="filter_all">All (247)</button>
-    <button class="btn btn-sm" onclick="filterLeads('hot',this)">🔥 <span data-i18n="filter_hot">Hot (34)</span></button>
-    <button class="btn btn-sm" onclick="filterLeads('warm',this)" data-i18n="filter_warm">Warm (89)</button>
-    <button class="btn btn-sm" onclick="filterLeads('cold',this)" data-i18n="filter_cold">Cold (124)</button>
+    <button class="btn btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="filterLeads('all',this)" data-i18n="filter_all">All</button>
+    <button class="btn btn-sm" onclick="filterLeads('hot',this)">🔥 <span data-i18n="filter_hot">Hot</span></button>
+    <button class="btn btn-sm" onclick="filterLeads('warm',this)" data-i18n="filter_warm">Warm</button>
+    <button class="btn btn-sm" onclick="filterLeads('cold',this)" data-i18n="filter_cold">Cold</button>
     <button class="btn btn-sm" onclick="filterLeads('buyer',this)" data-i18n="filter_buyers">Buyers</button>
     <button class="btn btn-sm" onclick="filterLeads('seller',this)" data-i18n="filter_sellers">Sellers</button>
   </div>
@@ -983,6 +983,7 @@
           <button class="btn btn-sm" onclick="selectType(this)">Referral</button>
         </div>
       </div>
+      <div class="field-group"><div class="field-label">Stage</div><select class="field-input" id="al-status"><option>New</option><option>Qualified</option><option>Meeting Set</option><option>Offer Stage</option><option>Closed Won</option></select></div>
       <div class="field-group"><div class="field-label" data-i18n="budget_aed">Budget (AED)</div><input class="field-input" id="al-budget" placeholder="e.g. 2,500,000"></div>
       <div class="field-group"><div class="field-label" data-i18n="pref_area">Preferred Area</div><input class="field-input" id="al-area" placeholder="e.g. Dubai Hills, Downtown"></div>
     </div>
