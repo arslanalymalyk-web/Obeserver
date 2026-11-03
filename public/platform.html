@@ -8,7 +8,8 @@
 <link rel="stylesheet" href="css/platform.css">
 <link rel="stylesheet" href="css/a11y.css">
 </head>
-<body>
+<body class="has-banner">
+<div class="proto-banner" role="note"><strong>Concept prototype — sample data</strong><span>Brokerage lead-management workspace (separate from the portfolio product). Pipeline, funnel, channel, SLA and messaging views show illustrative figures, not live data, and no messages are sent. The Leads, Team and integration screens use this app’s demo backend.</span><a href="demo/index.html">← Portfolio &amp; Investor Operations prototype</a></div>
 <div class="app">
 
 <!-- ═══════════ SIDEBAR ═══════════ -->
@@ -17,7 +18,7 @@
     <div class="logo-mark" data-i18n="brand">Observer</div>
     <div class="logo-sub" data-i18n="brand_sub">Autonomous Revenue Engine</div>
     <div style="display:flex;gap:5px;margin-top:6px;align-items:center">
-      <div class="logo-tag">⚡ <span data-i18n="ai_powered">AI-POWERED</span></div>
+      <div class="logo-tag">⚡ <span data-i18n="ai_powered">DEMO</span></div>
       <div class="logo-tag" style="background:var(--green-bg);border-color:var(--green)33;color:var(--green)">v3</div>
     </div>
   </div>
@@ -25,7 +26,7 @@
     <div class="org-dot"></div>
     <div style="flex:1">
       <div class="org-name" id="org-name">Your agency</div>
-      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)" data-i18n="org_sub">Dubai, UAE · Enterprise</div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)" data-i18n="org_sub">Sample agency</div>
     </div>
     <div class="org-arrow">⌄</div>
   </div>
@@ -62,7 +63,7 @@
     </div>
     <div class="nav-item" onclick="showView('call_assist',this)">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 3.5c0 5 4.5 9.5 9.5 9.5l1.5-2.2-2.8-1.3-1.2 1.2c-1.6-.8-2.9-2.1-3.7-3.7l1.2-1.2L6 2.9 3.8 2C3.4 2 3 2.5 3 3.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      <span>Live Call Assistant</span><span class="nav-badge red">LIVE</span>
+      <span>Live Call Assistant</span><span class="nav-badge red">DEMO</span>
     </div>
     <div class="nav-section" data-i18n="nav_channels">Channels</div>
     <div class="nav-item" onclick="showView('whatsapp',this)">
@@ -131,8 +132,8 @@
 <main class="main">
   <div class="topbar">
     <div class="page-title" id="page-title" data-i18n="nav_dashboard">Dashboard</div>
-    <div class="live-badge"><span class="live-dot"></span><span data-i18n="live">Live</span></div>
-    <div class="ai-badge">⚡ <span data-i18n="ai_active">AI Active</span></div>
+    <div class="live-badge"><span class="live-dot"></span><span data-i18n="live">Demo</span></div>
+    <div class="ai-badge">⚡ <span data-i18n="ai_active">Sample data</span></div>
     <div class="topbar-right">
       <!-- CONTROLS GROUP -->
       <div class="topbar-controls" style="display:flex;align-items:center;gap:5px">
@@ -417,7 +418,7 @@
 <!-- ═══════════ AI SCORING ═══════════ -->
 <div class="view" id="view-scoring">
   <div class="metrics-row">
-    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="model">Model</div><div class="metric-value" style="font-size:18px;color:var(--purple)">XGBoost</div><div class="metric-delta" style="color:var(--purple)">v2.4 · 91.3% acc.</div></div>
+    <div class="metric-card mc-purple"><div class="metric-label" data-i18n="model">Model</div><div class="metric-value" style="font-size:18px;color:var(--purple)">Rule-based</div><div class="metric-delta" style="color:var(--purple)">Sample weights</div></div>
     <div class="metric-card"><div class="metric-label" data-i18n="scored_today">Scored Today</div><div class="metric-value">184</div><div class="metric-delta">↑ +22 new</div></div>
     <div class="metric-card mc-green"><div class="metric-label" data-i18n="high_intent">High Intent</div><div class="metric-value" style="color:var(--green)">47</div><div class="metric-delta">↑ 25.5% of scored</div></div>
     <div class="metric-card"><div class="metric-label" data-i18n="avg_score">Avg Score</div><div class="metric-value" style="color:var(--accent)">78</div><div class="metric-delta warn">↑ vs 61 last month</div></div>
@@ -618,7 +619,7 @@
     <!-- Right sidebar: live queue -->
     <div style="display:flex;flex-direction:column;gap:13px">
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">🔴 Live Send Queue</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Live</div></div>
+        <div class="panel-header"><span class="panel-title">Sample send queue (nothing is sent)</span><div class="live-badge" style="font-size:9px"><span class="live-dot"></span>Live</div></div>
         <div class="panel-body" id="seq-live-queue"></div>
       </div>
       <div class="panel">
@@ -668,7 +669,7 @@
 <!-- ═══════════ CHANNEL ROI ═══════════ -->
 <div class="view" id="view-roi">
   <div class="metrics-row">
-    <div class="metric-card mc-green"><div class="metric-label" data-i18n="best_roi">Best ROI Channel</div><div class="metric-value" style="font-size:18px;color:var(--wa-dark)">WhatsApp</div><div class="metric-delta">412% ROI · AED 18 CPL</div></div>
+    <div class="metric-card mc-green"><div class="metric-label" data-i18n="best_roi">Best ROI Channel</div><div class="metric-value" style="font-size:18px;color:var(--wa-dark)">WhatsApp</div><div class="metric-delta">Sample figures</div></div>
     <div class="metric-card"><div class="metric-label" data-i18n="ad_spend">Total Ad Spend</div><div class="metric-value">AED 10.4K</div><div class="metric-delta">This month</div></div>
     <div class="metric-card mc-teal"><div class="metric-label" data-i18n="rev_attributed">Revenue Attributed</div><div class="metric-value" style="color:var(--teal)">AED 4.2M</div><div class="metric-delta">↑ Tracked deals</div></div>
     <div class="metric-card mc-warm"><div class="metric-label" data-i18n="m_cpl">Blended CPL</div><div class="metric-value" style="color:var(--warm)">AED 42</div><div class="metric-delta warn">↓ -18% MoM</div></div>
@@ -775,7 +776,7 @@
 
     <!-- INPUT PANEL -->
     <div class="panel">
-      <div class="panel-header"><span class="panel-title">⚡ Real-Time Payment Calculator</span><div class="ai-badge">AI-Powered</div></div>
+      <div class="panel-header"><span class="panel-title">⚡ Payment calculator (sample inputs)</span></div>
       <div class="panel-body">
         <!-- PROPERTY PRICE -->
         <div class="field-group">

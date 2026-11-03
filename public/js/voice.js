@@ -3,17 +3,17 @@
 // ══════════════════════════════════════════════════
 const T={
   en:{
-    'logo-status':'CALLING ENGINE ACTIVE','ns-live':'Live Operations','ni-live':'Live Call Center',
+    'logo-status':'SIMULATION · NO CALLS PLACED','ns-live':'Live Operations','ni-live':'Live Call Center',
     'ni-queue':'Call Queue','ni-campaigns':'Campaigns','ns-scripts':'Scripts & AI','ni-scripts':'Script Library',
     'ni-objections':'Objection Handling','ns-analytics':'Analytics','ni-analytics':'Call Analytics',
     'ni-calllog':'Call Log','ns-settings':'System','ni-settings':'Voice Settings','ni-notifications':'Notifications',
     'page-title-live':'Live Call Center','page-title-queue':'Call Queue','page-title-campaigns':'Campaigns',
     'page-title-scripts':'Script Library','page-title-objections':'Objection Handling',
     'page-title-analytics':'Call Analytics','page-title-calllog':'Call Log','page-title-settings':'Voice Settings','page-title-notifications':'Notifications',
-    'tb-live':'Live','tb-ai':'Voice AI Active','tb-end':'End All Calls','tb-new':'New Call',
-    'm-active-calls':'Active Calls','md-active':'🟢 Live now','m-queue-size':'Queue Size','md-queue':'Waiting',
-    'm-today-calls':'Calls Today','md-today':'↑ 23 answered','m-connect-rate':'Connect Rate','md-connect':'↑ vs 48% avg',
-    'm-handoffs':'Handoffs Today','md-handoffs':'Hot leads → agents',
+    'tb-live':'Demo','tb-ai':'Scripted simulation','tb-end':'End simulated call','tb-new':'New simulated call',
+    'm-active-calls':'Active Calls','md-active':'Simulated','m-queue-size':'Queue Size','md-queue':'Waiting',
+    'm-today-calls':'Calls Today','md-today':'Sample figure','m-connect-rate':'Connect Rate','md-connect':'Sample figure',
+    'm-handoffs':'Handoffs Today','md-handoffs':'Sample figure',
     'cq-title':'Call Queue','cq-sub':'8 leads · Ordered by AI score',
     'sp-title':'AI Script Router','ai-score-label':'AI Score',
     'ca-quick':'⚡ Quick Actions','ca-obj':'🛡️ Objection Handlers',
@@ -21,7 +21,7 @@ const T={
     'wf-who':'🤖 AI Agent',
     'm-q-high':'High Intent Waiting','md-q-high':'Score 80+','m-q-mid':'Medium Intent','md-q-mid':'Score 50–79',
     'm-q-low':'Low Intent','md-q-low':'Score 0–49','m-avg-wait':'Avg Wait Time','md-wait':'Target: <2 min',
-    'm-auto-rate':'Auto-Dial Rate','md-auto':'AI-paced','qv-title':'Full Call Queue','qv-live':'Auto-dialing',
+    'm-auto-rate':'Auto-Dial Rate','md-auto':'Not implemented','qv-title':'Full Call Queue','qv-live':'Sample queue',
     'dial-next-btn':'📞 Dial Next',
     'm-total-camps':'Total Campaigns','m-total-leads':'Total Leads','m-called':'Called',
     'm-handoff-camp':'Handoffs','m-camp-rev':'Revenue Pipeline',
@@ -43,17 +43,17 @@ const T={
     'score-tier-hot':'HIGH INTENT','score-tier-mid':'MEDIUM INTENT','score-tier-low':'LOW INTENT',
   },
   ar:{
-    'logo-status':'محرك الاتصال نشط','ns-live':'العمليات الحية','ni-live':'مركز الاتصال المباشر',
+    'logo-status':'محاكاة · لا يتم إجراء مكالمات','ns-live':'العمليات الحية','ni-live':'مركز الاتصال المباشر',
     'ni-queue':'قائمة الانتظار','ni-campaigns':'الحملات','ns-scripts':'النصوص والذكاء','ni-scripts':'مكتبة النصوص',
     'ni-objections':'معالجة الاعتراضات','ns-analytics':'التحليلات','ni-analytics':'تحليلات المكالمات',
     'ni-calllog':'سجل المكالمات','ns-settings':'النظام','ni-settings':'إعدادات الصوت','ni-notifications':'الإشعارات',
     'page-title-live':'مركز الاتصال المباشر','page-title-queue':'قائمة الانتظار','page-title-campaigns':'الحملات',
     'page-title-scripts':'مكتبة النصوص','page-title-objections':'معالجة الاعتراضات',
     'page-title-analytics':'تحليلات المكالمات','page-title-calllog':'سجل المكالمات','page-title-settings':'إعدادات الصوت','page-title-notifications':'الإشعارات',
-    'tb-live':'مباشر','tb-ai':'الذكاء الصوتي نشط','tb-end':'إنهاء جميع المكالمات','tb-new':'مكالمة جديدة',
-    'm-active-calls':'المكالمات النشطة','md-active':'🟢 مباشر الآن','m-queue-size':'حجم القائمة','md-queue':'في الانتظار',
-    'm-today-calls':'مكالمات اليوم','md-today':'↑ 23 تمت الإجابة','m-connect-rate':'معدل الاتصال','md-connect':'↑ مقارنة بـ 48%',
-    'm-handoffs':'التحويلات اليوم','md-handoffs':'عملاء ساخنون ← وكلاء',
+    'tb-live':'عرض','tb-ai':'محاكاة مكتوبة مسبقًا','tb-end':'إنهاء المكالمة المحاكاة','tb-new':'مكالمة محاكاة جديدة',
+    'm-active-calls':'المكالمات النشطة','md-active':'محاكى','m-queue-size':'حجم القائمة','md-queue':'في الانتظار',
+    'm-today-calls':'مكالمات اليوم','md-today':'رقم تجريبي','m-connect-rate':'معدل الاتصال','md-connect':'رقم تجريبي',
+    'm-handoffs':'التحويلات اليوم','md-handoffs':'رقم تجريبي',
     'cq-title':'قائمة المكالمات','cq-sub':'8 عملاء · مرتبة حسب نقاط الذكاء',
     'sp-title':'موجه نص الذكاء الاصطناعي','ai-score-label':'نقاط الذكاء',
     'ca-quick':'⚡ إجراءات سريعة','ca-obj':'🛡️ ردود الاعتراضات',
@@ -61,7 +61,7 @@ const T={
     'wf-who':'🤖 الوكيل الذكي',
     'm-q-high':'انتظار عالي النية','md-q-high':'نقاط 80+','m-q-mid':'نية متوسطة','md-q-mid':'نقاط 50–79',
     'm-q-low':'نية منخفضة','md-q-low':'نقاط 0–49','m-avg-wait':'متوسط وقت الانتظار','md-wait':'الهدف: أقل من دقيقتين',
-    'm-auto-rate':'معدل الاتصال التلقائي','md-auto':'بتحكم ذكي','qv-title':'قائمة المكالمات الكاملة','qv-live':'اتصال تلقائي',
+    'm-auto-rate':'معدل الاتصال التلقائي','md-auto':'غير منفذ','qv-title':'قائمة المكالمات الكاملة','qv-live':'قائمة تجريبية',
     'dial-next-btn':'📞 اتصل بالتالي',
     'm-total-camps':'إجمالي الحملات','m-total-leads':'إجمالي العملاء','m-called':'تم الاتصال',
     'm-handoff-camp':'التحويلات','m-camp-rev':'خط الإيرادات',
@@ -103,17 +103,20 @@ function toggleTheme(){document.body.classList.toggle('light');document.getEleme
 // ══════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════
+// Lead-to-property relationship: each sample lead references a demo asset id; the link opens that asset in the portfolio prototype.
+const PORTFOLIO_BASE=location.pathname.includes('/demo/')?'index.html':'demo/index.html';
 const queueData=[
-  {id:1,name:'Ahmed Al Khalidi',initials:'AK',phone:'+971 50 234 5678',score:87,intent:'Buyer',area:'Dubai Hills',lang:'EN',status:'active',c:'#0d2a1a'},
-  {id:2,name:'Nour Al Mansouri',initials:'NM',phone:'+971 52 456 7890',score:91,intent:'Buyer',area:'Emirates Hills',lang:'EN',status:'waiting',c:'#1a0d2a'},
-  {id:3,name:'Fatima Al Zaabi',initials:'FA',phone:'+971 55 876 5432',score:81,intent:'Buyer',area:'Downtown',lang:'AR',status:'waiting',c:'#0d1a2a'},
-  {id:4,name:'Rania Hassan',initials:'RH',phone:'+971 50 567 8901',score:69,intent:'Buyer',area:'Palm Jumeirah',lang:'AR',status:'waiting',c:'#2a1a0d'},
-  {id:5,name:'Tariq Mahmoud',initials:'TM',phone:'+971 50 890 1234',score:62,intent:'Seller',area:'Business Bay',lang:'AR',status:'waiting',c:'#0d2a2a'},
-  {id:6,name:'Mohammad Siddiqui',initials:'MS',phone:'+971 52 345 6789',score:55,intent:'Investor',area:'JVC',lang:'EN',status:'waiting',c:'#1a1a2a'},
-  {id:7,name:'Omar Al Farouq',initials:'OF',phone:'+971 56 789 0123',score:44,intent:'Buyer',area:'Sharjah',lang:'AR',status:'waiting',c:'#2a2a0d'},
-  {id:8,name:'Sara Al Blooshi',initials:'SB',phone:'+971 52 012 3456',score:38,intent:'Tenant',area:'JBR',lang:'AR',status:'missed',c:'#2a0d0d'},
-  {id:9,name:'Khalid Al Muhairi',initials:'KM',phone:'+971 55 321 0987',score:29,intent:'Buyer',area:'Ajman',lang:'AR',status:'waiting',c:'#0d2a2a'},
+  {id:1,name:'Ahmed (sample)',initials:'AS',phone:'+000 555 0101',score:87,intent:'Tenant',area:'Marlow Street Mixed-Use · 2-bedroom',assetId:'A7',lang:'EN',status:'active',c:'#0d2a1a'},
+  {id:2,name:'Nour (sample)',initials:'NS',phone:'+000 555 0102',score:91,intent:'Tenant',area:'Quayside Serviced Apartments · 1-bedroom',assetId:'A8',lang:'EN',status:'waiting',c:'#1a0d2a'},
+  {id:3,name:'Fatima (sample)',initials:'FS',phone:'+000 555 0103',score:81,intent:'Tenant',area:'Cedar Row Townhomes · 3-bedroom',assetId:'A5',lang:'AR',status:'waiting',c:'#0d1a2a'},
+  {id:4,name:'Rania (sample)',initials:'RS',phone:'+000 555 0104',score:69,intent:'Tenant',area:'Harbor Point Residences · studio',assetId:'A1',lang:'AR',status:'waiting',c:'#2a1a0d'},
+  {id:5,name:'Tariq (sample)',initials:'TS',phone:'+000 555 0105',score:62,intent:'Tenant',area:'Northgate Office Park · Floor 2 suite',assetId:'A2',lang:'AR',status:'waiting',c:'#0d2a2a'},
+  {id:6,name:'Mohammad (sample)',initials:'MS',phone:'+000 555 0106',score:55,intent:'Investor',area:'Portfolio enquiry (no specific asset)',assetId:null,lang:'EN',status:'waiting',c:'#1a1a2a'},
+  {id:7,name:'Omar (sample)',initials:'OS',phone:'+000 555 0107',score:44,intent:'Tenant',area:'Atlas Business Centre · small suite',assetId:'A6',lang:'AR',status:'waiting',c:'#2a2a0d'},
+  {id:8,name:'Sara (sample)',initials:'SS',phone:'+000 555 0108',score:38,intent:'Tenant',area:'Marlow Street Mixed-Use · retail unit',assetId:'A7',lang:'AR',status:'missed',c:'#2a0d0d'},
+  {id:9,name:'Khalid (sample)',initials:'KS',phone:'+000 555 0109',score:29,intent:'Tenant',area:'Harbor Point Residences · 1-bedroom',assetId:'A1',lang:'AR',status:'waiting',c:'#0d2a2a'},
 ];
+
 
 const scriptsEN={
   greeting:`Hello, am I speaking with [Client Name]?\n\nHi [Client Name], this is [Agent Name], the automated assistant from [Platform Name]. We noticed your interest in real estate in [Area/City]. Is this a good time for a quick 1-minute call?\n\n<em>Would you prefer to continue in English or Arabic?</em>`,
@@ -172,32 +175,34 @@ const objectionsAR=[
 ];
 
 const callLogData=[
-  {time:'14:32',name:'Ahmed Al Khalidi',score:87,intent:'Buyer',lang:'EN',duration:'3m 12s',outcome:'Handoff',next:'Viewing Booked'},
-  {time:'14:18',name:'Nour Al Mansouri',score:91,intent:'Buyer',lang:'EN',duration:'2m 48s',outcome:'CTA Accepted',next:'Specialist Call'},
-  {time:'14:05',name:'Fatima Al Zaabi',score:81,intent:'Buyer',lang:'AR',duration:'4m 01s',outcome:'Shortlist Sent',next:'Follow-up 24h'},
-  {time:'13:55',name:'Rania Hassan',score:69,intent:'Buyer',lang:'AR',duration:'1m 44s',outcome:'WA Fallback',next:'Send Shortlist'},
-  {time:'13:42',name:'Tariq Mahmoud',score:62,intent:'Seller',lang:'AR',duration:'2m 22s',outcome:'Callback Req.',next:'Call Tomorrow 10am'},
-  {time:'13:30',name:'Mohammad Siddiqui',score:55,intent:'Investor',lang:'EN',duration:'3m 55s',outcome:'Shortlist Sent',next:'Advisor Call'},
-  {time:'13:15',name:'Omar Al Farouq',score:44,intent:'Buyer',lang:'AR',duration:'0m 58s',outcome:'Not Interested',next:'DNC Marked'},
-  {time:'13:02',name:'Sara Al Blooshi',score:38,intent:'Tenant',lang:'AR',duration:'No Answer',outcome:'WA Sent',next:'Retry +24h'},
+  {time:'14:32',name:'Ahmed (sample)',score:87,intent:'Tenant',lang:'EN',duration:'3m 12s',outcome:'Handoff requested',next:'Viewing request (sample)'},
+  {time:'14:18',name:'Nour (sample)',score:91,intent:'Tenant',lang:'EN',duration:'2m 48s',outcome:'Viewing requested',next:'Leasing agent call'},
+  {time:'14:05',name:'Fatima (sample)',score:81,intent:'Tenant',lang:'AR',duration:'4m 01s',outcome:'Details requested',next:'Follow-up 24h'},
+  {time:'13:55',name:'Rania (sample)',score:69,intent:'Tenant',lang:'AR',duration:'1m 44s',outcome:'Prefers messaging',next:'Send details'},
+  {time:'13:42',name:'Tariq (sample)',score:62,intent:'Tenant',lang:'AR',duration:'2m 22s',outcome:'Callback requested',next:'Call tomorrow 10:00'},
+  {time:'13:30',name:'Mohammad (sample)',score:55,intent:'Investor',lang:'EN',duration:'3m 55s',outcome:'Human follow-up',next:'Investor relations call'},
+  {time:'13:15',name:'Omar (sample)',score:44,intent:'Tenant',lang:'AR',duration:'0m 58s',outcome:'Not interested',next:'Opted out (sample)'},
+  {time:'13:02',name:'Sara (sample)',score:38,intent:'Tenant',lang:'AR',duration:'No Answer',outcome:'No answer',next:'Retry later'},
 ];
+
 
 const notifData=[
-  {text:'🔥 Ahmed Al Khalidi (Score 87) — Handoff triggered, Sarah Ahmed notified',time:'2m ago',color:'var(--hot)',unread:true},
-  {text:'📞 Nour Al Mansouri answered — Specialist call booked for today 4pm',time:'15m ago',color:'var(--call)',unread:true},
-  {text:'🚨 Sara Al Blooshi — No answer, WhatsApp fallback sent automatically',time:'1h ago',color:'var(--warm)',unread:true},
-  {text:'⚡ AI re-scored queue: 3 leads upgraded to High Intent after website activity',time:'1h ago',color:'#9b7fff',unread:true},
-  {text:'💬 Fatima Al Zaabi replied on WhatsApp — "Yes, please send the shortlist"',time:'2h ago',color:'var(--wa)',unread:true},
-  {text:'✅ Campaign "Bayut Hot Leads Q3" reached 80% coverage — 47 calls placed',time:'3h ago',color:'var(--call)',unread:true},
-  {text:'📊 Daily call analytics ready — 61% connect rate, 9 handoffs today',time:'4h ago',color:'var(--text2)',unread:false},
-  {text:'⚠️ Omar Al Farouq marked DNC — removed from all future call queues',time:'5h ago',color:'var(--warm)',unread:false},
+  {text:'🔥 Ahmed (sample), score 87: handoff rule met (example event, nothing was sent)',time:'sample',color:'var(--hot)',unread:true},
+  {text:'📞 Nour (sample): leasing agent call requested (example event)',time:'sample',color:'var(--call)',unread:true},
+  {text:'🚨 Sara (sample): no answer. A retry would be a human decision (example event)',time:'sample',color:'var(--warm)',unread:true},
+  {text:'⚡ Example: queue scores would be recalculated when new lead activity arrives (not implemented)',time:'sample',color:'#9b7fff',unread:true},
+  {text:'💬 Fatima (sample) asked for details by message (example event)',time:'sample',color:'var(--wa)',unread:false},
+  {text:'✅ Sample campaign "Marlow Street lease-up" shows 80% of its sample list reviewed',time:'sample',color:'var(--call)',unread:false},
+  {text:'⚠️ Omar (sample) opted out: a real system must honour this on every channel (requirement, not implemented)',time:'sample',color:'var(--warm)',unread:false},
 ];
 
+
 const campaigns=[
-  {name:'Bayut Hot Leads — Q3 Dubai',status:'active',leads:84,called:68,answered:42,handoffs:18,conv:26,bar:81,barColor:'var(--call)'},
-  {name:'Property Finder — Warm Buyers',status:'active',leads:67,called:48,answered:29,handoffs:9,conv:19,bar:72,barColor:'var(--warm)'},
-  {name:'Facebook Leads — Sharjah',status:'paused',leads:96,called:26,answered:16,handoffs:4,conv:25,bar:27,barColor:'var(--cold)'},
+  {name:'Sample campaign: Marlow Street lease-up',status:'active',leads:84,called:68,answered:42,handoffs:18,conv:26,bar:81,barColor:'var(--call)'},
+  {name:'Sample campaign: Cedar Row refurbished units',status:'active',leads:67,called:48,answered:29,handoffs:9,conv:19,bar:72,barColor:'var(--warm)'},
+  {name:'Sample campaign: Northgate office enquiries',status:'paused',leads:96,called:26,answered:16,handoffs:4,conv:25,bar:27,barColor:'var(--cold)'},
 ];
+
 
 const scriptsLibrary=[
   {icon:'🔥',name:'High Intent — Opening',type:'Score 80–100',tags:['hot','en','ar'],preview:'Hello, am I speaking with [Client Name]? ... Based on your recent interest, we may have highly relevant options...'},
@@ -393,12 +398,13 @@ function renderSettings(){
         <button class="btn btn-sm" onclick="selectType(this)">Auto-detect</button>
       </div>
     </div>
-    <div class="stat-row"><div class="stat-label">WhatsApp Fallback</div><div style="flex:1;font-size:12px;color:var(--call)">✓ Enabled — Auto-send on no answer</div></div>`;
+    <div class="stat-row"><div class="stat-label">Message fallback</div><div style="flex:1;font-size:12px;color:var(--text3)">Not implemented. No messages are sent by this prototype.</div></div>
+    <div class="stat-row" style="margin-top:14px;display:block"><div class="stat-label" style="margin-bottom:6px">Before any real use (not implemented here)</div><ul style="margin:0;padding-inline-start:18px;font-size:12px;color:var(--text2);line-height:1.7"><li>Recorded consent and opt-out handling across channels</li><li>Call-recording disclosure and retention rules for each region</li><li>Telecom and marketing-contact regulations for each market</li><li>Human approval points before any outreach</li><li>Telephony, speech and CRM integrations (none are connected)</li></ul></div>`;
   document.getElementById('routing-settings').innerHTML=`
     <div class="stat-row" style="margin-bottom:12px"><div class="stat-label">High Intent (80+)</div><div style="flex:1;font-size:12px;color:var(--hot)">Push to viewing / Handoff immediately</div></div>
     <div class="stat-row" style="margin-bottom:12px"><div class="stat-label">Medium (50–79)</div><div style="flex:1;font-size:12px;color:var(--warm)">Qualify → Send shortlist → Book callback</div></div>
     <div class="stat-row" style="margin-bottom:12px"><div class="stat-label">Low (0–49)</div><div style="flex:1;font-size:12px;color:var(--cold)">Soft discovery → Capture WA/email → Nurture</div></div>
-    <div class="stat-row"><div class="stat-label">Auto-dial Speed</div><input type="range" min="1" max="5" step="1" value="3" style="flex:1;accent-color:var(--call)"><div class="stat-val" style="color:var(--call)">3/min</div></div>`;
+    <div class="stat-row"><div class="stat-label">Dial pacing (illustrative)</div><input type="range" min="1" max="5" step="1" value="3" style="flex:1;accent-color:var(--call)"><div class="stat-val" style="color:var(--call)">3/min</div></div>`;
   const vars=['client_name','agent_name','platform_name','ai_score','lead_intent','preferred_language','area_city','property_type','budget_range','timeline','contact_channel','callback_time','lead_source','handoff_required'];
   document.getElementById('system-vars').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap">${vars.map(v=>`<span style="background:var(--bg4);border:1px solid var(--border2);border-radius:5px;padding:4px 10px;font-family:var(--font-m);font-size:11.5px;color:var(--text2)">[${v}]</span>`).join('')}</div>`;
 }
@@ -433,17 +439,18 @@ function startCallTimer(){
 }
 
 const transcriptQueue=[
-  {role:'agent',delay:0,text:'Hello, am I speaking with Ahmed Al Khalidi?'},
+  {role:'agent',delay:0,text:'Hello, am I speaking with Ahmed?'},
   {role:'client',delay:2200,text:'Yes, speaking. Who is this?'},
-  {role:'agent',delay:4400,text:'Hi Ahmed, this is Sara, the automated assistant from Observer Platform. We noticed your interest in real estate in Dubai Hills. Is this a good time for a quick 1-minute call?'},
+  {role:'agent',delay:4400,text:'Hi Ahmed, this is the automated assistant for the leasing team. You enquired about a two-bedroom at Marlow Street Mixed-Use. Is this a good time for a one-minute call?'},
   {role:'client',delay:8000,text:'Yes, sure. Go ahead.'},
-  {role:'agent',delay:9500,text:'Thank you. Based on your recent activity, we may have some highly relevant options for you.\n\nMay I quickly ask — are you looking to buy, rent, or invest?'},
-  {role:'client',delay:13500,text:'Buy. Looking for a villa in Dubai Hills. 4 to 4.5 million budget, cash purchase.'},
-  {role:'agent',delay:15500,text:'Excellent! Cash buyer, Dubai Hills — we have exactly that. Which area within Dubai Hills do you prefer: Park Heights, Golf Place, or Sidra?'},
-  {role:'client',delay:19000,text:'Golf Place if possible. Ready to move in within 6 weeks.'},
-  {role:'system',delay:21000,text:'⚡ HANDOFF TRIGGER: Cash buyer, specific area, 6-week timeline → Route to human specialist'},
-  {role:'agent',delay:22500,text:'Perfect. Based on what you shared, I have 3 Golf Place villas matching your criteria. I\'d like to connect you with our specialist Sarah Ahmed who can arrange a viewing today or tomorrow. Does that work for you?'},
+  {role:'agent',delay:9500,text:'Thank you. May I ask: is this home for you, or for a family?'},
+  {role:'client',delay:13500,text:'For my family. Two bedrooms, and I would need to move in within six weeks.'},
+  {role:'agent',delay:15500,text:'Thanks. Do you need parking, and do you have a monthly budget in mind?'},
+  {role:'client',delay:19000,text:'One parking space. Around 5,000 a month.'},
+  {role:'system',delay:21000,text:'⚡ HANDOFF RULE (sample): specific unit, 6-week move-in → route to a human leasing agent'},
+  {role:'agent',delay:22500,text:'Perfect. I would like to connect you with a leasing specialist who can confirm availability and arrange a viewing. Does that work for you?'},
 ];
+
 
 let tIdx=0;
 function runTranscript(){
@@ -538,8 +545,8 @@ function renderQuickActions(){
 function sendShortlist(){addToTranscript('agent','Certainly. Would you prefer to receive properties by WhatsApp or email?');}
 function bookViewing(){addToTranscript('agent','Perfect. May I confirm your preferred day for the viewing: today, tomorrow, or this weekend?');}
 function scheduleCallback(){addToTranscript('agent','Of course. May I confirm the best time for a callback — morning, afternoon, or evening?');}
-function switchToWA(){addToTranscript('system','📲 Switching to WhatsApp channel — message auto-queued');}
-function dropVoicemail(){addToTranscript('system','📬 Voicemail dropped — WhatsApp fallback triggered');}
+function switchToWA(){addToTranscript('system','📲 (simulated) A real build would offer a message channel here. No message is sent.');}
+function dropVoicemail(){addToTranscript('system','📬 (simulated) No voicemail is left and no message is sent.');}
 function handleObj(type){
   const responses={
     'Busy':'Of course, I understand. May I arrange a callback at a time that suits you better?',
@@ -552,11 +559,11 @@ function handleObj(type){
 }
 function triggerHandoff(){
   document.getElementById('handoff-alert').style.display='flex';
-  addToTranscript('system','🚨 HANDOFF TRIGGERED — Routing to human specialist');
+  addToTranscript('system','🚨 HANDOFF (simulated) — in a real build this would alert a human leasing agent');
 }
 function confirmHandoff(){
   document.getElementById('handoff-alert').style.display='none';
-  addToTranscript('system','✅ Handoff confirmed — Sarah Ahmed notified · Call data transferred');
+  addToTranscript('system','✅ Handoff confirmed (simulated) — nobody was notified and no data was transferred');
 }
 function toggleMute(){
   isMuted=!isMuted;
@@ -567,7 +574,7 @@ function endCurrentCall(){
   clearInterval(callInterval);
   stopWave();
   setWaveStatus('silent');
-  addToTranscript('system','📵 Call ended — Duration: '+document.getElementById('call-timer').textContent);
+  addToTranscript('system','📵 Simulated call ended — timer shows '+document.getElementById('call-timer').textContent);
 }
 
 // ══════════════════════════════════════════════════
@@ -598,6 +605,7 @@ function selectQueueItem(id){
   const q=queueData.find(x=>x.id===id);if(!q)return;
   document.getElementById('call-name').textContent=q.name;
   document.getElementById('call-meta').textContent=`${q.phone} · ${q.area}`;
+  const al=document.getElementById('call-asset-link');if(al){if(q.assetId){al.href=PORTFOLIO_BASE+'#/assets/'+q.assetId;al.hidden=false}else al.hidden=true}
   document.getElementById('call-avatar').textContent=q.initials;
   document.getElementById('score-fill').style.width=q.score+'%';
   document.getElementById('score-fill').style.background=q.score>=80?'var(--hot)':q.score>=50?'var(--warm)':'var(--cold)';
@@ -634,7 +642,7 @@ function startNewCall(){
   closeModal('new-call-modal');
   document.getElementById('call-name').textContent=name;
   document.getElementById('transcript-area').innerHTML='';
-  addToTranscript('system',`📞 Call initiated with ${name}`);
+  addToTranscript('system',`📞 Simulated call with ${name}. No call is placed.`);
   addToTranscript('agent','Hello, am I speaking with '+name+'?');
   setWaveStatus('speaking');
 }
@@ -645,7 +653,7 @@ function startNewCall(){
 renderQueueList();
 buildWaveform();
 startCallTimer();
-setScript(87,'buyer');
+selectQueueItem(1); // header, score and script come from the sample queue, not hard-coded markup
 renderQuickActions();
 // Start transcript simulation
 setTimeout(runTranscript,1200);

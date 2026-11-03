@@ -3,14 +3,14 @@
 // ══════════════════════════════════════════════════
 const T = {
   en: {
-    brand:'Observer', brand_sub:'Autonomous Revenue Engine', ai_powered:'AI-POWERED',
-    org_sub:'Dubai, UAE · Enterprise',
+    brand:'Observer', brand_sub:'Autonomous Revenue Engine', ai_powered:'DEMO',
+    org_sub:'Sample agency',
     nav_core:'Core', nav_dashboard:'Dashboard', nav_pipeline:'Pipeline', nav_leads:'All Leads',
     nav_ai:'AI Engine', nav_scoring:'Lead Scoring', nav_intent:'Intent Detection', nav_nba:'Next Best Action',
     nav_channels:'Channels', nav_wa:'WhatsApp', nav_sms:'SMS / Sequences', nav_social_auto:'FB & Instagram Automation',
     nav_analytics:'Analytics', nav_funnel:'Conversion Funnel', nav_roi:'Channel ROI', nav_agents:'Agent Performance',
     nav_enterprise:'Enterprise', nav_sla:'SLA Tracking', nav_compliance:'Compliance', nav_notif:'Notifications',
-    live:'Live', ai_active:'AI Active', add_lead:'Add Lead',
+    live:'Demo', ai_active:'Sample data', add_lead:'Add Lead',
     m_total:'Total Leads', m_hot:'Hot Leads 🔥', m_calls:'Calls Booked', m_response:'Avg Response',
     m_ai_score:'AI Score Avg', m_wa:'WhatsApp Opens', m_revenue:'Revenue Pipeline', m_cpl:'Cost Per Lead',
     this_week:'this week', today:'today', scored:'scored', booking_rate:'booking rate',
@@ -59,14 +59,14 @@ const T = {
     search_ph:'Search leads, agents...',
   },
   ar: {
-    brand:'أوبزرفر', brand_sub:'محرك الإيرادات الذاتي', ai_powered:'مدعوم بالذكاء الاصطناعي',
-    org_sub:'دبي، الإمارات · مؤسسة',
+    brand:'أوبزرفر', brand_sub:'محرك الإيرادات الذاتي', ai_powered:'عرض',
+    org_sub:'وكالة تجريبية',
     nav_core:'الأساسيات', nav_dashboard:'لوحة القيادة', nav_pipeline:'خط المبيعات', nav_leads:'جميع العملاء',
     nav_ai:'محرك الذكاء الاصطناعي', nav_scoring:'تقييم العملاء', nav_intent:'كشف النية', nav_nba:'أفضل إجراء قادم',
     nav_channels:'القنوات', nav_wa:'واتساب', nav_sms:'رسائل / تسلسلات', nav_social_auto:'أتمتة فيسبوك وإنستغرام',
     nav_analytics:'التحليلات', nav_funnel:'قمع التحويل', nav_roi:'عائد القنوات', nav_agents:'أداء الوكلاء',
     nav_enterprise:'المؤسسة', nav_sla:'تتبع مستوى الخدمة', nav_compliance:'الامتثال', nav_notif:'الإشعارات',
-    live:'مباشر', ai_active:'الذكاء نشط', add_lead:'إضافة عميل',
+    live:'عرض', ai_active:'بيانات تجريبية', add_lead:'إضافة عميل',
     m_total:'إجمالي العملاء', m_hot:'العملاء الساخنون 🔥', m_calls:'المكالمات المحجوزة', m_response:'متوسط الاستجابة',
     m_ai_score:'متوسط نقاط الذكاء', m_wa:'فتح واتساب', m_revenue:'خط الإيرادات', m_cpl:'تكلفة العميل',
     this_week:'هذا الأسبوع', today:'اليوم', scored:'مُقيَّم', booking_rate:'معدل الحجز',
@@ -221,7 +221,7 @@ const activityEvents=[
   {icon:'📞',color:'var(--green-bg)',text:'<strong>Sarah Ahmed</strong> booked a viewing with Fatima Al Zaabi for tomorrow 10am'},
   {icon:'⚡',color:'var(--purple-bg)',text:'AI Copilot flagged <strong>5 leads</strong> with no contact in 2+ hours — SLA risk'},
   {icon:'🏠',color:'var(--accent-bg)',text:'<strong>Jaber Al Nuaimi</strong> deal closed — AED 3.8M villa in Dubai Hills'},
-  {icon:'📊',color:'var(--cold-bg)',text:'XGBoost re-scored <strong>184 leads</strong> — 47 upgraded, 12 downgraded'},
+  {icon:'📊',color:'var(--cold-bg)',text:'Sample event: scoring rules re-ran over <strong>184 leads</strong> (illustrative)'},
 ];
 const nbaData=[
   {p:'p1',lead:'Ahmed Al Khalidi',action:'Send WhatsApp now',reason:'Score 87 · Cash buyer · Viewed 8 listings · No contact',channel:'💬 WhatsApp',btn:'Send'},
@@ -1624,12 +1624,14 @@ function toggleCopilot(){document.getElementById('copilot-panel').classList.togg
 
 const COPILOT_SYSTEM = `You are Observer AI Copilot — a sharp, data-driven real estate CRM assistant for a Dubai property agency.
 
-Current platform data snapshot:
-- 247 total leads: 34 hot, 89 warm, 124 cold
-- AI scoring model: XGBoost v2.4 (91.3% accuracy)
+IMPORTANT: everything below is illustrative SAMPLE data from a concept prototype, not live or real. Say so when you cite it, never present it as real results, and do not give investment, tax or legal advice.
+
+Sample data snapshot:
+- 247 total leads: 34 hot, 89 warm, 124 cold (sample)
+- Lead scoring: rule-based sample weights (not a trained model; no accuracy figure exists)
 - Top priority leads: Ahmed Al Khalidi (score 87, cash buyer, 6-week timeline), Nour Al Mansouri (score 91, offer pending), Fatima Al Zaabi (score 81, viewing tomorrow)
 - 2 active SLA breaches. Avg response time: 6m 12s (target: <5 min)
-- Best channel: WhatsApp (89% open rate, 412% ROI)
+- Best channel in the sample data: WhatsApp (no verified open-rate or ROI figures)
 - Revenue pipeline: AED 4.2M
 - 8 active agents, top converter: Sarah Ahmed (32% conv. rate)
 - GCC Developer coverage: 42 developers across UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman
