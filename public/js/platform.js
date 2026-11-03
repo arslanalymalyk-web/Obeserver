@@ -1474,7 +1474,7 @@ function showView(id,el){
     document.getElementById('page-title').textContent=t[titleKey]||id;
   }
   // lazy renders
-  if(id==='team')renderTeam();
+  if(id==='team'){renderTeam();renderIntegrations();}
   if(id==='scoring'){renderWeights();renderScoreQueue();}
   if(id==='intent')renderIntentGrid();
   if(id==='nba')renderNBA();
@@ -1555,7 +1555,7 @@ async function importLeadsCSV(input){
   try{
     const r=await api('POST','/api/leads/import',{csv:await f.text()});
     leads.splice(0,leads.length,...await api('GET','/api/leads'));refreshLeadViews();
-    toastMsg(`Imported ${r.imported}`+(r.skipped?`, skipped ${r.skipped} (row ${r.errors[0].row}: ${r.errors[0].error})`:''));
+    toastMsg(`Imported ${r.imported}`+(r.duplicates?`, ${r.duplicates} already existed (merged)`:'')+(r.skipped?`, skipped ${r.skipped} (row ${r.errors[0].row}: ${r.errors[0].error})`:''));
   }catch(e){toastMsg(e.message)}
 }
 function toastMsg(t){
@@ -1589,7 +1589,7 @@ function openLead(id){
       <div>${tempBadge(l.temp)}</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      ${[['Type',l.type],['Intent',l.intent+' · '+l.urgency],['Timeframe',l.timeframe],['Budget',l.budget],['Financing',l.financing],['Source',l.source],['Agent',l.agent],['Area',l.area]].map(([k,v])=>`
+      ${[['Type',l.type],['Intent',l.intent+' · '+l.urgency],['Timeframe',l.timeframe],['Budget',l.budget],['Financing',l.financing],['Source',l.source],['Agent',l.agent],['Area',l.area],...(l.notes?[['Notes',l.notes]]:[])].map(([k,v])=>`
         <div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px"><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono);margin-bottom:2px;text-transform:uppercase">${k}</div><div style="font-size:12.5px;color:var(--text);font-weight:500">${esc(v)}</div></div>`).join('')}
     </div>
     <div style="display:flex;gap:6px">
@@ -2347,8 +2347,9 @@ async function sendInvite(){
     renderTeam();
   }catch(e){toastMsg(e.message)}
 }
-function copyInvite(){
-  const i=document.getElementById('inv-link');i.select();
+function copyInvite(){copyField('inv-link')}
+function copyField(id){
+  const i=document.getElementById(id);i.select();
   (navigator.clipboard?navigator.clipboard.writeText(i.value):Promise.reject()).then(()=>toastMsg('Link copied'),()=>{document.execCommand('copy');toastMsg('Link copied')});
 }
 async function setRole(id,sel){
@@ -2359,3 +2360,29 @@ async function removeUser(id){
   try{await api('DELETE','/api/users/'+id);renderTeam();toastMsg('Removed')}catch(e){toastMsg(e.message)}
 }
 async function revokeInvite(id){try{await api('DELETE','/api/invites/'+id);renderTeam()}catch(e){toastMsg(e.message)}}
+
+async function renderIntegrations(){
+  const body=document.getElementById('intg-table');
+  try{
+    const {integrations}=await api('GET','/api/integrations');
+    document.getElementById('intg-count').textContent=integrations.length?integrations.length+' active':'';
+    body.innerHTML=integrations.length?integrations.map(i=>`<tr><td>${esc(i.label)}</td>
+      <td style="color:var(--text3)">${i.last_used_at?esc(new Date(i.last_used_at).toLocaleString()):'never'}</td><td>${esc(i.received)}</td>
+      <td><button class="btn btn-sm" style="color:var(--hot)" onclick="revokeIntegration(${Number(i.id)})">Revoke</button></td></tr>`).join('')
+      :'<tr><td colspan="4" style="color:var(--text3);padding:14px">No webhooks yet.</td></tr>';
+  }catch(e){body.textContent=e.message}
+}
+async function createIntegration(){
+  try{
+    const r=await api('POST','/api/integrations',{adapter:'webhook',label:document.getElementById('intg-label').value});
+    const url=location.origin+r.path;
+    document.getElementById('intg-url').value=url;
+    document.getElementById('intg-curl').textContent=`curl -X POST '${url}' \\\n  -H 'content-type: application/json' \\\n  -d '{"name":"Layla Hassan","phone":"050 111 2233","email":"layla@example.com","budget":2500000,"message":"Interested in 2BR"}'`;
+    document.getElementById('intg-result').style.display='';document.getElementById('intg-label').value='';
+    renderIntegrations();
+  }catch(e){toastMsg(e.message)}
+}
+async function revokeIntegration(id){
+  if(!confirm('Revoke this webhook? Systems posting to it will stop working.'))return;
+  try{await api('DELETE','/api/integrations/'+id);renderIntegrations()}catch(e){toastMsg(e.message)}
+}

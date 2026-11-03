@@ -97,6 +97,43 @@ async function main() {
   assert.equal((await c2('GET', '/api/calls/' + call.id)).s, 404);
   const mine = (await c2('POST', '/api/calls', { lead_name: 'Z' })).j;
   assert.equal((await a('GET', '/api/calls/' + mine.id)).s, 200, 'admin sees agent call');
+  // integrations / intake / dedupe
+  const raw = (key, body, h = {}) => fetch(base + '/api/intake/' + key, { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: JSON.stringify(body) }).then(async r => ({ s: r.status, j: await r.json() }));
+  assert.equal((await a('POST', '/api/integrations', { label: '' })).s, 400, 'label required');
+  assert.equal((await a('POST', '/api/integrations', { label: 'X', adapter: 'nope' })).s, 400, 'unknown adapter');
+  const ig = (await a('POST', '/api/integrations', { label: 'Bayut' })).j;
+  assert.ok(ig.key.length >= 30 && ig.path === '/api/intake/' + ig.key);
+  assert.equal((await b('GET', '/api/integrations')).j.integrations.length, 0, 'tenant scoped');
+  assert.equal((await raw('x'.repeat(32), { name: 'N' })).s, 404, 'unknown key');
+  assert.equal((await b('POST', '/api/integrations', { label: 'B-portal' })).s, 201);
+  const before = (await a('GET', '/api/leads')).j.length;
+  let r1 = (await raw(ig.key, { Full_Name: 'Layla Hassan', Mobile: '050 111 2233', Email: 'Layla@X.com', price: 2500000, message: 'Interested in 2BR', community: 'Marina' })).j;
+  assert.deepEqual([r1.created, r1.duplicates], [1, 0]);
+  let L = (await a('GET', '/api/leads')).j; assert.equal(L.length, before + 1);
+  const layla = L.find(l => l.name === 'Layla Hassan');
+  assert.equal(layla.source, 'Bayut', 'source defaults to the integration label');
+  assert.equal(layla.budget, 'AED 2,500,000'); assert.equal(layla.notes, 'Interested in 2BR'); assert.equal(layla.area, 'Marina');
+  // same person, different phone formatting -> merged, not duplicated; blank fields filled, existing never overwritten
+  const r2 = (await raw(ig.key, { name: 'Layla H.', phone: '+971 50 111 2233', timeframe: '3 months', budget: 'AED 9M' })).j;
+  assert.deepEqual([r2.created, r2.duplicates, r2.merged], [0, 1, 1]);
+  L = (await a('GET', '/api/leads')).j; assert.equal(L.length, before + 1, 'no new row');
+  const l2 = L.find(l => l.id === layla.id);
+  assert.equal(l2.timeframe, '3 months'); assert.equal(l2.budget, 'AED 2,500,000', 'not overwritten'); assert.equal(l2.name, 'Layla Hassan');
+  // email-only match
+  assert.equal((await raw(ig.key, { name: 'L', email: 'LAYLA@x.com' })).j.duplicates, 1);
+  // batch with an in-batch duplicate, a nameless record, and one new person
+  const r3 = (await raw(ig.key, [{ name: 'Omar K', phone: '0559998877' }, { name: 'Omar Khan', phone: '+971559998877' }, { phone: '1' }, { name: 'Sam', email: 's@x.com' }])).j;
+  assert.deepEqual([r3.created, r3.duplicates, r3.errors.length], [2, 1, 1]);
+  assert.equal((await raw(ig.key, { leads: Array.from({ length: 201 }, () => ({ name: 'q' })) })).s, 400, 'batch cap');
+  // tenant isolation: A's key never writes to B
+  assert.equal((await b('GET', '/api/leads')).j.length, 0);
+  // CSV import also dedupes
+  const imp2 = (await a('POST', '/api/leads/import', { csv: 'name,phone,notes\nLayla again,00971501112233,from csv\nNew One,0501230000,hi' })).j;
+  assert.deepEqual([imp2.imported, imp2.duplicates], [1, 1]);
+  const ig2 = (await a('GET', '/api/integrations')).j.integrations[0]; assert.equal(ig2.received >= 5, true);
+  assert.equal(JSON.stringify(ig2).includes(ig.key), false, 'key is never listed again');
+  assert.equal((await a('DELETE', '/api/integrations/' + ig2.id)).s, 200);
+  assert.equal((await raw(ig.key, { name: 'late' })).s, 404, 'revoked key stops working');
   // admin management
   const users = (await a('GET', '/api/users')).j.users, agentRow = users.find(u => u.role === 'agent'), adminRow = users.find(u => u.role === 'admin');
   assert.equal((await a('DELETE', '/api/users/' + adminRow.id)).s, 400, 'cannot remove yourself');

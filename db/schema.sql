@@ -66,3 +66,22 @@ CREATE TABLE IF NOT EXISTS invites (
   accepted_at TIMESTAMPTZ,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Lead intake: notes + normalised keys used for duplicate detection (generated, so they can never drift).
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS notes TEXT NOT NULL DEFAULT '';
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS phone_key TEXT GENERATED ALWAYS AS (
+  CASE WHEN length(regexp_replace(phone, '\D', '', 'g')) >= 7 THEN right(regexp_replace(phone, '\D', '', 'g'), 9) ELSE '' END) STORED;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS email_key TEXT GENERATED ALWAYS AS (lower(email)) STORED;
+CREATE INDEX IF NOT EXISTS leads_phone_key_idx ON leads (tenant_id, phone_key) WHERE phone_key <> '';
+CREATE INDEX IF NOT EXISTS leads_email_key_idx ON leads (tenant_id, email_key) WHERE email_key <> '';
+
+CREATE TABLE IF NOT EXISTS integrations (
+  id           SERIAL PRIMARY KEY,
+  tenant_id    INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  adapter      TEXT NOT NULL,
+  label        TEXT NOT NULL,
+  key_hash     TEXT NOT NULL UNIQUE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_used_at TIMESTAMPTZ,
+  received     INT NOT NULL DEFAULT 0
+);
