@@ -49,13 +49,24 @@ function mode(s) {
   $('pw').autocomplete = s ? 'new-password' : 'current-password';
   $('err').textContent = '';
 }
+const invite = new URLSearchParams(location.search).get('invite');
 $('toggle').onclick = () => mode(!signup);
+if (invite) {
+  // Invite link: the email and agency are fixed by the invite; the person only chooses a password.
+  $('toggle').classList.add('hide'); $('email').readOnly = true;
+  $('h').textContent = 'Join your team'; $('sub').textContent = 'Choose a password (10+ characters).'; $('go').textContent = 'Join';
+  $('pw').autocomplete = 'new-password';
+  fetch('/api/auth/invite?token=' + encodeURIComponent(invite)).then(r => r.json().then(j => ({ ok: r.ok, j }))).then(({ ok, j }) => {
+    if (!ok) { $('err').textContent = j.error; $('go').disabled = true; return; }
+    $('email').value = j.email; $('sub').textContent = `Join ${j.agency} as ${j.role}. Choose a password (10+ characters).`;
+  });
+}
 $('f').onsubmit = async e => {
   e.preventDefault(); $('go').disabled = true; $('err').textContent = '';
   try {
-    const r = await fetch('/api/auth/' + (signup ? 'signup' : 'login'), {
+    const r = await fetch('/api/auth/' + (invite ? 'accept' : signup ? 'signup' : 'login'), {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: $('email').value, password: $('pw').value, agency: $('agency').value, seed_demo: $('seed').checked }),
+      body: JSON.stringify({ email: $('email').value, password: $('pw').value, agency: $('agency').value, seed_demo: $('seed').checked, token: invite }),
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || 'Something went wrong');

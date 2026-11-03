@@ -55,3 +55,14 @@ CREATE TABLE IF NOT EXISTS call_turns (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS call_turns_call_idx ON call_turns (call_id, id);
+
+CREATE TABLE IF NOT EXISTS invites (
+  id          SERIAL PRIMARY KEY,
+  tenant_id   INT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  email       TEXT NOT NULL,
+  role        TEXT NOT NULL DEFAULT 'agent' CHECK (role IN ('admin','agent')),
+  token_hash  TEXT NOT NULL UNIQUE,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  accepted_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

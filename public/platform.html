@@ -43,6 +43,10 @@
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 13c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       <span data-i18n="nav_leads">All Leads</span>
     </div>
+    <div class="nav-item" id="nav-team" style="display:none" onclick="showView('team',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 13c0-2 2-3.5 4.5-3.5S10.5 11 10.5 13M11 3.2a2.5 2.5 0 010 3.6M12.5 9.7c1.2.5 2 1.5 2 3.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span>Team</span>
+    </div>
     <div class="nav-section" data-i18n="nav_ai">AI Engine</div>
     <div class="nav-item" onclick="showView('scoring',this)">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -365,6 +369,26 @@
       <thead><tr><th data-i18n="col_lead">Lead</th><th data-i18n="col_source">Source</th><th data-i18n="col_score">AI Score</th><th data-i18n="col_intent">Intent</th><th data-i18n="col_temp">Temp</th><th data-i18n="col_budget">Budget</th><th data-i18n="col_agent">Agent</th><th data-i18n="col_last">Last Contact</th><th></th></tr></thead>
       <tbody id="all-leads-table"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- ═══════════ TEAM (admins) ═══════════ -->
+<div class="view" id="view-team">
+  <div class="panel" style="max-width:860px">
+    <div class="panel-header"><span class="panel-title">Invite a teammate</span></div>
+    <div style="padding:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+      <div class="field-group" style="flex:2;min-width:200px;margin:0"><div class="field-label">Email</div><input class="field-input" id="inv-email" type="email" placeholder="agent@agency.com"></div>
+      <div class="field-group" style="flex:1;min-width:120px;margin:0"><div class="field-label">Role</div><select class="field-input" id="inv-role"><option value="agent">Agent</option><option value="admin">Admin</option></select></div>
+      <button class="btn btn-primary" onclick="sendInvite()">Create invite link</button>
+    </div>
+    <div id="inv-result" style="padding:0 14px 14px;font-size:12px;display:none">
+      <div style="color:var(--text3);margin-bottom:4px">Share this link with them. It works once, for 7 days, and is not shown again.</div>
+      <div style="display:flex;gap:6px"><input class="field-input" id="inv-link" readonly style="flex:1;font-family:var(--font-mono);font-size:11px"><button class="btn" onclick="copyInvite()">Copy</button></div>
+    </div>
+  </div>
+  <div class="panel" style="max-width:860px;margin-top:14px">
+    <div class="panel-header"><span class="panel-title">Team</span><span class="panel-count" id="team-count"></span></div>
+    <table class="lead-table"><thead><tr><th>Email</th><th>Role</th><th></th></tr></thead><tbody id="team-table"></tbody></table>
   </div>
 </div>
 

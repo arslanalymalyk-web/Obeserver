@@ -72,6 +72,45 @@ async function main() {
   assert.equal((await a('POST', `/api/calls/${call.id}/say`, { text: 'again' })).s, 400, 'cannot talk after end');
   const list = (await a('GET', '/api/calls')).j; assert.equal(list[0].turns, 3);
   assert.equal((await b('GET', '/api/calls')).j.length, 0, 'call list is tenant scoped');
+  // invites + roles
+  const c2 = mk(), tokenless = mk();
+  assert.equal((await b('GET', '/api/users')).j.users.length, 1);
+  const inv = (await a('POST', '/api/users/invite', { email: `ag${tag}@t.co`, role: 'agent' })).j;
+  assert.ok(inv.token && inv.token.length > 30);
+  assert.equal((await a('POST', '/api/users/invite', { email: `a${tag}@t.co` })).s, 409, 'already a user');
+  assert.equal((await a('POST', '/api/users/invite', { email: 'nope' })).s, 400);
+  assert.equal((await tokenless('GET', '/api/auth/invite?token=wrong')).s, 404);
+  assert.equal((await tokenless('GET', '/api/auth/invite?token=' + inv.token)).j.agency, 'A');
+  assert.equal((await tokenless('POST', '/api/auth/accept', { token: inv.token, password: 'short' })).s, 400);
+  assert.equal((await c2('POST', '/api/auth/accept', { token: inv.token, password: 'agent-password-1' })).s, 201);
+  assert.equal((await tokenless('POST', '/api/auth/accept', { token: inv.token, password: 'agent-password-2' })).s, 404, 'invite is single-use');
+  assert.equal((await c2('GET', '/api/auth/me')).j.role, 'agent');
+  assert.equal((await c2('GET', '/api/leads')).j.length > 0, true, 'agent sees the agency leads');
+  assert.equal((await c2('GET', '/api/users')).s, 403, 'agent cannot list users');
+  assert.equal((await c2('POST', '/api/users/invite', { email: 'x@y.co' })).s, 403);
+  const target = (await c2('GET', '/api/leads')).j[0];
+  assert.equal((await c2('DELETE', '/api/leads/' + target.id)).s, 403, 'agent cannot delete leads');
+  assert.equal((await c2('POST', '/api/leads/import', { csv: 'name\nX' })).s, 403, 'agent cannot import');
+  assert.equal((await c2('PATCH', '/api/leads/' + target.id, { status: 'Qualified' })).s, 200, 'agent can edit leads');
+  // calls are private to agents; admin sees all
+  assert.equal((await c2('GET', '/api/calls')).j.length, 0, 'agent does not see admin calls');
+  assert.equal((await c2('GET', '/api/calls/' + call.id)).s, 404);
+  const mine = (await c2('POST', '/api/calls', { lead_name: 'Z' })).j;
+  assert.equal((await a('GET', '/api/calls/' + mine.id)).s, 200, 'admin sees agent call');
+  // admin management
+  const users = (await a('GET', '/api/users')).j.users, agentRow = users.find(u => u.role === 'agent'), adminRow = users.find(u => u.role === 'admin');
+  assert.equal((await a('DELETE', '/api/users/' + adminRow.id)).s, 400, 'cannot remove yourself');
+  assert.equal((await a('PATCH', '/api/users/' + adminRow.id, { role: 'agent' })).s, 400, 'last admin cannot be demoted');
+  assert.equal((await b('PATCH', '/api/users/' + agentRow.id, { role: 'admin' })).s, 404, 'other tenant cannot touch this tenant\'s users');
+  assert.equal((await a('PATCH', '/api/users/' + agentRow.id, { role: 'admin' })).j.role, 'admin');
+  assert.equal((await c2('GET', '/api/users')).s, 200, 'promotion applies immediately, no re-login');
+  assert.equal((await a('PATCH', '/api/users/' + agentRow.id, { role: 'agent' })).j.role, 'agent');
+  assert.equal((await c2('GET', '/api/users')).s, 403, 'demotion applies immediately');
+  const inv2 = (await a('POST', '/api/users/invite', { email: `gone${tag}@t.co` })).j;
+  assert.equal((await a('DELETE', '/api/invites/' + inv2.id)).s, 200);
+  assert.equal((await tokenless('GET', '/api/auth/invite?token=' + inv2.token)).s, 404, 'revoked invite');
+  assert.equal((await a('DELETE', '/api/users/' + agentRow.id)).s, 200);
+  assert.equal((await c2('GET', '/api/leads')).s, 401, 'removed user is locked out immediately');
   await a('POST', '/api/auth/logout', {});
   console.log('all API tests passed');
 }

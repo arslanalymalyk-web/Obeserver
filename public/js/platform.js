@@ -1474,6 +1474,7 @@ function showView(id,el){
     document.getElementById('page-title').textContent=t[titleKey]||id;
   }
   // lazy renders
+  if(id==='team')renderTeam();
   if(id==='scoring'){renderWeights();renderScoreQueue();}
   if(id==='intent')renderIntentGrid();
   if(id==='nba')renderNBA();
@@ -1486,7 +1487,7 @@ function showView(id,el){
   if(id==='compliance'){renderCompliance();renderAuditLog();}
   if(id==='sms'){renderSMSSequences();renderOrchestration();renderFollowUpTemplates();}
   if(id==='social_auto'){renderSocialWorkflows();renderSocialConvFeed();renderAICallQueue();renderSocialPipeline();renderFbStats();renderIgStats();}
-  if(!viewTitles[id]) document.getElementById('page-title').textContent = id==='social_auto'?'FB & Instagram Automation':id==='call_assist'?'Live Call Assistant':id;
+  if(!viewTitles[id]) document.getElementById('page-title').textContent = id==='social_auto'?'FB & Instagram Automation':id==='call_assist'?'Live Call Assistant':id==='team'?'Team':id;
 
   // Animate metric bars on view change
   setTimeout(()=>{
@@ -1595,7 +1596,7 @@ function openLead(id){
       <button class="btn btn-wa" style="flex:1;justify-content:center">💬 WhatsApp</button>
       <button class="btn btn-primary" style="flex:1;justify-content:center">📅 Book Viewing</button>
       <button class="btn" style="flex:1;justify-content:center" onclick="editLead(${l.id})">✎ Edit</button>
-      <button class="btn" style="flex:1;justify-content:center;color:var(--hot)" onclick="deleteLead(${l.id})">🗑 Delete</button>
+      ${(window.__me||{}).role==='admin'?`<button class="btn" style="flex:1;justify-content:center;color:var(--hot)" onclick="deleteLead(${l.id})">🗑 Delete</button>`:''}
     </div>`;
   document.getElementById('lead-detail-modal').classList.add('open');
 }
@@ -2317,3 +2318,44 @@ setTimeout(()=>{
 document.querySelectorAll('.metric-value').forEach(el=>{
   el.style.animation='countUp .5s cubic-bezier(.22,1,.36,1) both';
 });
+
+
+// ── Team & roles ─────────────────────────────────────────────────────
+(function(){
+  const me=window.__me||{},admin=me.role==='admin';
+  if(admin)document.getElementById('nav-team').style.display='';
+  // Agents cannot import or delete (the server enforces this too); hide the controls.
+  if(!admin){const imp=document.querySelector('[onclick*="csv-file"]');if(imp)imp.style.display='none';}
+})();
+async function renderTeam(){
+  const body=document.getElementById('team-table');
+  try{
+    const {users,invites}=await api('GET','/api/users'),me=window.__me||{};
+    document.getElementById('team-count').textContent=users.length+' member'+(users.length===1?'':'s')+(invites.length?` · ${invites.length} pending`:'');
+    body.innerHTML=users.map(u=>`<tr><td>${esc(u.email)}${u.email===me.email?' <span style="color:var(--text3)">(you)</span>':''}</td>
+      <td><select class="field-input" style="width:auto;padding:4px 8px" onchange="setRole(${Number(u.id)},this)" aria-label="Role for ${esc(u.email)}"><option value="agent"${u.role==='agent'?' selected':''}>Agent</option><option value="admin"${u.role==='admin'?' selected':''}>Admin</option></select></td>
+      <td>${u.email===me.email?'':`<button class="btn btn-sm" style="color:var(--hot)" onclick="removeUser(${Number(u.id)})">Remove</button>`}</td></tr>`).join('')
+      +invites.map(i=>`<tr><td>${esc(i.email)} <span style="color:var(--text3)">· invited</span></td><td>${esc(i.role)}</td>
+      <td><button class="btn btn-sm" onclick="revokeInvite(${Number(i.id)})">Revoke</button></td></tr>`).join('');
+  }catch(e){body.textContent=e.message}
+}
+async function sendInvite(){
+  try{
+    const r=await api('POST','/api/users/invite',{email:document.getElementById('inv-email').value,role:document.getElementById('inv-role').value});
+    document.getElementById('inv-link').value=location.origin+'/login.html?invite='+encodeURIComponent(r.token);
+    document.getElementById('inv-result').style.display='';document.getElementById('inv-email').value='';
+    renderTeam();
+  }catch(e){toastMsg(e.message)}
+}
+function copyInvite(){
+  const i=document.getElementById('inv-link');i.select();
+  (navigator.clipboard?navigator.clipboard.writeText(i.value):Promise.reject()).then(()=>toastMsg('Link copied'),()=>{document.execCommand('copy');toastMsg('Link copied')});
+}
+async function setRole(id,sel){
+  try{await api('PATCH','/api/users/'+id,{role:sel.value});toastMsg('Role updated')}catch(e){toastMsg(e.message);renderTeam()}
+}
+async function removeUser(id){
+  if(!confirm('Remove this person? They lose access immediately.'))return;
+  try{await api('DELETE','/api/users/'+id);renderTeam();toastMsg('Removed')}catch(e){toastMsg(e.message)}
+}
+async function revokeInvite(id){try{await api('DELETE','/api/invites/'+id);renderTeam()}catch(e){toastMsg(e.message)}}
