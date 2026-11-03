@@ -1185,7 +1185,7 @@ function addToTranscript(role,text){
     div.textContent=text;
   } else {
     div.className=`transcript-bubble ${role}`;
-    div.innerHTML=`<div class="tb-role">${role==='agent'?'🤖 AI Agent':'👤 Client'}</div>${text.replace(/\n/g,'<br>')}<div class="tb-time">${ts}</div>`;
+    div.innerHTML=`<div class="tb-role">${role==='agent'?'🤖 AI Agent':'👤 Client'}</div>${String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])).replace(/\n/g,'<br>')}<div class="tb-time">${ts}</div>`;
   }
   area.appendChild(div);
   area.scrollTop=area.scrollHeight;
