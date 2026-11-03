@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "node test/api.test.js && node test/portfolio.test.js",
-    "test:demo": "node test/demo-calc.test.js"
+    "test:demo": "node test/demo-calc.test.js",
+    "db:smoke": "node scripts/db-smoke.js"
   },
   "dependencies": {
     "pg": "^8.13.0"
