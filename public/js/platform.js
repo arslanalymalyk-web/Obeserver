@@ -169,16 +169,8 @@ function toggleFocus() {
 // ══════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════
-const leads=[
-  {id:1,name:'Ahmed Al Khalidi',phone:'+971 50 234 5678',score:87,temp:'hot',type:'Buyer',source:'Bayut',budget:'AED 4M',timeframe:'1-2 mo',financing:'Cash',agent:'Sarah A.',status:'Qualifying',intent:'buyer',urgency:'serious',area:'Dubai Hills',photo:'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:2,name:'Fatima Al Zaabi',phone:'+971 55 876 5432',score:81,temp:'hot',type:'Buyer',source:'Property Finder',budget:'AED 2.8M',timeframe:'3 mo',financing:'Mortgage',agent:'Khalid M.',status:'Meeting Set',intent:'buyer',urgency:'serious',area:'Downtown',photo:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:3,name:'Mohammad Siddiqui',phone:'+971 52 345 6789',score:73,temp:'warm',type:'Seller',source:'Facebook',budget:'AED 1.5M',timeframe:'6 mo',financing:'N/A',agent:'Leila R.',status:'New',intent:'seller',urgency:'researching',area:'JVC',photo:'https://images.unsplash.com/photo-1463453091185-61582044d556?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:4,name:'Rania Hassan',phone:'+971 50 567 8901',score:69,temp:'warm',type:'Buyer',source:'Referral',budget:'AED 3.2M',timeframe:'2 mo',financing:'Cash',agent:'Ahmed T.',status:'Qualified',intent:'buyer',urgency:'serious',area:'Palm Jumeirah',photo:'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:5,name:'Omar Al Farouq',phone:'+971 56 789 0123',score:44,temp:'cold',type:'Buyer',source:'Bayut',budget:'AED 900K',timeframe:'12 mo',financing:'Mortgage',agent:'Unassigned',status:'New',intent:'buyer',urgency:'researching',area:'Sharjah',photo:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:6,name:'Nour Al Mansouri',phone:'+971 55 234 5678',score:91,temp:'hot',type:'Buyer',source:'WhatsApp',budget:'AED 6M',timeframe:'<1 mo',financing:'Cash',agent:'Sarah A.',status:'Offer Stage',intent:'buyer',urgency:'serious',area:'Emirates Hills',photo:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:7,name:'Tariq Mahmoud',phone:'+971 50 890 1234',score:55,temp:'warm',type:'Seller',source:'Property Finder',budget:'AED 2.1M',timeframe:'4 mo',financing:'N/A',agent:'Khalid M.',status:'Qualified',intent:'seller',urgency:'researching',area:'Business Bay',photo:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-  {id:8,name:'Sara Al Blooshi',phone:'+971 52 012 3456',score:38,temp:'cold',type:'Buyer',source:'Facebook',budget:'AED 750K',timeframe:'18 mo',financing:'Mortgage',agent:'Unassigned',status:'New',intent:'buyer',urgency:'researching',area:'Ajman',photo:'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=120&h=120&q=80&auto=format&fit=crop&crop=faces'},
-];
+// Leads come from /api/leads (loaded by common.js before this script runs).
+const leads=window.__leads||[];
 
 // ── PROPERTY IMAGE LIBRARY — realistic GCC residential, mapped by area ──
 // Uses photo IDs already proven to render in this app (developer hero set),
@@ -205,7 +197,7 @@ function listingFor(lead){
     img: propImg(lead.area, 600),
     imgSmall: propImg(lead.area, 280),
     price: lead.budget,
-    meta: `${p.beds} Bed · ${lead.area} · ${lead.type==='Seller'?'For Valuation':'For Sale'}`,
+    meta: `${p.beds} Bed · ${esc(lead.area)} · ${lead.type==='Seller'?'For Valuation':'For Sale'}`,
     ref: 'OBS-' + (1000 + (lead.id||1)*7)
   };
 }
@@ -883,11 +875,12 @@ function avatarHTML(person, opts={}){
   const cls = opts.class || 'agent-avatar';
   const size = opts.size || 30;
   const fs = opts.fs || (size<28?9.5:11);
-  const initials = person.initials || (person.name?person.name.split(' ').map(n=>n[0]).slice(0,2).join(''):'?');
+  // Letters/digits only: initials are also placed inside an inline onerror JS string below.
+  const initials = String(person.initials || (person.name?person.name.split(' ').map(n=>n[0]||'').slice(0,2).join(''):'?')).replace(/[^\p{L}\p{N}]/gu,'')||'?';
   const extraStyle = opts.style || '';
   const bg = opts.bg || '';
   if(person.photo){
-    return `<div class="${cls} has-photo" style="width:${size}px;height:${size}px;font-size:${fs}px;${extraStyle}"><img src="${person.photo}" alt="${esc(person.name||'')}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='${bg||'linear-gradient(135deg,var(--accent),var(--accent2))'}';this.parentElement.innerHTML='${initials}'"></div>`;
+    return `<div class="${cls} has-photo" style="width:${size}px;height:${size}px;font-size:${fs}px;${extraStyle}"><img src="${esc(person.photo)}" alt="${esc(person.name||'')}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.remove('has-photo');this.parentElement.style.background='${bg||'linear-gradient(135deg,var(--accent),var(--accent2))'}';this.parentElement.innerHTML='${initials}'"></div>`;
   }
   return `<div class="${cls}" style="width:${size}px;height:${size}px;font-size:${fs}px;${bg?'background:'+bg+';':''}${extraStyle}">${initials}</div>`;
 }
@@ -910,9 +903,9 @@ function renderHotLeads(){
   const hot=leads.filter(l=>l.temp==='hot');
   document.getElementById('hot-leads-table').innerHTML=hot.map(l=>`
     <tr class="row-hot pulse-hot" onclick="openLead(${l.id})">
-      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:28,fs:10})}<div><span class="lead-name">${l.name}</span><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${l.source}</div></div></div></td>
+      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:28,fs:10})}<div><span class="lead-name">${esc(l.name)}</span><div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${esc(l.source)}</div></div></div></td>
       <td>${scoreRingHTML(l.score)}</td>
-      <td><span class="intent-tag ${l.intent}">${l.intent}</span></td>
+      <td><span class="intent-tag ${esc(l.intent)}">${esc(l.intent)}</span></td>
       <td><span style="font-size:10px;font-family:var(--font-mono);color:var(--text3)">2m ago</span></td>
       <td><button class="btn btn-sm btn-wa" onclick="event.stopPropagation();showView('whatsapp',null)">💬</button></td>
     </tr>`).join('');
@@ -928,13 +921,13 @@ function renderAllLeads(filter='all'){
   document.getElementById('leads-count').textContent=list.length+' leads';
   document.getElementById('all-leads-table').innerHTML=list.map(l=>`
     <tr class="${l.temp==='hot'?'row-hot':''}" onclick="openLead(${l.id})">
-      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:26,fs:9.5})}<span class="lead-name">${l.name}</span></div></td>
-      <td><span style="font-size:10.5px;font-family:var(--font-mono);color:var(--text3)">${l.source}</span></td>
+      <td><div style="display:flex;align-items:center;gap:9px">${avatarHTML(l,{size:26,fs:9.5})}<span class="lead-name">${esc(l.name)}</span></div></td>
+      <td><span style="font-size:10.5px;font-family:var(--font-mono);color:var(--text3)">${esc(l.source)}</span></td>
       <td>${scoreRingHTML(l.score,13)}</td>
-      <td><span class="intent-tag ${l.intent}">${l.intent}</span> <span class="intent-tag ${l.urgency}" style="margin-left:3px">${l.urgency}</span></td>
+      <td><span class="intent-tag ${esc(l.intent)}">${esc(l.intent)}</span> <span class="intent-tag ${esc(l.urgency)}" style="margin-left:3px">${esc(l.urgency)}</span></td>
       <td>${tempBadge(l.temp)}</td>
-      <td style="font-family:var(--font-mono);font-size:12px">${l.budget}</td>
-      <td>${l.agent}</td>
+      <td style="font-family:var(--font-mono);font-size:12px">${esc(l.budget)}</td>
+      <td>${esc(l.agent)}</td>
       <td><span style="font-size:10px;font-family:var(--font-mono);color:var(--text3)">2h ago</span></td>
       <td><button class="btn btn-sm btn-wa" onclick="event.stopPropagation()">💬</button></td>
     </tr>`).join('');
@@ -1024,8 +1017,8 @@ function renderScoreQueue(){
     <div class="score-item" onclick="explainScore(${l.id})" style="cursor:pointer">
       ${avatarHTML(l,{size:30,fs:10})}
       <div style="flex:1;min-width:0">
-        <div style="font-size:12.5px;font-weight:500;color:var(--text)">${l.name}</div>
-        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${l.source} · ${top2}</div>
+        <div style="font-size:12.5px;font-weight:500;color:var(--text)">${esc(l.name)}</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${esc(l.source)} · ${top2}</div>
       </div>
       <div style="text-align:right;margin-right:6px">
         <div style="font-size:15px;font-family:var(--font-mono);font-weight:700;color:${fill}">${r.score}</div>
@@ -1048,8 +1041,8 @@ function explainScore(leadId){
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
       ${avatarHTML(lead,{size:46,fs:15})}
       <div style="flex:1">
-        <div style="font-size:15px;font-weight:600;color:var(--text)">${lead.name}</div>
-        <div style="font-size:11.5px;color:var(--text3);font-family:var(--font-mono)">${lead.source} · ${lead.budget} · ${r.bt.tier} · ${lead.area}</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text)">${esc(lead.name)}</div>
+        <div style="font-size:11.5px;color:var(--text3);font-family:var(--font-mono)">${esc(lead.source)} · ${esc(lead.budget)} · ${r.bt.tier} · ${esc(lead.area)}</div>
       </div>
       <div style="text-align:center">
         <div style="font-size:30px;font-family:var(--font-display);color:${fill};line-height:1">${r.score}</div>
@@ -1082,7 +1075,7 @@ function renderIntentGrid(){
     <div class="intent-card">
       <div class="ic-head">
         ${avatarHTML(l,{class:'ic-avatar',size:30,fs:11})}
-        <div style="flex:1"><div class="ic-name">${l.name}</div><div class="ic-phone">${l.phone}</div></div>
+        <div style="flex:1"><div class="ic-name">${esc(l.name)}</div><div class="ic-phone">${esc(l.phone)}</div></div>
         <div style="text-align:right">
           <div style="font-size:9px;font-family:var(--font-mono);color:var(--purple)">CONFIDENCE</div>
           <div style="font-size:15px;font-family:var(--font-mono);font-weight:700;color:var(--purple)">${intent.confidence}%</div>
@@ -1497,7 +1490,56 @@ function filterLeads(f,tab){
 // ══════════════════════════════════════════════════
 // MODALS
 // ══════════════════════════════════════════════════
-function openAddLead(){document.getElementById('add-lead-modal').classList.add('open')}
+let editingLeadId=null;
+function openAddLead(){
+  editingLeadId=null;
+  ['al-name','al-phone','al-budget','al-area'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#add-lead-modal .modal-body .btn').forEach(b=>{b.style.borderColor='';b.style.color='';b.style.background=''});
+  document.getElementById('al-save').textContent='⚡ Add & Score';
+  document.getElementById('add-lead-modal').classList.add('open');
+}
+function editLead(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  closeModal('lead-detail-modal');openAddLead();editingLeadId=id;
+  document.getElementById('al-name').value=l.name;document.getElementById('al-phone').value=l.phone;
+  document.getElementById('al-budget').value=l.budget;document.getElementById('al-area').value=l.area;
+  document.querySelectorAll('#add-lead-modal .modal-body .btn').forEach(b=>{if(b.textContent.trim()===l.source)selectType(b)});
+  document.getElementById('al-save').textContent='Save changes';
+}
+function refreshLeadViews(){
+  renderHotLeads();renderAllLeads();
+  if(typeof renderKanban==='function')renderKanban();
+  const a=document.querySelector('#view-scoring.active');if(a)renderScoreQueue();
+}
+async function saveLead(){
+  const src=[...document.querySelectorAll('#add-lead-modal .modal-body .btn')].find(b=>b.style.color)?.textContent.trim()||'';
+  const data={name:document.getElementById('al-name').value,phone:document.getElementById('al-phone').value,
+    budget:document.getElementById('al-budget').value,area:document.getElementById('al-area').value,source:src};
+  if(!data.name.trim()){toastMsg('Name is required');return}
+  try{
+    if(editingLeadId){const r=await api('PATCH','/api/leads/'+editingLeadId,data);leads.splice(leads.findIndex(x=>x.id===editingLeadId),1,r)}
+    else leads.push(await api('POST','/api/leads',data));
+    closeModal('add-lead-modal');refreshLeadViews();toastMsg(editingLeadId?'Lead updated':'Lead added');
+  }catch(e){toastMsg(e.message)}
+}
+async function deleteLead(id){
+  if(!confirm('Delete this lead permanently?'))return;
+  try{await api('DELETE','/api/leads/'+id);leads.splice(leads.findIndex(x=>x.id===id),1);closeModal('lead-detail-modal');refreshLeadViews();toastMsg('Lead deleted')}
+  catch(e){toastMsg(e.message)}
+}
+async function importLeadsCSV(input){
+  const f=input.files[0];input.value='';if(!f)return;
+  try{
+    const r=await api('POST','/api/leads/import',{csv:await f.text()});
+    leads.splice(0,leads.length,...await api('GET','/api/leads'));refreshLeadViews();
+    toastMsg(`Imported ${r.imported}`+(r.skipped?`, skipped ${r.skipped} (row ${r.errors[0].row}: ${r.errors[0].error})`:''));
+  }catch(e){toastMsg(e.message)}
+}
+function toastMsg(t){
+  const el=document.createElement('div');el.setAttribute('role','status');el.className='toast-msg';el.textContent=t;
+  el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg4);color:var(--text);border:1px solid var(--border2);padding:9px 16px;border-radius:8px;font-size:12.5px;z-index:400';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})});
 function selectType(btn){
@@ -1519,18 +1561,19 @@ function openLead(id){
     </div>
     <div style="display:flex;align-items:center;gap:13px;margin-bottom:16px">
       ${avatarHTML(l,{size:40,fs:13})}
-      <div><div style="font-size:15px;font-weight:500">${l.name}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${l.phone} · Ref ${listing.ref}</div></div>
+      <div><div style="font-size:15px;font-weight:500">${esc(l.name)}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${esc(l.phone)} · Ref ${listing.ref}</div></div>
       <div style="margin-left:auto">${scoreRingHTML(l.score,18)}</div>
       <div>${tempBadge(l.temp)}</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
       ${[['Type',l.type],['Intent',l.intent+' · '+l.urgency],['Timeframe',l.timeframe],['Budget',l.budget],['Financing',l.financing],['Source',l.source],['Agent',l.agent],['Area',l.area]].map(([k,v])=>`
-        <div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px"><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono);margin-bottom:2px;text-transform:uppercase">${k}</div><div style="font-size:12.5px;color:var(--text);font-weight:500">${v}</div></div>`).join('')}
+        <div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px"><div style="font-size:9.5px;color:var(--text3);font-family:var(--font-mono);margin-bottom:2px;text-transform:uppercase">${k}</div><div style="font-size:12.5px;color:var(--text);font-weight:500">${esc(v)}</div></div>`).join('')}
     </div>
     <div style="display:flex;gap:6px">
       <button class="btn btn-wa" style="flex:1;justify-content:center">💬 WhatsApp</button>
       <button class="btn btn-primary" style="flex:1;justify-content:center">📅 Book Viewing</button>
-      <button class="btn" style="flex:1;justify-content:center">Assign</button>
+      <button class="btn" style="flex:1;justify-content:center" onclick="editLead(${l.id})">✎ Edit</button>
+      <button class="btn" style="flex:1;justify-content:center;color:var(--hot)" onclick="deleteLead(${l.id})">🗑 Delete</button>
     </div>`;
   document.getElementById('lead-detail-modal').classList.add('open');
 }

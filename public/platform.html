@@ -163,6 +163,9 @@
       </div>
       <button class="btn btn-wa" onclick="showView('whatsapp',null)">💬 <span data-i18n="nav_wa">WhatsApp</span></button>
       <button class="btn btn-primary" onclick="openAddLead()">+ <span data-i18n="add_lead">Add Lead</span></button>
+      <button class="btn" onclick="document.getElementById('csv-file').click()">⬆ Import CSV</button>
+      <input type="file" id="csv-file" accept=".csv,text/csv" hidden aria-label="Import leads from CSV" onchange="importLeadsCSV(this)">
+      <button class="btn" onclick="signOut()">Sign out</button>
     </div>
   </div>
 
@@ -969,8 +972,8 @@
   <div class="modal">
     <div class="modal-head"><div class="modal-title" data-i18n="add_lead_title">Add New Lead</div><button class="modal-close" onclick="closeModal('add-lead-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="field-group"><div class="field-label" data-i18n="full_name">Full Name</div><input class="field-input" placeholder="Mohammed Al Rashid"></div>
-      <div class="field-group"><div class="field-label" data-i18n="wa_phone">WhatsApp / Phone</div><input class="field-input" placeholder="+971 50 000 0000"></div>
+      <div class="field-group"><div class="field-label" data-i18n="full_name">Full Name</div><input class="field-input" id="al-name" placeholder="Mohammed Al Rashid"></div>
+      <div class="field-group"><div class="field-label" data-i18n="wa_phone">WhatsApp / Phone</div><input class="field-input" id="al-phone" placeholder="+971 50 000 0000"></div>
       <div class="field-group"><div class="field-label" data-i18n="col_source">Source</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="selectType(this)">Bayut</button>
@@ -980,12 +983,12 @@
           <button class="btn btn-sm" onclick="selectType(this)">Referral</button>
         </div>
       </div>
-      <div class="field-group"><div class="field-label" data-i18n="budget_aed">Budget (AED)</div><input class="field-input" placeholder="e.g. 2,500,000"></div>
-      <div class="field-group"><div class="field-label" data-i18n="pref_area">Preferred Area</div><input class="field-input" placeholder="e.g. Dubai Hills, Downtown"></div>
+      <div class="field-group"><div class="field-label" data-i18n="budget_aed">Budget (AED)</div><input class="field-input" id="al-budget" placeholder="e.g. 2,500,000"></div>
+      <div class="field-group"><div class="field-label" data-i18n="pref_area">Preferred Area</div><input class="field-input" id="al-area" placeholder="e.g. Dubai Hills, Downtown"></div>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('add-lead-modal')" data-i18n="cancel">Cancel</button>
-      <button class="btn btn-primary" onclick="closeModal('add-lead-modal')">⚡ <span data-i18n="add_score">Add & Score</span></button>
+      <button class="btn btn-primary" id="al-save" onclick="saveLead()">⚡ Add &amp; Score</button>
     </div>
   </div>
 </div>
@@ -1027,6 +1030,6 @@
 </div>
 
 <script src="js/common.js"></script>
-<script src="js/platform.js"></script>
+<script>bootApp("js/platform.js")</script>
 </body>
 </html>

@@ -38,3 +38,22 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
       .observe(document.body, { childList: true, subtree: true });
   });
 })();
+
+// ── API + session bootstrap ──────────────────────────────────────────
+async function api(method, path, body) {
+  const r = await fetch(path, { method, headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && !path.startsWith('/api/auth/')) { location.href = '/login.html'; throw new Error('Signed out'); }
+  if (!r.ok) throw new Error(j.error || 'Request failed (' + r.status + ')');
+  return j;
+}
+async function signOut() { try { await api('POST', '/api/auth/logout', {}); } finally { location.href = '/login.html'; } }
+// Require a session, optionally load leads into window.__leads, then run the page script.
+function bootApp(src, withLeads = true) {
+  Promise.all([api('GET', '/api/auth/me'), withLeads ? api('GET', '/api/leads') : []])
+    .then(([me, leads]) => {
+      window.__me = me; window.__leads = leads;
+      const s = document.createElement('script'); s.src = src; document.body.appendChild(s);
+    })
+    .catch(e => { if (e.message !== 'Signed out') document.body.textContent = 'Could not load: ' + e.message; });
+}
